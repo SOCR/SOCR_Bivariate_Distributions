@@ -40,5 +40,6 @@ This work is supported in part by NIH grants [P20 NR015331](www.socr.umich.edu/C
 References
 ==========
 
+* [BVN App1 (WebGL)](https://socr.umich.edu/HTML5/BivariateNormal/) and [BVN App2 (Plotly)](https://socr.umich.edu/HTML5/BivariateNormal/BVN2/).
 * [SOCR Bivariate Normal Distribution Activity](http://wiki.stat.ucla.edu/socr/index.php/SOCR_BivariateNormal_JS_Activity).
 * Dinov, ID, Kamino, S, Bhakhrani, B, Christou, N. (2013) [Technology-enhanced Interactive Teaching of Marginal, Joint and Conditional Probabilities: The Special Case of Bivariate Normal Distribution](http://onlinelibrary.wiley.com/doi/10.1111/test.12012/abstract), Teaching Statistics, 35(3):131–139, DOI: 10.1111/test.12012.
