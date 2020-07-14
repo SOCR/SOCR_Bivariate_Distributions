@@ -24,13 +24,14 @@ $(document).ready(function(){
     var old = [];// stores old values to check if x,y,z need updating
     var des = 0; //0 = marginal x, 1 = marginal y, 2 = x|y at ymin, 3 = x|y at ymax, 4 = y|x at xmin, 5 = y|x at xmax, 6 = cdf x, 7 = cdf y
     var numPoints = 250;// number of points per distribution, max = 500
-    var sigmaStep = 5;// bounds how many sigmas away are the distributions calculated
-    var sigmaDisp = 3// bounds how many sigmas away are displayed
+    var sigmaStep = 4;// bounds how many sigmas away are the distributions calculated
+    var sigmaDisp = 4// bounds how many sigmas away are displayed
     var out = 0;// value to be displayed in the P box
     var des3d = 0;// 0 = bivariate PDF, 1 = bivariate CDF
     var starting = 0;// used for initial settings to be displayed
     var output = [];// String array to store history of outputs
     var $graph = $('#graph');// Canvas for 2d graph
+    var settingsOpen = false;// Logs if the settings menu is open
                                                             //Functions
     var check = function(){// Checks if inputs are correct, if they are wrong it resets them to previously recorded values
         if(rho >= 1 || rho < 0 || isNaN(rho)){
@@ -135,6 +136,16 @@ $(document).ready(function(){
             }
             zCut.push(temp);
         }
+        updateOutput('P(' + xmin + ' < X < ' + xmax + ' ∩ ' + ymin + ' < Y < ' + ymax + ') = ' + (sumMat(zCut)/sumMat(z)).toFixed(3));
+    }
+    var sumMat = function(mat){
+        var temp = 0;
+        for (var i = 0; i < numPoints; i++){
+            for (var j = 0; j < numPoints; j++){
+                temp += mat[i][j];
+            }
+        }
+        return temp;
     }
     var CDF = function(mu, sigma, val){// Calculates value of p(x <= val) for given mu and sigma in a distribution
         var temp1 = (val-mu)/sigma;
@@ -444,8 +455,7 @@ $(document).ready(function(){
             })
         }
     }
-                                                            //Buttons
-    $('#close').click(function(){//Does all the work updating everything
+    var doAll = function(){// Does everything
         old = [mux, muy, sigmax, sigmay, rho, xmin, xmax, ymin, ymax];
         mux = Number($('#mux').val());
         muy = Number($('#muy').val());
@@ -474,10 +484,24 @@ $(document).ready(function(){
         updatePlot();//Updates 3D Graph
         $('main').hide(1000);
         $('#backdim').hide(1000);
+        settingsOpen = false
+    }
+                                                            //Buttons
+    $('#close').click(function(){//X button
+        doAll();
     })
+    $('#backdim').click(function(){//Clicking outside the settings box
+        doAll();
+    })
+    $(document).keyup(function(e){// Pressing Esc key
+        if(e.which == 27 && settingsOpen) {
+            doAll();
+        }
+    });
     $('#show').click(function(){//Shows the settings menu
         $('#backdim').show(1000);
         $('main').show(1000);
+        settingsOpen = true;
     })
                                                             //3D model
     var updatePlot = function(){// Uses Plotly to generate a 3d plot
@@ -520,5 +544,4 @@ $(document).ready(function(){
         starting++;
     }
     initial();//running on load
-    
 })

@@ -60,11 +60,11 @@ main{
     z-index: 4;
     position: fixed;
     max-width: 75vw;
-    top: 15vh;
+    top: 10vh;
     left: 15vw;
     border: 2px solid black;
     border-radius: 10px;
-    max-height: 35vw;
+    max-height: 90vh;
     overflow: auto;
 }
 
@@ -132,7 +132,7 @@ h2{
         min-height: 50vh;
         top: 15vh;
         left: 25vw;
-        max-height: 35vw;
+        max-height: 75vh;
         overflow: auto;
     }
 }
