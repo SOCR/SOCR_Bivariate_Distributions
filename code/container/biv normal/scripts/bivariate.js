@@ -35,47 +35,38 @@ $(document).ready(function(){
                                                             //Functions
     var check = function(){// Checks if inputs are correct, if they are wrong it resets them to previously recorded values
         if(rho >= 1 || rho < 0 || isNaN(rho)){
-            alert("Incorrect value for rho, resetting to previous value");
             rho = old[4];
             $('#rho').replaceWith('<textarea id = "rho" onfocus="this.select()" rows="1" maxlength="4">' + rho + '</textarea>');
         }
         if(isNaN(mux)){
-            alert("Incorrect value for mu of X, resetting to previous value");
             mux = old[0];
             $('#mux').replaceWith('<textarea id = "mux" onfocus="this.select()" rows="1" maxlength="4">' + mux + '</textarea>');
         }
         if(isNaN(muy)){
-            alert("Incorrect value for mu of Y, resetting to previous value");
             muy = old[1];
             $('#muy').replaceWith('<textarea id = "muy" onfocus="this.select()" rows="1" maxlength="4">' + muy + '</textarea>');
         }
         if(sigmax <=0 || isNaN(sigmax)){
-            alert("Incorrect value for sigma of X, resetting to previous value");
             sigmax = old[2];
             $('#six').replaceWith('<textarea id = "six" onfocus="this.select()" rows="1" maxlength="4">' + sigmax + '</textarea>');
         }
         if(sigmay <=0 || isNaN(sigmay)){
-            alert("Incorrect value for sigma of Y, resetting to previous value");
             sigmay = old[3];
             $('#siy').replaceWith('<textarea id = "siy" onfocus="this.select()" rows="1" maxlength="4">' + sigmay + '</textarea>');
         }
         if(xmin >= xmax || isNaN(xmin)){
-            alert("Incorrect value for Xmin, resetting to previous value");
             xmin = old[5];
             $('#xmin').replaceWith('<textarea id = "xmin" onfocus="this.select()" rows="1" maxlength="4">' + xmin + '</textarea>');
         }
         if(isNaN(xmax)){
-            alert("Incorrect value for Xmax, resetting to previous value");
             xmax = old[6];
             $('#xmax').replaceWith('<textarea id = "xmax" onfocus="this.select()" rows="1" maxlength="4">' + xmax + '</textarea>');
         }
         if(ymin >= ymax || isNaN(ymin)){
-            alert("Incorrect value for Ymin, resetting to previous value");
             ymin = old[7];
             $('#ymin').replaceWith('<textarea id = "ymin" onfocus="this.select()" rows="1" maxlength="4">' + ymin + '</textarea>');
         }
         if(isNaN(ymax)){
-            alert("Incorrect value for Ymax, resetting to previous value");
             ymax = old[8];
             $('#ymax').replaceWith('<textarea id = "ymax" onfocus="this.select()" rows="1" maxlength="4">' + ymax + '</textarea>');
         }
@@ -258,7 +249,7 @@ $(document).ready(function(){
                 toDisp = makeDisp(y,maxy);
                 drawData(toDisp);
                 out = CDF(muy, sigmay, ymax) - CDF(muy, sigmay, ymin);
-                $('#pout').replaceWith('<td id = "pout">P(' + ymin + ' < Y < ' + ymax + ') = ' + out.toFixed(3) + '</td>');
+                $('#pout').replaceWith('P(' + ymin + ' < Y < ' + ymax + ') = ' + out.toFixed(3));
                 shadeIn(muy, sigmay, ymin, ymax);
                 break;
             case 2:// p(X|Y=ymin)
@@ -306,7 +297,7 @@ $(document).ready(function(){
                 toDisp = makeCDF(mux, sigmax);
                 drawData(toDisp);
                 out = CDF(mux, sigmax, xmax) - CDF(mux, sigmax, xmin);
-                updateOutput('<td id = "pout">P(' + xmin + ' < X < ' + xmax + ') = ' + out.toFixed(3));
+                updateOutput('P(' + xmin + ' < X < ' + xmax + ') = ' + out.toFixed(3));
                 shadeIn(mux, sigmax, xmin, xmax);
                 break;
             case 7:// CDF of Y
