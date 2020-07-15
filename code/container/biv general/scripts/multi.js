@@ -612,9 +612,7 @@ $(document).ready(function(){
                                                             // On loading
     var initial = function(){// loads initial functions to be displayed
         if(starting != 0){return;}
-        updateZCut();
-        updateGraph(des);//Updates 2D Graph
-        updatePlot();//Updates 3D Graph
+        doAll();
         starting++;
     }
     initial();//running on load
