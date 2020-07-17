@@ -6,8 +6,8 @@ $(document).ready(function(){
     var Fy = [];
     var x = [];// time array for x
     var y = [];// time array for y
-    var xdist = "";// Stores what type of distribution X is, 0 = normal, 1 = poisson
-    var ydist = "";// Stores what type of distribution Y is, values same as X
+    var xdist = 0;// Stores what type of distribution X is, 0 = normal, 1 = poisson
+    var ydist = 0;// Stores what type of distribution Y is, values same as X
     var toDisp = [];// Stores what radio is selected
     var b = [];// Stores matrix for b(x,y)
     var bCut = [];// Stores matrix for f(x,y) between bounds
@@ -42,42 +42,62 @@ $(document).ready(function(){
     var changed = 0;// Detects if the distribution type was changed
     var $graph = $('#graph');// Canvas for 2d graph
     var settingsOpen = false;// Logs if the settings menu is open
+    var rulesOpen = false;// Logs of the rules window is open
                                                             //Functions
-    var check = function(){// Checks if inputs are correct, if they are wrong it resets them to previously recorded values
+    var check = function(){// Checks if inputs are correct, if they are wrong it resets them to previously recorded values. Add the appropriate checks if more distributions are added
+        //Rho
         if(rho >= 1 || rho < 0 || isNaN(rho)){
             rho = old[4];
             $('#rho').replaceWith('<textarea id = "rho" onfocus="this.select()" rows="1" maxlength="4">' + rho + '</textarea>');
         }
+        //Mu x / lambda
         if(isNaN(px1)){
-            px1 = old[0];
+            px1 = 0;
             $('#px1').replaceWith('<textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">' + px1 + '</textarea>');
         }
+        else if(px1 < 0 && xdist == 1){
+            px1 = 0;
+            $('#px1').replaceWith('<textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">' + px1 + '</textarea>');
+        }
+        else if(px1 < 0 && xdist == 1){
+            px1 = 0;
+            $('#px1').replaceWith('<textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">' + px1 + '</textarea>');
+        }
+        //Mu y / lambda
         if(isNaN(py1)){
-            px2 = old[1];
+            px2 = 0;
             $('#px2').replaceWith('<textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">' + px2 + '</textarea>');
         }
-        if(isNaN(px2)){
-            px2 = old[2];
+        else if(py1 < 0 && ydist == 1){
+            px2 = 0;
             $('#px2').replaceWith('<textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">' + px2 + '</textarea>');
         }
-        if(isNaN(py2)){
-            py2 = old[3];
+        //Sigma x
+        if(isNaN(px2) || (px2 <= 0 && xdist == 0)){
+            px2 = 1;
+            $('#px2').replaceWith('<textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">' + px2 + '</textarea>');
+        }
+        //Sigma y
+        if(isNaN(py2) || (py2 <= 0 && ydist == 0)){
+            py2 = 1;
             $('#py2').replaceWith('<textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">' + py2 + '</textarea>');
         }
-        if(xmin >= xmax || isNaN(xmin)){
-            xmin = old[5];
+        //X
+        if(xmin >= xmax || isNaN(xmin) || (xmin < 0 && xdist == 1)){
+            xmin = 0;
             $('#xmin').replaceWith('<textarea id = "xmin" onfocus="this.select()" rows="1" maxlength="4">' + xmin + '</textarea>');
         }
-        if(isNaN(xmax)){
-            xmax = old[6];
+        if(isNaN(xmax) || (xmax < 0 && xdist == 1)){
+            xmax = 5;
             $('#xmax').replaceWith('<textarea id = "xmax" onfocus="this.select()" rows="1" maxlength="4">' + xmax + '</textarea>');
         }
-        if(ymin >= ymax || isNaN(ymin)){
-            ymin = old[7];
+        //Y
+        if(ymin >= ymax || isNaN(ymin) || (ymin < 0 && ydist == 1)){
+            ymin = 0;
             $('#ymin').replaceWith('<textarea id = "ymin" onfocus="this.select()" rows="1" maxlength="4">' + ymin + '</textarea>');
         }
-        if(isNaN(ymax)){
-            ymax = old[8];
+        if(isNaN(ymax) || (ymax < 0 && ydist == 1)){
+            ymax = 5;
             $('#ymax').replaceWith('<textarea id = "ymax" onfocus="this.select()" rows="1" maxlength="4">' + ymax + '</textarea>');
         }
     }
@@ -101,30 +121,32 @@ $(document).ready(function(){
         var start = mu-sigmaStep*sigma;
         var end = mu+sigmaStep*sigma;
         var step = Math.abs((end-start)/numPoints);
+        var tempdist = new NormalDistribution(mu,sigma);
         for(var i = 0; i <= numPoints; i++){
             t.push(start+step*i);
-            f.push((1/(sigma*Math.sqrt(2*Math.PI)))*Math.exp(-0.5*Math.pow(((t[i]-mu)/sigma),2)));
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
         }
-        F = makeCDF(f,step);
         if(des == 0){x = t; fx = f; Fx = F}
         else{y = t; fy = f; Fy = F;}
     }
-    var poisson = function(des){
+    var poisson = function(des){//Makes a poisson distribution
         var t = [];
         var f = [];
         var F = [];
         var lambda = 0;
         if(des == 0){lambda = mux;x = [];fx = [];Fx = [];}
         else{lambda = muy;y = [];fy = [];Fy = [];}
+        var tempdist = new PoissonDistribution(lambda);
         for(var i = 0; i <= 30; i++){
             t.push(i);
-            f.push((Math.pow(lambda,i)*Math.exp(-lambda))/(factorials[i]));
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
         }
-        F = makeCDF(f,1);
         if(des == 0){x = t; fx = f; Fx = F}
         else{y = t; fy = f; Fy = F;}
     }
-    var template = function(des){//Template for adding more distributions, copy as a new function then add formulae for pdf and CDF
+    var template = function(des){//Template for adding more distributions, copy as a new function then add references to distributions.js
         var t = [];
         var f = [];
         var F = [];
@@ -135,10 +157,12 @@ $(document).ready(function(){
         var start = mu-sigmaStep*sigma;
         var end = mu+sigmaStep*sigma;
         var step = Math.abs((end-start)/10);
+        var tempdist = new Distribution();
         for(var i = 0; i < numPoints; i++){
-            //Enter Formula here
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
         }
-        F = makeCDF(f,step);
         if(des == 0){x = t; fx = f; Fx = F}
         else{y = t; fy = f; Fy = F;}
     }
@@ -181,7 +205,9 @@ $(document).ready(function(){
             }
             bCut.push(temp);
         }
-        updateOutput('P(' + xmin + ' < X < ' + xmax + ' ∩ ' + ymin + ' < Y < ' + ymax + ') = ' + (sumMat(bCut)/sumMat(b)).toFixed(3));
+        var temp1 = (sumMat(bCut)/sumMat(b));
+        if(isNaN(temp1)){temp1 = 0;}
+        updateOutput('P(' + xmin + ' < X < ' + xmax + ' ∩ ' + ymin + ' < Y < ' + ymax + ') = ' + temp1.toFixed(3));
     }
     var sumMat = function(mat){
         var temp = 0;
@@ -480,7 +506,7 @@ $(document).ready(function(){
         }
     }
     var doAll = function(){
-        old = [px1, py1, px2, py2, rho, xmin, xmax, ymin, ymax];
+        old = [px1, py1, px2, py2, rho];
         px1 = Number($('#px1').val());
         py1 = Number($('#py1').val());
         px2 = Number($('#px2').val());
@@ -495,7 +521,7 @@ $(document).ready(function(){
         check();
         var updating = checkUpdate();
         if(updating == 1 || changed == 1){
-            switch(Number(xdist)){//Add additional cases for any distribution added
+            switch(xdist){//Add additional cases for any distribution added
                 case 0:
                     mux = px1;
                     sigmax = px2;
@@ -508,7 +534,7 @@ $(document).ready(function(){
                     poisson(0);
                     break;
             }
-            switch(Number(ydist)){//Add additional cases for any distribution added
+            switch(ydist){//Add additional cases for any distribution added
                 case 0:
                     muy = py1;
                     sigmay = py2;
@@ -543,20 +569,37 @@ $(document).ready(function(){
         settingsOpen = true;
     })
     $('#backdim').click(function(){//Clicking outside the settings box
-        doAll();
+        if (settingsOpen){doAll();}
+        else if(rulesOpen){$('#rules').hide(1000);$('#backdim').hide(1000);rulesOpen = false;}
+    })
+    $('#showR').click(function(){//Sgows the rules
+        $('#backdim').show(1000);
+        $('#rules').show(1000);
+        rulesOpen = true;
+    })
+    $('#closeR').click(function(){//Does all the work updating everything
+        $('#rules').hide(1000);
+        $('#backdim').hide(1000);
+        rulesOpen = false;
     })
     $(document).keyup(function(e){// Pressing Esc key
         if(e.which == 27 && settingsOpen) {
             doAll();
         }
+        else if(e.which == 27 && rulesOpen){
+            $('#rules').hide(1000);
+            $('#backdim').hide(1000);
+            rulesOpen = false;
+        }
     });
     $(document).on('change', '#xdist', function(){//Detects change in select menu for X and alters the page accordingly
-        xdist = "";
+        var temp = "";
         changed = 1;
 		$('#xdist option:selected').each(function(){
-			xdist += $(this).val();
+			temp += $(this).val();
         })
-        switch (Number(xdist)){//Add other cases for any distribution added
+        xdist = Number(temp);
+        switch (xdist){//Add other cases for any distribution added
             case 0:
                 $('#x1').replaceWith('<td id = "x1">&mu;<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>');
                 $('#x2').replaceWith('<td id = "x2">&sigma;<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
@@ -568,12 +611,13 @@ $(document).ready(function(){
         }
     })
     $(document).on('change', '#ydist', function(){//Detects change in select menu for Y and alters the page accordingly
-        ydist = "";
+        var temp = "";
         changed = 1;
 		$('#ydist option:selected').each(function(){//Add other cases for any distribution added
-			ydist += $(this).val();
+			temp += $(this).val();
         })
-        switch (Number(ydist)){
+        ydist = Number(temp);
+        switch (ydist){
             case 0:
                 $('#y1').replaceWith('<td id = "y1">&mu;<sub>X</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>');
                 $('#y2').replaceWith('<td id = "y2">&sigma;<sub>X</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');

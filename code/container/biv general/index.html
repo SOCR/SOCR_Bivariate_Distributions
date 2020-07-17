@@ -15,6 +15,7 @@
     <script type="text/javascript" src="./scripts/jquery-1.7.2.min.js"></script>
     <script type="text/javascript" src="./scripts/jcanvas.js"></script>
     <script type="text/javascript" src="./scripts/plotly.min.js"></script>
+    <script type="text/javascript" src="./scripts/distributions.js"></script>
     <script type="text/javascript" src="./scripts/multi.js"></script>
     <link href="./scripts/style.css" rel="stylesheet">
     <title>Bivariate Distribution Calculator</title>
@@ -181,6 +182,24 @@
         </ul>
     </header>
     <div id = "backdim"></div>
+    <div id = "rules">
+        <button id = "closeR">&times;</button>
+        <h2>Methodology</h2>
+        <p>The Joint Bivariate Distribution is formed by using the Farlie–Gumbel–Morgenstern copula that combines the X and Y distributions. The steps taken by the calculator are outlined below:</p>
+        <ol>
+            <li>All continuous distribution are discretized, turning into discrete arrays with 250 points</li>
+            <li>&kappa; is calculated from the values of &rho; and the standard deviations of both distributions using the following formula: <img src="./img/kappa.PNG" /></li>
+            <li>Using the value for &kappa;, the Joint Bivariate PDF is calculated using the following formula: <img src = "./img/b.PNG"/></li>
+            <li>Finally, the Joint Bivariate CDF is calculated using the following formula: <img src = "./img/bigb.PNG"/></li>
+        </ol>
+        <br>
+        <h2>Calculator Rules</h2>
+        <ul>
+            <li>While this calculator allows discrete and continuous probabilities to be used together simultaneously, using discrete functions may produce minor visual errors. They will not impact the overall calculations, but an occasional red streak can be visible on the 2D graph</li>
+            <li>Normal Distribution limits: mean can take any value, but the standard deviation must be greater than 0, otherwise the calculator will reset the value back to 1</li>
+            <li>Poisson Distribution limits: the value of lambda must be a non-negative number, otherwise the calculator will reset its value to 0. Also, the X or Y limits must also be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+        </ul>
+    </div>
     <main><div id="mainContainer">
         <button id = "close">&times;</button>
         <h2>Instructions</h2>
@@ -188,7 +207,7 @@
             <li>Use the <b>Distribution type</b> section to select what distributions you would like to be displayed</li>
             <li>Use the <b>Variable Settings</b> section to input the distribution parameters and correlation coefficient</li>
             <li>Use the <b>Control</b> section to input appropriate bivariate limits for X and Y variables</li>
-            <li>Use the <b>Graph Settings</b> sections to indicate what type of 2D and 3D graph to view. You can select to view either the Marginal functions of each variable, the Conditional distributions at the limits of variables, or the CDF functions for the 2D graph, while the PDF and the CDF are available for the 3D graph.</li>
+            <li>Use the <b>Graph Settings</b> sections to indicate what type of Marginal Distribution and Joint Bivariate Distribution to view. You can select to view either the Marginal functions of each variable, the Conditional distributions at the limits of variables, or the CDF functions for the Marginal Distribution graph, while the PDF and the CDF are available for the Joint Bivariate Distribution plot.</li>
             <li>Once done, click the <b>X</b> button to close the Graph Settings Section. The graph may take a few seconds to update.</li>
         </ul>
         <table>
@@ -232,7 +251,7 @@
         </table>
         <table>
             <tr>
-                <td colspan="2"><h2>2D Graph Settings</h2></td>
+                <td colspan="2"><h2>Marginal Distribution Settings</h2></td>
             </tr>
             <tr>
                 <td><input type = "radio" name = "1" value='0' checked> Marginal of X</td>
@@ -251,7 +270,7 @@
                 <td><input type = "radio" name = "1"  value="7"> CDF of Y</td>
             </tr>
             <tr>
-                <td colspan="2"><h2>3D Graph Settings</h2></td>
+                <td colspan="2"><h2>Joint Bivariate Distribution</h2></td>
             </tr>
             <tr>
                 <td><input type = "radio" name = "2" value="0" checked> Bivariate PDF</td>
@@ -260,6 +279,7 @@
         </table><!--<button id = "test">Test</button>-->
     </div></main>
     <button id = "show">Graph Settings</button>
+    <button id = "showR">Methodology and Calculator Rules</button>
     <table id = "res">
         <tr><td><h2>Probability Results</h2></td></tr>
         <tr><td><textarea id="pout" readonly></textarea></td></tr>

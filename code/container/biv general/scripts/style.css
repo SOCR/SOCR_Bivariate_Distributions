@@ -5,7 +5,7 @@ body{
 	padding-top: 3em;
 }
 
-p,table,tr,td,div,textarea,h1,h2,button, li, ul{
+p,table,tr,td,div,textarea,h1,h2,button, li, ul,ol{
     font-family: trebuchet ms, verdana, arial, tahoma;
     font-style: normal;
     color: black;
@@ -68,6 +68,21 @@ main{
     overflow: auto;
 }
 
+#rules{
+    display: none;
+    background-color: #eee;
+    z-index: 4;
+    position: fixed;
+    max-width: 75vw;
+    top: 5vh;
+    left: 15vw;
+    border: 2px solid black;
+    border-radius: 10px;
+    max-height: 35vw;
+    overflow: auto;
+    padding-left: 1em;
+}
+
 #mainContainer{
     display: flex;
     flex-flow: column;
@@ -89,6 +104,17 @@ main{
 }
 
 #close{
+    position: absolute;
+	z-index: 3;
+    background-color: rgb(200, 200, 200);
+    width: 1em !important;
+    height: 1em !important;
+    font-size:2em;
+    right: 0.5em;
+    margin-top: 0.5em;
+}
+
+#closeR{
     position: absolute;
 	z-index: 3;
     background-color: rgb(200, 200, 200);
@@ -126,6 +152,15 @@ h2{
         margin-top: 2.5em;
     }
     main{
+        min-width: 50vw;
+        max-width: 50vw;
+        min-height: 35vh;
+        top: 15vh;
+        left: 25vw;
+        max-height: 35vw;
+        overflow: auto;
+    }
+    #rules{
         min-width: 50vw;
         max-width: 50vw;
         min-height: 35vh;
