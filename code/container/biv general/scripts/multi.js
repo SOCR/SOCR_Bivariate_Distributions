@@ -6,7 +6,7 @@ $(document).ready(function(){
     var Fy = [];
     var x = [];// time array for x
     var y = [];// time array for y
-    var xdist = 0;// Stores what type of distribution X is, 0 = normal, 1 = poisson
+    var xdist = 0;// Stores what type of distribution X is, 0 = normal, 1 = poisson, 2 = gamma, 3 = chi-sq, 4 = t-dist, 5 = f-dist, 6 = beta, 7 = weibull, 8 = pareto, 9 = logistic, 10 = log-normal, 11 = gumbel, 12 = uniform, 13 = birthday, 14 = u-quadratic, 15 = arcsine, 16 = semicircle, 17 = max walk, 18 = final pos walk, 19 = cauchy, 20 = hyperbolic secant, 21 = irwin-hall, 22 = laplace, 23 = benford-mantissa, 24 = exp-log, 25 = beta prime, 26 = zeta, 27 = loglogistic, 28 = maxwell-bolzmnan, 29 = logarithmic
     var ydist = 0;// Stores what type of distribution Y is, values same as X
     var toDisp = [];// Stores what radio is selected
     var b = [];// Stores matrix for b(x,y)
@@ -17,10 +17,6 @@ $(document).ready(function(){
     var px2 = 0;// second parameter of distribution X
     var py1 = 1;// first parameter of distribution Y
     var py2 = 1;// second parameter of distribution X
-    var mux = 0;// mean of X
-    var muy = 0;// mean of Y
-    var sigmax = 1;// std dev of X
-    var sigmay = 1;// std dev of Y
     var xmin = -4;// input value of x min
     var xmax = 4;// input value of x max
     var ymin = -4;// input value of y min
@@ -31,7 +27,7 @@ $(document).ready(function(){
     var c = [];// conditional distribution stored here
     var C = [];// conditional CDF stored here
     var maxc = 0;// max of conditional prob
-    var old = [];// stores old values to check if x,y,z need updating
+    var old = 0;// stores old value of rho in case the user enters an incorrect one
     var des = 0; //0 = marginal x, 1 = marginal y, 2 = x|y at ymin, 3 = x|y at ymax, 4 = y|x at xmin, 5 = y|x at xmax, 6 = cdf x, 7 = cdf y
     var numPoints = 250;// number of points per distribution, max = 500
     var sigmaStep = 5;// bounds how many sigmas away are the distributions calculated
@@ -39,85 +35,127 @@ $(document).ready(function(){
     var des3d = 0;// 0 = bivariate PDF, 1 = bivariate CDF
     var starting = 0;// used for initial settings to be displayed
     var output = [];// String array to store history of outputs
-    var changed = 0;// Detects if the distribution type was changed
     var $graph = $('#graph');// Canvas for 2d graph
     var settingsOpen = false;// Logs if the settings menu is open
     var rulesOpen = false;// Logs of the rules window is open
+    var instructions = [10, 10];// Logs what instructions are visible
+    var flattitle = ['Marginal of X', 'Marginal of Y', 'Conditional of X|Y = Y<sub>min</sub>', 'Conditional of X|Y = Y<sub>max</sub>', 'Conditional of Y|X = X<sub>min</sub>', 'Conditional of Y|X = X<sub>max</sub>', 'CDF of X', 'CDF of Y'];// Stores the names of all 2d graphs
+    var surftitle = ['Bivariate PDF', 'Bivariate CDF'];// Stores the names of all 3d graphs
                                                             //Functions
     var check = function(){// Checks if inputs are correct, if they are wrong it resets them to previously recorded values. Add the appropriate checks if more distributions are added
         //Rho
         if(rho >= 1 || rho < 0 || isNaN(rho)){
-            rho = old[4];
+            rho = old;
             $('#rho').replaceWith('<textarea id = "rho" onfocus="this.select()" rows="1" maxlength="4">' + rho + '</textarea>');
         }
-        //Mu x / lambda
+        //Mu x / lambda (poisson) / shape / k / v / d1 / alpha / xm / a / days / hats / R / N / scale / terms / b / p / alpha / s
         if(isNaN(px1)){
             px1 = 0;
             $('#px1').replaceWith('<textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">' + px1 + '</textarea>');
         }
-        else if(px1 < 0 && xdist == 1){
-            px1 = 0;
+        else if(px1 <= 0 && (xdist == 1 || xdist == 2 || xdist == 3 || xdist == 4 || xdist == 5 || xdist == 6 || xdist == 7 || xdist == 8 || xdist == 13 || xdist == 16 || xdist == 17 || xdist == 18 || xdist == 19 || xdist == 21 || xdist == 25 || xdist == 27 || xdist == 28)){
+            px1 = 1;
             $('#px1').replaceWith('<textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">' + px1 + '</textarea>');
         }
-        else if(px1 < 0 && xdist == 1){
-            px1 = 0;
+        else if((px1 <= 0 || px1 >= 1) && (xdist == 24 || xdist == 29)){
+            px1 = 0.5;
             $('#px1').replaceWith('<textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">' + px1 + '</textarea>');
         }
-        //Mu y / lambda
+        else if(px1 <= 1 && (xdist == 26 || xdist == 23)){
+            px1 = 2;
+            $('#px1').replaceWith('<textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">' + px1 + '</textarea>');
+        }
+        //Mu y / lambda (poisson) / shape / k / v / d1 / alpha / ym / a / days / hats / R / N / scale / terms / b / p / alpha / s
         if(isNaN(py1)){
-            px2 = 0;
-            $('#px2').replaceWith('<textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">' + px2 + '</textarea>');
+            py1 = 0;
+            $('#py1').replaceWith('<textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">' + py1 + '</textarea>');
         }
-        else if(py1 < 0 && ydist == 1){
-            px2 = 0;
-            $('#px2').replaceWith('<textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">' + px2 + '</textarea>');
+        else if(py1 <= 0 && (ydist == 1 || ydist == 2 || ydist == 3 ||  ydist == 4 ||  ydist == 5 ||  ydist == 6 ||  ydist == 7 ||  ydist == 8 ||  ydist == 13 ||  ydist == 16 ||  ydist == 17 ||  ydist == 18 || ydist == 19 ||  ydist == 21 || ydist == 25 || ydist == 27 || ydist == 28)){
+            py1 = 1;
+            $('#py1').replaceWith('<textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">' + py1 + '</textarea>');
         }
-        //Sigma x
-        if(isNaN(px2) || (px2 <= 0 && xdist == 0)){
+        else if((py1 <= 0 || py1 >= 1) && (ydist == 24 || ydist == 29)){
+            py1 = 0.5;
+            $('#py1').replaceWith('<textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">' + py1 + '</textarea>');
+        }
+        else if(py1 <= 1 && (ydist == 26 || ydist == 23)){
+            py1 = 2;
+            $('#py1').replaceWith('<textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">' + py1 + '</textarea>');
+        }
+        //Sigma x / scale / d2 / beta / alpha / s / b / sample
+        if(isNaN(px2) || (px2 <= 0 && (xdist == 0 || xdist == 2 || xdist == 5 || xdist == 6 || xdist == 7 || xdist == 8 || xdist == 9 || xdist == 10 || xdist == 11 || xdist == 13 || xdist == 20 || xdist == 22 || xdist == 24 || xdist == 25 || xdist == 27))){
             px2 = 1;
             $('#px2').replaceWith('<textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">' + px2 + '</textarea>');
         }
-        //Sigma y
-        if(isNaN(py2) || (py2 <= 0 && ydist == 0)){
+        else if((xdist == 12 || xdist == 14) && px1 >= px2){
+            px2 = px1 + 5;
+            $('#px2').replaceWith('<textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">' + px2 + '</textarea>');
+        }
+        //Sigma y / scale / d2 / beta / aplha / s / b / sample
+        if(isNaN(py2) || (py2 <= 0 && (ydist == 0 || ydist == 2 || ydist == 5 || ydist == 6 || ydist == 7 || ydist == 8 || ydist == 9 || ydist == 10 || ydist == 11 || ydist == 13 || ydist == 20 || ydist == 22 || ydist == 24 || ydist == 25 || ydist == 27))){
             py2 = 1;
             $('#py2').replaceWith('<textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">' + py2 + '</textarea>');
         }
-        //X
-        if(xmin >= xmax || isNaN(xmin) || (xmin < 0 && xdist == 1)){
+        else if((ydist == 12 || ydist == 14) && py1 >= py2){
+            py2 = py1 + 5;
+            $('#py2').replaceWith('<textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">' + py2 + '</textarea>');
+        }
+        //X min
+        if(xmin >= xmax || isNaN(xmin) || (xmin < 0 && (xdist == 1 || xdist == 2 || xdist == 3 || xdist == 5 || xdist == 7 || xdist == 8 || xdist == 10 || xdist == 13 || xdist == 15 || xdist == 17 || xdist == 18 || xdist == 21 || xdist == 23 || xdist == 25 || xdist == 26 || xdist == 27 || xdist == 28 || xdist == 29))){
             xmin = 0;
             $('#xmin').replaceWith('<textarea id = "xmin" onfocus="this.select()" rows="1" maxlength="4">' + xmin + '</textarea>');
         }
-        if(isNaN(xmax) || (xmax < 0 && xdist == 1)){
+        else if(xmin < px1-2 && xdist == 12){
+            xmin = px1-2;
+            $('#xmin').replaceWith('<textarea id = "xmin" onfocus="this.select()" rows="1" maxlength="4">' + xmin + '</textarea>');
+        }
+        //X max
+        if(xmin >= xmax || isNaN(xmax) || (xmax < 0 && (xdist == 1 || xdist == 2 || xdist == 3 || xdist == 5 || xdist == 7 || xdist == 8 || xdist == 10 || xdist == 13 || xdist == 17 || xdist == 18 || xdist == 21 || xdist == 23 || xdist == 25 || xdist == 26 || xdist == 27 || xdist == 28 || xdist == 29))){
             xmax = 5;
             $('#xmax').replaceWith('<textarea id = "xmax" onfocus="this.select()" rows="1" maxlength="4">' + xmax + '</textarea>');
         }
-        //Y
-        if(ymin >= ymax || isNaN(ymin) || (ymin < 0 && ydist == 1)){
+        else if(xmax > 1 && (xdist == 6 || xdist == 15)){
+            xmax = 1;
+            $('#xmax').replaceWith('<textarea id = "xmax" onfocus="this.select()" rows="1" maxlength="4">' + xmax + '</textarea>');
+        }
+        else if(xmax > px2+2 && xdist == 12){
+            xmax = px2+2;
+            $('#xmax').replaceWith('<textarea id = "xmax" onfocus="this.select()" rows="1" maxlength="4">' + xmax + '</textarea>');
+        }
+        //Y min
+        if(ymin >= ymax || isNaN(ymin) || (ymin < 0 && (ydist == 1 || ydist == 2 || ydist == 3 || ydist == 5 || ydist == 7 || ydist == 8 || ydist == 10 || ydist == 13 || ydist == 15 || ydist == 17 || ydist == 18 || ydist == 21 || ydist == 23 || ydist == 25 || ydist == 26 || ydist == 27 || ydist == 28 || ydist == 29))){
             ymin = 0;
             $('#ymin').replaceWith('<textarea id = "ymin" onfocus="this.select()" rows="1" maxlength="4">' + ymin + '</textarea>');
         }
-        if(isNaN(ymax) || (ymax < 0 && ydist == 1)){
+        else if(ymin < py1-2 && ydist == 12){
+            ymin = py1-2;
+            $('#ymin').replaceWith('<textarea id = "ymin" onfocus="this.select()" rows="1" maxlength="4">' + ymin + '</textarea>');
+        }
+        //Y max
+        if(ymin >= ymax || isNaN(ymax) || (ymax < 0 && (ydist == 1 || ydist == 2 || ydist == 3 || ydist == 5 || ydist == 7 || ydist == 8 || ydist == 10 || ydist == 13 || ydist == 17 || ydist == 18 || ydist == 21 || ydist == 23 || ydist == 25 || ydist == 26 || ydist == 27 || ydist == 28 || ydist == 29))){
             ymax = 5;
             $('#ymax').replaceWith('<textarea id = "ymax" onfocus="this.select()" rows="1" maxlength="4">' + ymax + '</textarea>');
         }
-    }
-    var checkUpdate = function(){// checks if any distribution parameters have been updated
-        if(old[0] != mux){return 1;}
-        if(old[1] != muy){return 1;}
-        if(old[2] != sigmax){return 1;}
-        if(old[3] != sigmay){return 1;}
-        if(old[4] != rho){return 1;}
-        return 0;
+        else if(ymax > 1 && (ydist == 6 || ydist == 15)){
+            ymax = 1;
+            $('#ymax').replaceWith('<textarea id = "ymax" onfocus="this.select()" rows="1" maxlength="4">' + ymax + '</textarea>');
+        }
+        else if(ymax > py2+2 && ydist == 12){
+            ymax = py2+2;
+            $('#ymax').replaceWith('<textarea id = "ymax" onfocus="this.select()" rows="1" maxlength="4">' + ymax + '</textarea>');
+        }
     }
                                                             //Distributions
-    var normal = function(des){//Makes a nornal distribution
+    //Can do: normal, poisson, gamma, chisq, student t, F, beta, weibull, pareto, logistic, lognormal, gumbel, uniform, birthday, discrete arcsine, semicircle, max random walk, final random walk, cauchy, hyperbolic secant, irwin-hall, laplace, benford-mantissa, exp-log, beta prime, zeta, log, loglogistic, maxwell-boltzman, u quadratic
+    //Cannot do: hypergeometric, polya,  finite order, triangle, location scale, order statistic, beta binomial, beta neg binomial, arcsine, extreme value distribution, coupon collector, benford digit, matching hats
+    var normal = function(des){//Normal
         var t = [];
         var f = [];
         var F = [];
         var mu = 0;
         var sigma = 0;
-        if(des == 0){mu = mux;sigma = sigmax;x = [];fx = [];Fx = [];}
-        else{mu = muy;sigma = sigmay;y = [];fy = [];Fy = [];}
+        if(des == 0){mu = px1;sigma = px2;x = [];fx = [];Fx = [];}
+        else{mu = py1;sigma = py2;y = [];fy = [];Fy = [];}
         var start = mu-sigmaStep*sigma;
         var end = mu+sigmaStep*sigma;
         var step = Math.abs((end-start)/numPoints);
@@ -130,13 +168,13 @@ $(document).ready(function(){
         if(des == 0){x = t; fx = f; Fx = F}
         else{y = t; fy = f; Fy = F;}
     }
-    var poisson = function(des){//Makes a poisson distribution
+    var poisson = function(des){//Poisson
         var t = [];
         var f = [];
         var F = [];
         var lambda = 0;
-        if(des == 0){lambda = mux;x = [];fx = [];Fx = [];}
-        else{lambda = muy;y = [];fy = [];Fy = [];}
+        if(des == 0){lambda = px1;x = [];fx = [];Fx = [];}
+        else{lambda = py1;y = [];fy = [];Fy = [];}
         var tempdist = new PoissonDistribution(lambda);
         for(var i = 0; i <= 30; i++){
             t.push(i);
@@ -146,19 +184,559 @@ $(document).ready(function(){
         if(des == 0){x = t; fx = f; Fx = F}
         else{y = t; fy = f; Fy = F;}
     }
-    var template = function(des){//Template for adding more distributions, copy as a new function then add references to distributions.js
+    var gamma = function(des){//Gamma
+        var t = [];
+        var f = [];
+        var F = [];
+        var shape = 0;
+        var scale = 0;
+        if(des == 0){shape = px1;scale = px2;x = [];fx = [];Fx = [];}
+        else{shape = py1;scale = py2;y = [];fy = [];Fy = [];}
+        var start = 0;
+        var end = 20;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new GammaDistribution(shape, scale);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var chisq = function(des){//Chi-sq
+        var t = [];
+        var f = [];
+        var F = [];
+        var dof = 0;
+        if(des == 0){dof = px1;x = [];fx = [];Fx = [];}
+        else{dof = py1;y = [];fy = [];Fy = [];}
+        var start = 0;
+        if(dof == 1){start = 0.0001;}
+        var end = 20;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new ChiSquareDistribution(dof);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var t = function(des){//Student's t-distribution
+        var t = [];
+        var f = [];
+        var F = [];
+        var dof = 0;
+        if(des == 0){dof = px1;x = [];fx = [];Fx = [];}
+        else{dof = py1;y = [];fy = [];Fy = [];}
+        var start = -5;
+        var end = 5;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new StudentDistribution(dof);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var fdist = function(des){//F-distribution
+        var t = [];
+        var f = [];
+        var F = [];
+        var d1 = 0;
+        var d2 = 0;
+        if(des == 0){d1 = px1;d2 = px2;x = [];fx = [];Fx = [];}
+        else{d1 = py1;d2 = py2;y = [];fy = [];Fy = [];}
+        var start = 0;
+        if(d1 == 1){start = 0.001;}
+        var end = 10;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new FDistribution(d1, d2);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var beta = function(des){//Beta
+        var t = [];
+        var f = [];
+        var F = [];
+        var alpha = 0;
+        var beta = 0;
+        if(des == 0){alpha = px1;beta = px2;x = [];fx = [];Fx = [];}
+        else{alpha = py1;beta = py2;y = [];fy = [];Fy = [];}
+        var start = 0;
+        var end = 1;
+        if(alpha < 1 || beta < 1){start = 0.0001; end = 0.9999;}
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new BetaDistribution(alpha, beta);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var weibull = function(des){//Weibull
+        var t = [];
+        var f = [];
+        var F = [];
+        var shape = 0;
+        var scale = 0;
+        if(des == 0){shape = px1;scale = px2;x = [];fx = [];Fx = [];}
+        else{shape = py1;scale = py2;y = [];fy = [];Fy = [];}
+        var start = 0;
+        var end = 5;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new WeibullDistribution(shape, scale);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var pareto = function(des){//Pareto
+        var t = [];
+        var f = [];
+        var F = [];
+        var shape = 0;
+        var scale = 0;
+        if(des == 0){shape = px1;scale = px2;x = [];fx = [];Fx = [];}
+        else{shape = py1;scale = py2;y = [];fy = [];Fy = [];}
+        var start = scale;
+        var end = scale+10;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new ParetoDistribution(shape, scale);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var logistic = function(des){//Logistic
+        var t = [];
+        var f = [];
+        var F = [];
+        var mu = 0;
+        var s = 0;
+        if(des == 0){mu = px1;s = px2;x = [];fx = [];Fx = [];}
+        else{mu = py1;s = py2;y = [];fy = [];Fy = [];}
+        var start = mu-sigmaStep*s;
+        var end = mu+sigmaStep*s;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new LogisticDistribution(mu, s);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var lognormal = function(des){//Log-normal
         var t = [];
         var f = [];
         var F = [];
         var mu = 0;
         var sigma = 0;
-        if(des == 0){mu = mux;sigma = sigmax;x = [];fx = [];Fx = [];}
-        else{mu = muy;sigma = sigmay;y = [];fy = [];Fy = [];}
+        if(des == 0){mu = px1;sigma = px2;x = [];fx = [];Fx = [];}
+        else{mu = py1;sigma = py2;y = [];fy = [];Fy = [];}
+        var start = 0.001;
+        var end = 5*Math.floor(Math.exp(mu)+1);
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new LogNormalDistribution(mu, sigma);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var gumbel = function(des){//Gumbel
+        var t = [];
+        var f = [];
+        var F = [];
+        var mu = 0;
+        var scale = 0;
+        if(des == 0){mu = px1;scale = px2;x = [];fx = [];Fx = [];}
+        else{mu = py1;scale = py2;y = [];fy = [];Fy = [];}
+        var start = mu-sigmaStep*scale;
+        var end = mu+sigmaStep*scale;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new ExtremeValueDistribution(mu, scale);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var uniform = function(des){//Uniform
+        var t = [];
+        var f = [];
+        var F = [];
+        var left = 0;
+        var right = 0;
+        if(des == 0){left = px1;right = px2;x = [];fx = [];Fx = [];}
+        else{left = py1;right = py2;y = [];fy = [];Fy = [];}
+        var start = left-2;
+        var end = right+2;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new UniformDistribution(left, right);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var bday = function(des){//Birthday
+        var t = [];
+        var f = [];
+        var F = [];
+        var days = 0;
+        var sample = 0;
+        if(des == 0){days = px1;sample = px2;x = [];fx = [];Fx = [];}
+        else{days = py1;sample = py2;y = [];fy = [];Fy = [];}
+        var end = days;
+        var tempdist = new BirthdayDistribution(days, sample);
+        for(var i = 0; i <= end; i++){
+            t.push(Math.floor(i));
+            if(tempdist.density(t[i]) == 0 && tempdist.density(t[i-1]) == 0){f.push(0)}
+            else{f.push(tempdist.density(t[i]));}
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var arcsine = function(des){//Arcsine
+        var t = [];
+        var f = [];
+        var F = [];
+        if(des == 0){x = [];fx = [];Fx = [];}
+        else{y = [];fy = [];Fy = [];}
+        var start = 0.004;
+        var end = 0.996;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new ArcsineDistribution();
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var semicircle = function(des){//Semicircle
+        var t = [];
+        var f = [];
+        var F = [];
+        var r = 0;
+        if(des == 0){r = px1;x = [];fx = [];Fx = [];}
+        else{r = py1;y = [];fy = [];Fy = [];}
+        var start = -r;
+        var end = r;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new SemiCircleDistribution(r);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var finalwalk = function(des){//Max distance on a walk
+        var t = [];
+        var f = [];
+        var F = [];
+        var n = 0;
+        if(des == 0){n = px1;x = [];fx = [];Fx = [];}
+        else{n = py1;y = [];fy = [];Fy = [];}
+        var tempdist = new WalkMaxDistribution(n);
+        for(var i = 0; i <= 5+n; i++){
+            t.push(i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var maxwalk = function(des){//Final position on a walk
+        var t = [];
+        var f = [];
+        var F = [];
+        var n = 0;
+        if(des == 0){n = px1;x = [];fx = [];Fx = [];}
+        else{n = py1;y = [];fy = [];Fy = [];}
+        var tempdist = new WalkPositionDistribution(n);
+        for(var i = 0; i <= n+5; i++){
+            t.push(i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var cauchy = function(des){//Cauchy
+        var t = [];
+        var f = [];
+        var F = [];
+        var scale = 0;
+        if(des == 0){scale = px1;x = [];fx = [];Fx = [];}
+        else{scale = py1;y = [];fy = [];Fy = [];}
+        var start = -sigmaStep*scale;
+        var end = sigmaStep*scale;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new CauchyDistribution(scale);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var hypsec = function(des){//Hyperbolic Secant
+        var t = [];
+        var f = [];
+        var F = [];
+        var loc = 0;
+        var scale = 0;
+        if(des == 0){loc = px1;scale = px2;x = [];fx = [];Fx = [];}
+        else{loc = py1;scale = py2;y = [];fy = [];Fy = [];}
+        var start = loc-sigmaStep*scale;
+        var end = loc+sigmaStep*scale;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new HyperbolicSecantDistribution(loc, scale);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var irwin = function(des){//Irwin-Hall
+        var t = [];
+        var f = [];
+        var F = [];
+        var term = 0;
+        if(des == 0){term = px1;x = [];fx = [];Fx = [];}
+        else{term = py1;y = [];fy = [];Fy = [];}
+        var start = 0;
+        var end = term;
+        var step = Math.abs((end-start)/100);
+        var tempdist = new IrwinHallDistribution(term);
+        for(var i = 0; i < numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var laplace = function(des){//Laplace
+        var t = [];
+        var f = [];
+        var F = [];
+        var loc = 0;
+        var scale = 0;
+        if(des == 0){loc = px1;scale = px2;x = [];fx = [];Fx = [];}
+        else{loc = py1;scale = py2;y = [];fy = [];Fy = [];}
+        var start = loc-sigmaStep*scale;
+        var end = loc+sigmaStep*scale;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new LaplaceDistribution(loc, scale);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var benmat = function(des){//Benford-Mantissa
+        var t = [];
+        var f = [];
+        var F = [];
+        var b = 0;
+        if(des == 0){b = px1;x = [];fx = [];Fx = [];}
+        else{b = py1;y = [];fy = [];Fy = [];}
+        var start = b;
+        var end = b+Math.floor(10*b);
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new BenfordMantissaDistribution(b);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var explog = function(des){//Exponential-Logarithmic
+        var t = [];
+        var f = [];
+        var F = [];
+        var shape = 0.001;
+        var scale = 0;
+        if(des == 0){shape = px1;scale = px2;x = [];fx = [];Fx = [];}
+        else{shape = py1;scale = py2;y = [];fy = [];Fy = [];}
+        var start = 0;
+        var end = 3/scale;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new ExponentialLogarithmicDistribution(shape, scale);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var betaprime = function(des){//Beta Prime
+        var t = [];
+        var f = [];
+        var F = [];
+        var a = 0;
+        var b = 0;
+        if(des == 0){a = px1;b = px2;x = [];fx = [];Fx = [];}
+        else{a = py1;b = py2;y = [];fy = [];Fy = [];}
+        var start = 0;
+        if(a < 1){start = 0.004;}
+        var end = 5;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new BetaPrimeDistribution(a, b);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var zeta = function(des){//Zeta
+        var t = [];
+        var f = [];
+        var F = [];
+        var a = 0;
+        if(des == 0){a = px1;x = [];fx = [];Fx = [];}
+        else{a = py1;y = [];fy = [];Fy = [];}
+        var tempdist = new ZetaDistribution(a);
+        for(var i = 0; i <= 20; i++){
+            t.push(i+1);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var loglogistic = function(des){//LogLogistic
+        var t = [];
+        var f = [];
+        var F = [];
+        var scale = 0;
+        var shape = 0;
+        if(des == 0){scale = px1;shape = px2;x = [];fx = [];Fx = [];}
+        else{scale = py1;shape = py2;y = [];fy = [];Fy = [];}
+        var start = 0;
+        if(shape < 1){start = 0.001;}
+        var end = 5*scale;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new LogLogisticDistribution(scale, shape);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var maxwell = function(des){//Maxwell-Boltzman
+        var t = [];
+        var f = [];
+        var F = [];
+        var a = 0;
+        if(des == 0){a = px1;x = [];fx = [];Fx = [];}
+        else{a = py1;y = [];fy = [];Fy = [];}
+        var start = 0;
+        var end = 5*a;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new MaxwellBoltzmannDistribution(a);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var logdist = function(des){//Logarithmic
+        var t = [];
+        var f = [];
+        var F = [];
+        var p = 0;
+        if(des == 0){p = px1;x = [];fx = [];Fx = [];}
+        else{p = py1;y = [];fy = [];Fy = [];}
+        var end = 5+Math.floor(p*10);
+        var tempdist = new LogarithmicDistribution(p);
+        for(var i = 0; i <= end; i++){
+            t.push(i+1);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var uquad = function(des){//U-Quadratic
+        var t = [];
+        var f = [];
+        var F = [];
+        var a = 0;
+        var b = 0;
+        if(des == 0){a = px1;b = px2;x = [];fx = [];Fx = [];}
+        else{a = py1;b = py2;y = [];fy = [];Fy = [];}
+        var start = a;
+        var end = b;
+        var step = Math.abs((end-start)/numPoints);
+        var tempdist = new UQuadraticDistribution(a, b);
+        for(var i = 0; i <= numPoints; i++){
+            t.push(start+step*i);
+            f.push(tempdist.density(t[i]));
+            F.push(tempdist.CDF(t[i]));
+        }
+        if(des == 0){x = t; fx = f; Fx = F}
+        else{y = t; fy = f; Fy = F;}
+    }
+    var template = function(des){//Template for adding more distributions, copy as a new function then add references to distributions.js, or write in own functions for pdf/cdf. Note that the makeCDF function can be used to make the CDF from a pdf
+        var t = [];
+        var f = [];
+        var F = [];
+        var mu = 0;
+        var sigma = 0;
+        if(des == 0){mu = px1;sigma = px2;x = [];fx = [];Fx = [];}
+        else{mu = py1;sigma = py2;y = [];fy = [];Fy = [];}
         var start = mu-sigmaStep*sigma;
         var end = mu+sigmaStep*sigma;
-        var step = Math.abs((end-start)/10);
+        var step = Math.abs((end-start)/numPoints);
         var tempdist = new Distribution();
-        for(var i = 0; i < numPoints; i++){
+        for(var i = 0; i <= numPoints; i++){
             t.push(start+step*i);
             f.push(tempdist.density(t[i]));
             F.push(tempdist.CDF(t[i]));
@@ -179,7 +757,7 @@ $(document).ready(function(){
         for (var i = 0; i < y.length;i++){
             temp2 += deltay*y[i]*fy[i]*(2*Fy[i]-1);
         }
-        k = (temp1*temp2)/(rho*sigmax*sigmay);
+        k = (temp1*temp2)/(rho*px2*py2);
         k = 1/k;
         //making b,B
         b = [];
@@ -187,8 +765,11 @@ $(document).ready(function(){
         for (var i = 0; i < x.length; i++){
             var temp3 = [];
             var temp4 = [];
+            var temp5 = 0;
             for (var j = 0; j < y.length; j++){
-                temp3.push(fx[i]*fy[j]*(1+k*(2*Fx[i]-1)*(2*Fy[j]-1)));
+                temp5 = fx[i]*fy[j]*(1+k*(2*Fx[i]-1)*(2*Fy[j]-1));
+                if(temp5 < 0){temp5 = 0;}
+                temp3.push(temp5);
                 temp4.push(Fx[i]*Fy[j]*(1+k*(1-Fx[i])*(1-Fy[j])));
             }
             b.push(temp3);
@@ -354,7 +935,7 @@ $(document).ready(function(){
                 drawData(toDisp);
                 out = findCDF(y, Fy, ymax) - findCDF(y, Fy, ymin);
                 updateOutput('P(' + ymin + ' < Y < ' + ymax + ') = ' + out.toFixed(3));
-                shadeIn(muy, sigmay, ymin, ymax);
+                shadeIn(py1, py2, ymin, ymax);
                 break;
         }
     }
@@ -506,7 +1087,7 @@ $(document).ready(function(){
         }
     }
     var doAll = function(){
-        old = [px1, py1, px2, py2, rho];
+        old = rho;
         px1 = Number($('#px1').val());
         py1 = Number($('#py1').val());
         px2 = Number($('#px2').val());
@@ -519,45 +1100,260 @@ $(document).ready(function(){
         des = Number($("input[name='1']:checked").val());
         des3d = Number($("input[name='2']:checked").val());
         check();
-        var updating = checkUpdate();
-        if(updating == 1 || changed == 1){
-            switch(xdist){//Add additional cases for any distribution added
-                case 0:
-                    mux = px1;
-                    sigmax = px2;
-                    normal(0);
-                    break;
-                case 1:
-                    mux = px1;
-                    sigmax = px1;
-                    px2 = 1;
-                    poisson(0);
-                    break;
-            }
-            switch(ydist){//Add additional cases for any distribution added
-                case 0:
-                    muy = py1;
-                    sigmay = py2;
-                    normal(1);
-                    break;
-                case 1:
-                    muy = py1;
-                    sigmay = py1;
-                    py2 = 1;
-                    poisson(1);
-                    break;
-            }
-            maxx = Math.max(...fx);
-            maxy = Math.max(...fy);
-            makeB();
+        switch(xdist){//Add additional cases for any distribution added
+            case 0:
+                normal(0);
+                break;
+            case 1:
+                px2 = 1;
+                poisson(0);
+                break;
+            case 2:
+                gamma(0);
+                break;
+            case 3:
+                px1 = Math.floor(px1);
+                px2 = 1;
+                chisq(0);
+                break;
+            case 4:
+                px2 = 1;
+                t(0);
+                break;
+            case 5:
+                px1 = Math.floor(px1);
+                px2 = Math.floor(px2);
+                fdist(0);
+                break;
+            case 6:
+                beta(0);
+                break;
+            case 7:
+                weibull(0);
+                break;
+            case 8:
+                pareto(0);
+                break;
+            case 9:
+                logistic(0);
+                break;
+            case 10:
+                lognormal(0);
+                break;
+            case 11:
+                gumbel(0);
+                break;
+            case 12:
+                uniform(0);
+                break;
+            case 13:
+                px1 = Math.floor(px1);
+                px2 = Math.floor(px2);
+                bday(0);
+                break;
+            case 14:
+                uquad(0);
+                break;
+            case 15:
+                px1 = 1;
+                px2 = 1;
+                arcsine(0);
+                break;
+            case 16:
+                px2 = 1;
+                semicircle(0);
+                break;
+            case 17:
+                px1 = Math.floor(px1);
+                px2 = 1;
+                finalwalk(0);
+                break;
+            case 18:
+                px1 = Math.floor(px1);
+                px2 = 1;
+                maxwalk(0);
+                break;
+            case 19:
+                px2 = 1;
+                cauchy(0);
+                break;
+            case 20:
+                hypsec(0);
+                break;
+            case 21:
+                px1 = Math.floor(px1);
+                px2 = 1;
+                irwin(0);
+                break;
+            case 22:
+                laplace(0);
+                break;
+            case 23:
+                px2 = 1;
+                benmat(0);
+                break;
+            case 24:
+                explog(0);
+                break;
+            case 25:
+                betaprime(0);
+                break;
+            case 26:
+                px1 = Math.floor(px1);
+                px2 = 1;
+                zeta(0);
+                break;
+            case 27:
+                loglogistic(0);
+                break;
+            case 28:
+                px2 = 1;
+                maxwell(0);
+                break;
+            case 29:
+                px2 = 1;
+                logdist(0);
+                break;
         }
-        changed = 0;
+        switch(ydist){//Add additional cases for any distribution added
+            case 0:
+                normal(1);
+                break;
+            case 1:
+                py2 = 1;
+                poisson(1);
+                break;
+            case 2:
+                gamma(1);
+                break;
+            case 3:
+                py1 = Math.floor(py1);
+                py2 = 1;
+                chisq(1);
+                break;
+            case 4:
+                py2 = 1;
+                t(1);
+                break;
+            case 5:
+                py1 = Math.floor(py1);
+                py2 = Math.floor(py2);
+                fdist(1);
+                break;
+            case 6:
+                beta(1);
+                break;
+            case 7:
+                weibull(1);
+                break;
+            case 8:
+                pareto(1);
+                break;
+            case 9:
+                logistic(1);
+                break;
+            case 10:
+                lognormal(1);
+                break;
+            case 11:
+                gumbel(1);
+                break;
+            case 12:
+                uniform(1);
+                break;
+            case 13:
+                py1 = Math.floor(py1);
+                py2 = Math.floor(py2);
+                bday(1);
+                break;
+            case 14:
+                uquad(1);
+                break;
+            case 15:
+                py1 = 1;
+                py2 = 1;
+                arcsine(1);
+                break;
+            case 16:
+                py2 = 1;
+                semicircle(1);
+                break;
+            case 17:
+                py1 = Math.floor(py1);
+                py2 = 1;
+                finalwalk(1);
+                break;
+            case 18:
+                py1 = Math.floor(py1);
+                py2 = 1;
+                maxwalk(1);
+                break;
+            case 19:
+                py2 = 1;
+                cauchy(1);
+                break;
+            case 20:
+                hypsec(1);
+                break;
+            case 21:
+                py1 = Math.floor(py1);
+                py2 = 1;
+                irwin(1);
+                break;
+            case 22:
+                laplace(1);
+                break;
+            case 23:
+                py2 = 1;
+                benmat(1);
+                break;
+            case 24:
+                explog(1);
+                break;
+            case 25:
+                betaprime(1);
+                break;
+            case 26:
+                py1 = Math.floor(py1);
+                py2 = 1;
+                zeta(1);
+                break;
+            case 27:
+                loglogistic(1);
+                break;
+            case 28:
+                py2 = 1;
+                maxwell(1);
+                break;
+            case 29:
+                py2 = 1;
+                logdist(1);
+                break;
+            }
+        maxx = Math.max(...fx);
+        maxy = Math.max(...fy);
+        makeB();
         makebCut();
         updateGraph();//Updates 2D Graph
         updatePlot();//Updates 3D Graph
+        updateTitles();
         $('main').hide(1000);
         $('#backdim').hide(1000);
         settingsOpen = false;
+    }
+    var dispI = function(){
+        for (var i = 10; i < 40; i++){
+            if(i == instructions[0] || i == instructions[1]){
+                $('#' + i).show();
+            }
+            else{
+                $('#' + i).hide();
+            }
+        }
+    }
+    var updateTitles = function(){
+        $('#flattitle').replaceWith('<h2 id = "flattitle">' + flattitle[des] + '</h2>');
+        $('#surftitle').replaceWith('<h2 id = "surftitle">' + surftitle[des3d] + '</h2>');
     }
                                                             //Buttons
     $('#close').click(function(){//Does all the work updating everything
@@ -594,11 +1390,12 @@ $(document).ready(function(){
     });
     $(document).on('change', '#xdist', function(){//Detects change in select menu for X and alters the page accordingly
         var temp = "";
-        changed = 1;
 		$('#xdist option:selected').each(function(){
 			temp += $(this).val();
         })
         xdist = Number(temp);
+        instructions[0] = xdist+10;
+        dispI();
         switch (xdist){//Add other cases for any distribution added
             case 0:
                 $('#x1').replaceWith('<td id = "x1">&mu;<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>');
@@ -608,22 +1405,247 @@ $(document).ready(function(){
                 $('#x1').replaceWith('<td id = "x1">&lambda;<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>');
                 $('#x2').replaceWith('<td id = "x2">N/A</td>');
                 break;
+            case 2:
+                $('#x1').replaceWith('<td id = "x1">k<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">&theta;<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 3:
+                $('#x1').replaceWith('<td id = "x1">k<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">N/A</td>');
+                break;
+            case 4:
+                $('#x1').replaceWith('<td id = "x1">v<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">N/A</td>');
+                break;
+            case 5:
+                $('#x1').replaceWith('<td id = "x1">D1<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">D2<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 6:
+                $('#x1').replaceWith('<td id = "x1">&alpha;<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">&beta;<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 7:
+                $('#x1').replaceWith('<td id = "x1">k<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">&lambda;<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 8:
+                $('#x1').replaceWith('<td id = "x1">X<sub>m</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">&alpha;<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 9:
+                $('#x1').replaceWith('<td id = "x1">&mu;<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">s<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 10:
+                $('#x1').replaceWith('<td id = "x1">&mu;<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">&sigma;<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 11:
+                $('#x1').replaceWith('<td id = "x1">&mu;<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">&beta;<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 12:
+                $('#x1').replaceWith('<td id = "x1">a<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">b<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">5</textarea></td>');
+                break;
+            case 13:
+                $('#x1').replaceWith('<td id = "x1">Days<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">Sample<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">5</textarea></td>');
+                break;
+            case 14:
+                $('#x1').replaceWith('<td id = "x1">a<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">b<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">2</textarea></td>');
+                break;
+            case 15:
+                $('#x1').replaceWith('<td id = "x1">N/A</td>');
+                $('#x2').replaceWith('<td id = "x2">N/A</td>');
+                break;
+            case 16:
+                $('#x1').replaceWith('<td id = "x1">R<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">N/A</td>');
+                break;
+            case 17:
+                $('#x1').replaceWith('<td id = "x1">N<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">N/A</td>');
+                break;
+            case 18:
+                $('#x1').replaceWith('<td id = "x1">N<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">N/A</td>');
+                break;
+            case 19:
+                $('#x1').replaceWith('<td id = "x1">&gamma;<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">N/A</td>');
+                break;
+            case 20:
+                $('#x1').replaceWith('<td id = "x1">Location<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">Scale<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 21:
+                $('#x1').replaceWith('<td id = "x1">N<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">N/A</td>');
+                break;
+            case 22:
+                $('#x1').replaceWith('<td id = "x1">&mu;<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">b<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 23:
+                $('#x1').replaceWith('<td id = "x1">b<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">2</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">N/A</td>');
+                break;
+            case 24:
+                $('#x1').replaceWith('<td id = "x1">p<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">0.5</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">&beta;<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 25:
+                $('#x1').replaceWith('<td id = "x1">&alpha;<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">&beta;<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 26:
+                $('#x1').replaceWith('<td id = "x1">s<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">2</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">N/A</td>');
+                break;
+            case 27:
+                $('#x1').replaceWith('<td id = "x1">&alpha;<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">&beta;<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 28:
+                $('#x1').replaceWith('<td id = "x1">a<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">N/A</td>');
+                break;
+            case 29:
+                $('#x1').replaceWith('<td id = "x1">p<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">0.5</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">N/A</td>');
+                break;
         }
     })
     $(document).on('change', '#ydist', function(){//Detects change in select menu for Y and alters the page accordingly
         var temp = "";
-        changed = 1;
-		$('#ydist option:selected').each(function(){//Add other cases for any distribution added
+		$('#ydist option:selected').each(function(){//Add other cases for any distributions added
 			temp += $(this).val();
         })
         ydist = Number(temp);
+        instructions[1] = ydist+10;
+        dispI();
         switch (ydist){
             case 0:
-                $('#y1').replaceWith('<td id = "y1">&mu;<sub>X</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>');
-                $('#y2').replaceWith('<td id = "y2">&sigma;<sub>X</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y1').replaceWith('<td id = "y1">&mu;<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">&sigma;<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
                 break;
             case 1:
                 $('#y1').replaceWith('<td id = "y1">&lambda;<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">N/A</td>');
+                break;
+            case 2:
+                $('#y1').replaceWith('<td id = "y1">k<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">&theta;<sub>X</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 3:
+                $('#y1').replaceWith('<td id = "y1">k<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">N/A</td>');
+                break;
+            case 4:
+                $('#y1').replaceWith('<td id = "y1">v<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">N/A</td>');
+                break;
+            case 5:
+                $('#y1').replaceWith('<td id = "y1">D1<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">D2<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 6:
+                $('#y1').replaceWith('<td id = "y1">&alpha;<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">&beta;<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 7:
+                $('#y1').replaceWith('<td id = "y1">k<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">&lambda;<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 8:
+                $('#y1').replaceWith('<td id = "y1">Y<sub>m</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">&alpha;<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 9:
+                $('#y1').replaceWith('<td id = "y1">&mu;<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">s<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 10:
+                $('#y1').replaceWith('<td id = "y1">&mu;<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">&sigma;<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 11:
+                $('#y1').replaceWith('<td id = "y1">&mu;<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">&beta;<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 12:
+                $('#y1').replaceWith('<td id = "y1">a<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">b<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">5</textarea></td>');
+                break;
+            case 13:
+                $('#y1').replaceWith('<td id = "y1">Days<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">Sample<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">5</textarea></td>');
+                break;
+            case 14:
+                $('#y1').replaceWith('<td id = "y1">a<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">b<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">2</textarea></td>');
+                break;
+            case 15:
+                $('#y1').replaceWith('<td id = "y1">N/A</td>');
+                $('#y2').replaceWith('<td id = "y2">N/A</td>');
+                break;
+            case 16:
+                $('#y1').replaceWith('<td id = "y1">R<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">N/A</td>');
+                break;
+            case 17:
+                $('#y1').replaceWith('<td id = "y1">N<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">N/A</td>');
+                break;
+            case 18:
+                $('#y1').replaceWith('<td id = "y1">N<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">N/A</td>');
+                break;
+            case 19:
+                $('#y1').replaceWith('<td id = "y1">&gamma;<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">N/A</td>');
+                break;
+            case 20:
+                $('#y1').replaceWith('<td id = "y1">Location<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">Scale<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 21:
+                $('#y1').replaceWith('<td id = "y1">N<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">N/A</td>');
+                break;
+            case 22:
+                $('#y1').replaceWith('<td id = "y1">&mu;<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">b<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 23:
+                $('#y1').replaceWith('<td id = "y1">b<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">2</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">N/A</td>');
+                break;
+            case 24:
+                $('#y1').replaceWith('<td id = "y1">p<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">0.5</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">&beta;<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 25:
+                $('#y1').replaceWith('<td id = "y1">&alpha;<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">&beta;<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 26:
+                $('#y1').replaceWith('<td id = "y1">s<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">2</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">N/A</td>');
+                break;
+            case 27:
+                $('#y1').replaceWith('<td id = "y1">&alpha;<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">&beta;<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                break;
+            case 28:
+                $('#y1').replaceWith('<td id = "y1">a<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">N/A</td>');
+                break;
+            case 29:
+                $('#y1').replaceWith('<td id = "y1">p<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">0.5</textarea></td>');
                 $('#y2').replaceWith('<td id = "y2">N/A</td>');
                 break;
         }
@@ -658,31 +1680,7 @@ $(document).ready(function(){
         if(starting != 0){return;}
         doAll();
         starting++;
+        dispI();
     }
     initial();//running on load
-    //Factorial array
-    var factorials = [1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800, 39916800, 479001600, 6227020800, 87178291200, 1307674368000, 20922789888000, 355687428096000, 6402373705728000, 121645100408832000, 2432902008176640000, 51090942171709440000, 1124000727777607680000, 25852016738884976640000, 620448401733239439360000, 15511210043330985984000000, 403291461126605635584000000, 10888869450418352160768000000, 304888344611713860501504000000, 8841761993739701954543616000000, 265252859812191058636308480000000, 8222838654177922817725562880000000, 263130836933693530167218012160000000, 8683317618811886495518194401280000000, 295232799039604140847618609643520000000, 10333147966386144929666651337523200000000, 371993326789901217467999448150835200000000, 13763753091226345046315979581580902400000000, 523022617466601111760007224100074291200000000, 20397882081197443358640281739902897356800000000, 815915283247897734345611269596115894272000000000, 33452526613163807108170062053440751665152000000000, 1405006117752879898543142606244511569936384000000000, 60415263063373835637355132068513997507264512000000000, 2658271574788448768043625811014615890319638528000000000, 119622220865480194561963161495657715064383733760000000000, 5502622159812088949850305428800254892961651752960000000000, 258623241511168180642964355153611979969197632389120000000000, 12413915592536072670862289047373375038521486354677760000000000, 608281864034267560872252163321295376887552831379210240000000000, 30414093201713378043612608166064768844377641568960512000000000000, 1551118753287382280224243016469303211063259720016986112000000000000, 80658175170943878571660636856403766975289505440883277824000000000000, 4274883284060025564298013753389399649690343788366813724672000000000000, 230843697339241380472092742683027581083278564571807941132288000000000000, 12696403353658275925965100847566516959580321051449436762275840000000000000, 710998587804863451854045647463724949736497978881168458687447040000000000000, 40526919504877216755680601905432322134980384796226602145184481280000000000000, 2350561331282878571829474910515074683828862318181142924420699914240000000000000, 138683118545689835737939019720389406345902876772687432540821294940160000000000000, 8320987112741390144276341183223364380754172606361245952449277696409600000000000000, 507580213877224798800856812176625227226004528988036003099405939480985600000000000000, 31469973260387937525653122354950764088012280797258232192163168247821107200000000000000, 1982608315404440064116146708361898137544773690227268628106279599612729753600000000000000, 126886932185884164103433389335161480802865516174545192198801894375214704230400000000000000, 8247650592082470666723170306785496252186258551345437492922123134388955774976000000000000000, 544344939077443064003729240247842752644293064388798874532860126869671081148416000000000000000, 36471110918188685288249859096605464427167635314049524593701628500267962436943872000000000000000, 2480035542436830599600990418569171581047399201355367672371710738018221445712183296000000000000000, 171122452428141311372468338881272839092270544893520369393648040923257279754140647424000000000000000, 11978571669969891796072783721689098736458938142546425857555362864628009582789845319680000000000000000, 850478588567862317521167644239926010288584608120796235886430763388588680378079017697280000000000000000, 61234458376886086861524070385274672740778091784697328983823014963978384987221689274204160000000000000000, 4470115461512684340891257138125051110076800700282905015819080092370422104067183317016903680000000000000000, 330788544151938641225953028221253782145683251820934971170611926835411235700971565459250872320000000000000000, 24809140811395398091946477116594033660926243886570122837795894512655842677572867409443815424000000000000000000, 1885494701666050254987932260861146558230394535379329335672487982961844043495537923117729972224000000000000000000, 145183092028285869634070784086308284983740379224208358846781574688061991349156420080065207861248000000000000000000, 11324281178206297831457521158732046228731749579488251990048962825668835325234200766245086213177344000000000000000000, 894618213078297528685144171539831652069808216779571907213868063227837990693501860533361810841010176000000000000000000, 71569457046263802294811533723186532165584657342365752577109445058227039255480148842668944867280814080000000000000000000, 5797126020747367985879734231578109105412357244731625958745865049716390179693892056256184534249745940480000000000000000000, 475364333701284174842138206989404946643813294067993328617160934076743994734899148613007131808479167119360000000000000000000, 39455239697206586511897471180120610571436503407643446275224357528369751562996629334879591940103770870906880000000000000000000, 3314240134565353266999387579130131288000666286242049487118846032383059131291716864129885722968716753156177920000000000000000000, 281710411438055027694947944226061159480056634330574206405101912752560026159795933451040286452340924018275123200000000000000000000, 24227095383672732381765523203441259715284870552429381750838764496720162249742450276789464634901319465571660595200000000000000000000, 2107757298379527717213600518699389595229783738061356212322972511214654115727593174080683423236414793504734471782400000000000000000000, 185482642257398439114796845645546284380220968949399346684421580986889562184028199319100141244804501828416633516851200000000000000000000, 16507955160908461081216919262453619309839666236496541854913520707833171034378509739399912570787600662729080382999756800000000000000000000, 1485715964481761497309522733620825737885569961284688766942216863704985393094065876545992131370884059645617234469978112000000000000000000000, 135200152767840296255166568759495142147586866476906677791741734597153670771559994765685283954750449427751168336768008192000000000000000000000, 12438414054641307255475324325873553077577991715875414356840239582938137710983519518443046123837041347353107486982656753664000000000000000000000, 1156772507081641574759205162306240436214753229576413535186142281213246807121467315215203289516844845303838996289387078090752000000000000000000000, 108736615665674308027365285256786601004186803580182872307497374434045199869417927630229109214583415458560865651202385340530688000000000000000000000, 10329978488239059262599702099394727095397746340117372869212250571234293987594703124871765375385424468563282236864226607350415360000000000000000000000, 991677934870949689209571401541893801158183648651267795444376054838492222809091499987689476037000748982075094738965754305639874560000000000000000000000, 96192759682482119853328425949563698712343813919172976158104477319333745612481875498805879175589072651261284189679678167647067832320000000000000000000000, 9426890448883247745626185743057242473809693764078951663494238777294707070023223798882976159207729119823605850588608460429412647567360000000000000000000000, 933262154439441526816992388562667004907159682643816214685929638952175999932299156089414639761565182862536979208272237582511852109168640000000000000000000000, 93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000]
-                                                            //Testing
-    $('#test').click(function(){
-        var test1 = CDF(2,0.5,2);
-        var test2 = sum();
-        alert(test2);
-    })
-    var sum = function(){
-        var temptemp = 0;
-        for(var i = 0; i < numPoints; i++){for (var j = 0; j < numPoints; j++){temptemp += z[i][j];}}
-        return temptemp;
-    }
-    var findMaxZ = function(){//Finds max of Z
-        var tempy = 0;
-        for(var i = 0; i < numPoints; i++){
-            for (var j = 0; j < numPoints; j++){
-                if(tempy < z[i][j]){
-                    tempy = z[i][j];
-                }
-            }
-        }
-        return tempy;
-    }
-    
 })

@@ -1214,6 +1214,8 @@ function UniformDistribution(left, right){
 	this.data = new Data(this.minValue, this.maxValue, this.step);
 	
 	this.density = function(x){
+		if (x < this.left) return 0;
+		else if (x > this.right) return 0;
 		return 1 / (this.right - this.left);
 	};
 	
@@ -2144,7 +2146,7 @@ function DiscreteUniformDistribution(a, b){
 }	
 DiscreteUniformDistribution.prototype = new Distribution();
 
-//Exponential-Logarithmi distribution
+//Exponential-Logarithmic distribution
 function ExponentialLogarithmicDistribution(shape, scale){
 	this.scale = scale;
 	this.shape = shape;

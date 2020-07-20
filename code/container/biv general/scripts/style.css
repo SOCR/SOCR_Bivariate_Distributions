@@ -12,6 +12,10 @@ p,table,tr,td,div,textarea,h1,h2,button, li, ul,ol{
     text-align: left;
 }
 
+#flattitle, #surftitle{
+    padding-left: 2em;
+}
+
 button{
     text-align: center !important;
     margin-top: 1em;

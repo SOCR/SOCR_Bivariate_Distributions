@@ -195,9 +195,7 @@
         <br>
         <h2>Calculator Rules</h2>
         <ul>
-            <li>While this calculator allows discrete and continuous probabilities to be used together simultaneously, using discrete functions may produce minor visual errors. They will not impact the overall calculations, but an occasional red streak can be visible on the 2D graph</li>
-            <li>Normal Distribution limits: mean can take any value, but the standard deviation must be greater than 0, otherwise the calculator will reset the value back to 1</li>
-            <li>Poisson Distribution limits: the value of lambda must be a non-negative number, otherwise the calculator will reset its value to 0. Also, the X or Y limits must also be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li>While this calculator allows discrete and continuous probabilities to be used together simultaneously, using discrete functions may produce minor visual errors. They will not impact the overall calculations, but an occasional red streak or slight discrepancy between the red area and the blue line can be visible on the 2D graph</li>
         </ul>
     </div>
     <main><div id="mainContainer">
@@ -210,6 +208,39 @@
             <li>Use the <b>Graph Settings</b> sections to indicate what type of Marginal Distribution and Joint Bivariate Distribution to view. You can select to view either the Marginal functions of each variable, the Conditional distributions at the limits of variables, or the CDF functions for the Marginal Distribution graph, while the PDF and the CDF are available for the Joint Bivariate Distribution plot.</li>
             <li>Once done, click the <b>X</b> button to close the Graph Settings Section. The graph may take a few seconds to update.</li>
         </ul>
+        <h2>Rules</h2>
+        <ul>
+            <li id = "10">Normal Distribution: mean can take any value, but the standard deviation must be greater than 0, otherwise the calculator will reset the value back to 1</li>
+            <li id = "11">Poisson Distribution limits: the value of lambda must be a non-negative number, otherwise the calculator will reset its value to 1. Also, the X or Y limits must also be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "12">Gamma Distribution: both the shape (k) and the scale (&theta;) values must be greater than 0, otherwise the calculator will reset their values to 1. Also, the X or Y limits must also be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "13">Chi-Square Distribution: the number of degrees of freedom must be a natural number, any other number will be rounded down to the nearest integer. Also, the X or Y limits must also be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "14">Student's t-distribution: the number of degrees of freedom must be a positive number, otherwise the calculator will reset thi value to 1</li>
+            <li id = "15">F-distribution: the values for the degrees of freedom D1 and D2 must be positive integers, otherwise the calculator will reset them to 1. Also, the X or Y limits must also be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "16">Beta Distribution: the values for &alpha; and &beta; must be positive numbers, otherwise they will be reset to 1. Also, the limits must be within the 0 to 1 range, otherwise they will be reset to 0 for min and 1 for max</li>
+            <li id = "17">Weibull Distribution: the values for the shape (k) and scale (&lambda;) must be greater than 0, otherwise they will be reset to 1. Also, the X or Y limits must also be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "18">Pareto distribution: the values for the shape (&alpha;) and scale (Xm or Ym) must be greater than 0, otherwise they will be reset to 1. Also, the X or Y limits must also be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "19">Logistic distribution: while the value for the location (&mu;) may be any real number, the value for s must be greater than 0, otherwise it will be reset to 1</li>
+            <li id = "20">Log-normal distribution: &mu; must be a non-negative value, otherwise the calculator will reset it to 0, and &sigma; must be breater than 0, otherwise the calculator will reset its value to 1. Also, the X or Y limits must also be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "21">Gumbel distribution: while the value for the location (&mu;) may be any real number, the value for scale (&beta;) must be greater than 0, otherwise it will be reset to 1</li>
+            <li id = "22">Uniform distribution: while the values for both a and b can be any real number, b must be greater than a, otherwise it will be set to a+5. Also, the limits for X or Y must be no less than a-2 and no greater than b+2, otherwise the min will be reset to a-2 and max will be reset to b+2</li>
+            <li id = "23">Birthday distribution: the value for days and sample must be a positive integer, otherwise they will be reset to 1. Also, The limits for X or Y must be non-negative, otherwise they will be reset to 0 for min and 5 for max</li>
+            <li id = "24">U-Quadratic distribution: while the values for a and b can be any real number, b must be greater than a, otherwise the calculator will reset its value to a+5</li>
+            <li id = "25">Arcsine distribution: the X or Y limits must be between 0 and 1, otherwise the calculator will reset the min value to 0 and the max value to 1</li>
+            <li id = "26">Semicircle distribution: the value for the radius (R) must be greater than 0, otherwise the calculator will reset it to 1</li>
+            <li id = "27">Max Distance Walked distribution: the value for N must be a positive integer, otherwise the calculator will either floor the value entered or set it to 0. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "28">Final Position on a Walk distribution: the value for N must be a positive integer, otherwise the calculator will either floor the value entered or set it to 0. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "29">Cauchy distribution</li>
+            <li id = "30">Hyperbolic Secant distribution: while the value for the location may be any real number, the value for scale must be greater than 0, otherwise it will be reset to 1</li>
+            <li id = "31">Irwin-Hall distribution: the value for N must be a positive integer, otherwise the calculator will either floor the value entered or set it to 0. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "32">Laplace distribution: while the value for the location (&mu;) may be any real number, the value for scale (b) must be greater than 0, otherwise it will be reset to 1</li>
+            <li id = "33">Benford-Mantissa distribution: the value for b must be greater than 2, otherwise the calculator will set it to 2. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "34">Exponential-Logarithmic distribution: the value for p must be greater than 0 but less than 1, otherwise the calculator will reset it to 0.5, while the value for &beta; must be greater than 0, otherwise the calculator will reset it to 1. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "35">Beta Prime distribution: the values for &alpha; and &beta; must be positive numbers, otherwise they will be reset to 1. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "36">Zeta distribution: the value for s must be an integer greater than 1, otherwise the calculator will either floor the value or set it to 2. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "37">Log Logistic distribution: the values for &alpha; and &beta; must be positive numbers, otherwise they will be reset to 1. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "38">Maxwell–Boltzmann distribution: the value for a must be greater than 0, otherwise the calculator will either floor the value or set it to 1. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "39">Logarithmic distribution: the value for p must be greater than 0 but less than 1, otherwise the calculator will reset it to 0.5. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+        </ul>
         <table>
             <tr><td colspan = "2"><h2>Distribution type</h2></td></tr>
             <tr>
@@ -217,6 +248,34 @@
                 <td><select id = "xdist">
                     <option value = "0" selected>Normal</option>
                     <option value = "1">Poisson</option>
+                    <option value = "2">Gamma</option>
+                    <option value = "3">Chi-Square</option>
+                    <option value = "4">Student's t</option>
+                    <option value = "5">F-distribution</option>
+                    <option value = "6">Beta</option>
+                    <option value = "7">Weibull</option>
+                    <option value = "8">Pareto</option>
+                    <option value = "9">Logistic</option>
+                    <option value = "10">Log-normal</option>
+                    <option value = "11">Gumbel</option>
+                    <option value = "12">Uniform</option>
+                    <option value = "13">Birthday</option>
+                    <option value = "14">U-Quadratic</option>
+                    <option value = "15">Arcsine</option>
+                    <option value = "16">Semicircle</option>
+                    <option value = "17">Max Distane Walked</option>
+                    <option value = "18">Final Position on a Walk</option>
+                    <option value = "19">Cauchy</option>
+                    <option value = "20">Hyperbolic Secant</option>
+                    <option value = "21">Irwin-Hall</option>
+                    <option value = "22">Laplace</option>
+                    <option value = "23">Benford-Mantissa</option>
+                    <option value = "24">Exponential-Logarithmic</option>
+                    <option value = "25">Beta Prime</option>
+                    <option value = "26">Zeta</option>
+                    <option value = "27">Log Logistic</option>
+                    <option value = "28">Maxwell-Boltzmann</option>
+                    <option value = "29">Logarithmic</option>
                 </select></td>
             </tr>
             <tr>
@@ -224,6 +283,34 @@
                 <td><select id = "ydist">
                     <option value = "0" selected>Normal</option>
                     <option value = "1">Poisson</option>
+                    <option value = "2">Gamma</option>
+                    <option value = "3">Chi-Square</option>
+                    <option value = "4">Student's t</option>
+                    <option value = "5">F-distribution</option>
+                    <option value = "6">Beta</option>
+                    <option value = "7">Weibull</option>
+                    <option value = "8">Pareto</option>
+                    <option value = "9">Logistic</option>
+                    <option value = "10">Log-normal</option>
+                    <option value = "11">Gumbel</option>
+                    <option value = "12">Uniform</option>
+                    <option value = "13">Birthday</option>
+                    <option value = "14">U-Quadratic</option>
+                    <option value = "15">Arcsine</option>
+                    <option value = "16">Semicircle</option>
+                    <option value = "17">Max Distane Walked</option>
+                    <option value = "18">Final Position on a Walk</option>
+                    <option value = "19">Cauchy</option>
+                    <option value = "20">Hyperbolic Secant</option>
+                    <option value = "21">Irwin-Hall</option>
+                    <option value = "22">Laplace</option>
+                    <option value = "23">Benford-Mantissa</option>
+                    <option value = "24">Exponential-Logarithmic</option>
+                    <option value = "25">Beta Prime</option>
+                    <option value = "26">Zeta</option>
+                    <option value = "27">Log Logistic</option>
+                    <option value = "28">Maxwell-Boltzmann</option>
+                    <option value = "29">Logarithmic</option>
                 </select></td>
             </tr>
         </table>
@@ -285,8 +372,14 @@
         <tr><td><textarea id="pout" readonly></textarea></td></tr>
     </table>
     <div id = "graphs">
-        <canvas id = "graph" width = "570" height = "400"><p>It seems that the graph cannot load due to the use of assistive technologies, or your browser cannot support Canvas API. We are sorry for any inconveniences</p></canvas>
-        <div id = "surfacePlot"></div>
+        <div>
+            <h2 id = "flattitle"></h2>
+            <canvas id = "graph" width = "570" height = "400"><p>It seems that the graph cannot load due to the use of assistive technologies, or your browser cannot support Canvas API. We are sorry for any inconveniences</p></canvas>
+        </div>
+        <div>
+            <h2 id = "surftitle"></h2>
+            <div id = "surfacePlot"></div>
+        </div>
     </div>
 </div>
     <footer>
