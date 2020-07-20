@@ -2,7 +2,7 @@
 
 **Interactive Bivariate Distribution Calculators**
 
-<a href="https://socr.umich.edu/HTML5/BivariateNormal/"><img align="middle" src="https://raw.githubusercontent.com/SOCR/SOCR_Bivariate_Distributions/master/images/SOCR_BVN_Thumbnail.png"></a>
+<a href="http://www.distributome.org/V3/calc/index.html"><img align="middle" src="https://raw.githubusercontent.com/SOCR/SOCR_Bivariate_Distributions/master/images/SOCR_BVN_Thumbnail.png"></a>
 
 Table of contents
 =================
