@@ -25,7 +25,7 @@ The [SOCR bivariate distribution calculators](https://socr.umich.edu/HTML5/Bivar
 Code
 ====
 
-The pure HTML5/JavaScript code is available in the [code folder](https://github.com/SOCR/SOCR_Bivariate_Distributions/tree/master/code).
+The pure HTML5/JavaScript code is available in the [code folder](https://github.com/SOCR/SOCR_Bivariate_Distributions/tree/master/code/container).
 
 Team
 ====
