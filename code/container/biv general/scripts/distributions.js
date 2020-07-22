@@ -1583,6 +1583,7 @@ function CouponDistribution(m, k){
 	}
 	
 	this.density = function(x){
+		if(x >= this.maxValue){return 0;}
 		return ((m - k + 1) / m) * prob[x - 1][k - 1];
 	};
 

@@ -196,6 +196,9 @@
         <h2>Calculator Rules</h2>
         <ul>
             <li>While this calculator allows discrete and continuous probabilities to be used together simultaneously, using discrete functions may produce minor visual errors. They will not impact the overall calculations, but an occasional red streak or slight discrepancy between the red area and the blue line can be visible on the 2D graph</li>
+            <li>The calculator has certain limitations on the variables and min/max values, so if those limitats are exceeded then calculator will restore the incorrect values to default</li>
+            <li>Each distribution's limits are described under the <b>Rules</b> section in the <b>Graph Settings</b> tab</li>
+            <li>The calculator supports up to 4 different variables for both X and Y. Some of those variables are not used for every distribution, so an "N/A" will appear instead of an entry field. For example, the normal distribution only needs 2 variables to be entered, so the other two will be N/A for entry</li>
         </ul>
     </div>
     <main><div id="mainContainer">
@@ -210,36 +213,47 @@
         </ul>
         <h2>Rules</h2>
         <ul>
-            <li id = "10">Normal Distribution: mean can take any value, but the standard deviation must be greater than 0, otherwise the calculator will reset the value back to 1</li>
-            <li id = "11">Poisson Distribution limits: the value of lambda must be a non-negative number, otherwise the calculator will reset its value to 1. Also, the X or Y limits must also be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
-            <li id = "12">Gamma Distribution: both the shape (k) and the scale (&theta;) values must be greater than 0, otherwise the calculator will reset their values to 1. Also, the X or Y limits must also be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
-            <li id = "13">Chi-Square Distribution: the number of degrees of freedom must be a natural number, any other number will be rounded down to the nearest integer. Also, the X or Y limits must also be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
-            <li id = "14">Student's t-distribution: the number of degrees of freedom must be a positive number, otherwise the calculator will reset thi value to 1</li>
-            <li id = "15">F-distribution: the values for the degrees of freedom D1 and D2 must be positive integers, otherwise the calculator will reset them to 1. Also, the X or Y limits must also be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
-            <li id = "16">Beta Distribution: the values for &alpha; and &beta; must be positive numbers, otherwise they will be reset to 1. Also, the limits must be within the 0 to 1 range, otherwise they will be reset to 0 for min and 1 for max</li>
-            <li id = "17">Weibull Distribution: the values for the shape (k) and scale (&lambda;) must be greater than 0, otherwise they will be reset to 1. Also, the X or Y limits must also be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
-            <li id = "18">Pareto distribution: the values for the shape (&alpha;) and scale (Xm or Ym) must be greater than 0, otherwise they will be reset to 1. Also, the X or Y limits must also be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
-            <li id = "19">Logistic distribution: while the value for the location (&mu;) may be any real number, the value for s must be greater than 0, otherwise it will be reset to 1</li>
-            <li id = "20">Log-normal distribution: &mu; must be a non-negative value, otherwise the calculator will reset it to 0, and &sigma; must be breater than 0, otherwise the calculator will reset its value to 1. Also, the X or Y limits must also be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
-            <li id = "21">Gumbel distribution: while the value for the location (&mu;) may be any real number, the value for scale (&beta;) must be greater than 0, otherwise it will be reset to 1</li>
-            <li id = "22">Uniform distribution: while the values for both a and b can be any real number, b must be greater than a, otherwise it will be set to a+5. Also, the limits for X or Y must be no less than a-2 and no greater than b+2, otherwise the min will be reset to a-2 and max will be reset to b+2</li>
-            <li id = "23">Birthday distribution: the value for days and sample must be a positive integer, otherwise they will be reset to 1. Also, The limits for X or Y must be non-negative, otherwise they will be reset to 0 for min and 5 for max</li>
-            <li id = "24">U-Quadratic distribution: while the values for a and b can be any real number, b must be greater than a, otherwise the calculator will reset its value to a+5</li>
-            <li id = "25">Arcsine distribution: the X or Y limits must be between 0 and 1, otherwise the calculator will reset the min value to 0 and the max value to 1</li>
-            <li id = "26">Semicircle distribution: the value for the radius (R) must be greater than 0, otherwise the calculator will reset it to 1</li>
-            <li id = "27">Max Distance Walked distribution: the value for N must be a positive integer, otherwise the calculator will either floor the value entered or set it to 0. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
-            <li id = "28">Final Position on a Walk distribution: the value for N must be a positive integer, otherwise the calculator will either floor the value entered or set it to 0. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "10">Normal Distribution: mean can take any value, but the standard deviation must be greater than 0</li>
+            <li id = "11">Poisson Distribution limits: the value of lambda must be a non-negative number. Also, the X or Y limits must also be non-negative</li>
+            <li id = "12">Gamma Distribution: both the shape (k) and the scale (&theta;) values must be greater than 0. Also, the X or Y limits must also be non-negative</li>
+            <li id = "13">Chi-Square Distribution: the number of degrees of freedom must be a natural number. Also, the X or Y limits must also be non-negative</li>
+            <li id = "14">Student's t-distribution: the number of degrees of freedom must be a positive number</li>
+            <li id = "15">F-distribution: the values for the degrees of freedom D1 and D2 must be positive integers. Also, the X or Y limits must also be non-negative</li>
+            <li id = "16">Beta Distribution: the values for &alpha; and &beta; must be positive numbers. Also, the limits must be within the 0 to 1 range</li>
+            <li id = "17">Weibull Distribution: the values for the shape (k) and scale (&lambda;) must be greater than 0. Also, the X or Y limits must also be non-negative</li>
+            <li id = "18">Pareto distribution: the values for the shape (&alpha;) and scale (Xm or Ym) must be greater than 0. Also, the X or Y limits must also be non-negative</li>
+            <li id = "19">Logistic distribution: while the value for the location (&mu;) may be any real number, the value for s must be greater than 0</li>
+            <li id = "20">Log-normal distribution: &mu; must be a non-negative value and &sigma; must be breater than 0. Also, the X or Y limits must also be non-negative</li>
+            <li id = "21">Gumbel distribution: while the value for the location (&mu;) may be any real number, the value for scale (&beta;) must be greater than 0</li>
+            <li id = "22">Uniform distribution: while the values for both a and b can be any real number, b must be greater than a. Also, the limits for X or Y must be no less than a-2 and no greater than b+2</li>
+            <li id = "23">Birthday distribution: the value for days and sample must be a positive integer. Also, The limits for X or Y must be non-negative</li>
+            <li id = "24">U-Quadratic distribution: while the values for a and b can be any real number, b must be greater than a</li>
+            <li id = "25">Arcsine distribution: the X or Y limits must be between 0 and 1</li>
+            <li id = "26">Semicircle distribution: the value for the radius (R) must be greater than 0</li>
+            <li id = "27">Max Distance Walked distribution: the value for N must be a positive integer. Also, the X or Y limits must be non-negative</li>
+            <li id = "28">Final Position on a Walk distribution: the value for N must be a positive integer. Also, the X or Y limits must be non-negative</li>
             <li id = "29">Cauchy distribution</li>
-            <li id = "30">Hyperbolic Secant distribution: while the value for the location may be any real number, the value for scale must be greater than 0, otherwise it will be reset to 1</li>
-            <li id = "31">Irwin-Hall distribution: the value for N must be a positive integer, otherwise the calculator will either floor the value entered or set it to 0. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
-            <li id = "32">Laplace distribution: while the value for the location (&mu;) may be any real number, the value for scale (b) must be greater than 0, otherwise it will be reset to 1</li>
-            <li id = "33">Benford-Mantissa distribution: the value for b must be greater than 2, otherwise the calculator will set it to 2. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
-            <li id = "34">Exponential-Logarithmic distribution: the value for p must be greater than 0 but less than 1, otherwise the calculator will reset it to 0.5, while the value for &beta; must be greater than 0, otherwise the calculator will reset it to 1. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
-            <li id = "35">Beta Prime distribution: the values for &alpha; and &beta; must be positive numbers, otherwise they will be reset to 1. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
-            <li id = "36">Zeta distribution: the value for s must be an integer greater than 1, otherwise the calculator will either floor the value or set it to 2. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
-            <li id = "37">Log Logistic distribution: the values for &alpha; and &beta; must be positive numbers, otherwise they will be reset to 1. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
-            <li id = "38">Maxwell–Boltzmann distribution: the value for a must be greater than 0, otherwise the calculator will either floor the value or set it to 1. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
-            <li id = "39">Logarithmic distribution: the value for p must be greater than 0 but less than 1, otherwise the calculator will reset it to 0.5. Also, the X or Y limits must be non-negative, otherwise the calculator will reset the min value to 0 and the max value to 5</li>
+            <li id = "30">Hyperbolic Secant distribution: while the value for the location may be any real number, the value for scale must be greater than 0</li>
+            <li id = "31">Irwin-Hall distribution: the value for N must be a positive integer. Also, the X or Y limits must be non-negative</li>
+            <li id = "32">Laplace distribution: while the value for the location (&mu;) may be any real number, the value for scale (b) must be greater than 0</li>
+            <li id = "33">Benford-Mantissa distribution: the value for b must be greater than 2. Also, the X or Y limits must be non-negative</li>
+            <li id = "34">Exponential-Logarithmic distribution: the value for p must be greater than 0 but less than 1, while the value for &beta; must be greater than 0. Also, the X or Y limits must be non-negative</li>
+            <li id = "35">Beta Prime distribution: the values for &alpha; and &beta; must be positive numbers. Also, the X or Y limits must be non-negative</li>
+            <li id = "36">Zeta distribution: the value for s must be an integer greater than 1. Also, the X or Y limits must be non-negative</li>
+            <li id = "37">Log Logistic distribution: the values for &alpha; and &beta; must be positive numbers. Also, the X or Y limits must be non-negative</li>
+            <li id = "38">Maxwell–Boltzmann distribution: the value for a must be greater than 0. Also, the X or Y limits must be non-negative</li>
+            <li id = "39">Logarithmic distribution: the value for p must be greater than 0 but less than 1. Also, the X or Y limits must be non-negative</li>
+            <li id = "40">Binomial distribution: the value for Prob must be greater than 0 but less than 1, while the value for N must be a positive integer. Also, the X or Y limits must be non-negative</li>
+            <li id = "41">Negative Binomial distribution: the value for Prob must be greater than 0 but less than 1, while the value for K must be a positive integer. Also, the X or Y limits must be non-negative</li>
+            <li id = "42">Hypergeometric distribution: the value for N (population size) must be a positive integer, while the values for k and n must be positive integers no greater than N. Also, the X or Y limits must be non-negative</li>
+            <li id = "43">Polya: the value for N (population size) must be a positive integer, while the values for r and g must be positive integers no greater than N. Also, the X or Y limits must be non-negative</li>
+            <li id = "44">Finite Order distribution: the value for m (population size) must be a positive integer, the value for n must be a positive integer no greater than m, and the value for k must be a positive integer no greater than m. Also, the X or Y limits must be non-negative</li>
+            <li id = "45">Matching Hats distribution: the value for the number of hats must be a positive integer. Also, the X or Y limits must be non-negative</li>
+            <li id = "46">Triangular distribution: while all of the parameters can be any real number, Right must be greater than Left, while Middle must be in between Left and Right.</li>
+            <li id = "47">Coupon Collector distribution: both m and k must be positive integers, but k must be no greater than m. Also, the X or Y limits must be non-negative</li>
+            <li id = "48">Benford's Digit distribution: the value for b must be greater than 1. Also, the X or Y limits must be non-negative</li>
+            <li id = "49">Beta Binomial distribution: the value for n must be a positive integer, while a and b must be positive real numbers. Also, the X or Y limits must be non-negative</li>
+            <li id = "49">Beta Negative Binomial distribution: the value for k must be a positive integer, the value for a must be greater than 2 whileb must be positive real numbers. Also, the X or Y limits must be non-negative</li>
         </ul>
         <table>
             <tr><td colspan = "2"><h2>Distribution type</h2></td></tr>
@@ -276,6 +290,17 @@
                     <option value = "27">Log Logistic</option>
                     <option value = "28">Maxwell-Boltzmann</option>
                     <option value = "29">Logarithmic</option>
+                    <option value = "30">Binomial</option>
+                    <option value = "31">Negative Binomial</option>
+                    <option value = "32">Hypergeometric</option>
+                    <!--<option value = "33">Polya</option>-->
+                    <option value = "34">Finite Order</option>
+                    <option value = "35">Matching Hats</option>
+                    <option value = "36">Triangular</option>
+                    <option value = "37">Coupon Collector</option>
+                    <option value = "38">Benford's Digit</option>
+                    <option value = "39">Beta Binomial</option>
+                    <option value = "40">Beta Negative Binomial</option>
                 </select></td>
             </tr>
             <tr>
@@ -311,6 +336,17 @@
                     <option value = "27">Log Logistic</option>
                     <option value = "28">Maxwell-Boltzmann</option>
                     <option value = "29">Logarithmic</option>
+                    <option value = "30">Binomial</option>
+                    <option value = "31">Negative Binomial</option>
+                    <option value = "32">Hypergeometric</option>
+                    <!--<option value = "33">Polya</option>-->
+                    <option value = "34">Finite Order</option>
+                    <option value = "35">Matching Hats</option>
+                    <option value = "36">Triangular</option>
+                    <option value = "37">Coupon Collector</option>
+                    <option value = "38">Benford's Digit</option>
+                    <option value = "39">Beta Binomial</option>
+                    <option value = "40">Beta Negative Binomial</option>
                 </select></td>
             </tr>
         </table>
@@ -329,6 +365,14 @@
             <tr>
                 <td id = "x2">&sigma;<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>
                 <td id = "y2">&sigma;<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>
+            </tr>
+            <tr>
+                <td id = "x3">N/A</td>
+                <td id = "y3">N/A</td>
+            </tr>
+            <tr>
+                <td id = "x4">N/A</td>
+                <td id = "y4">N/A</td>
             </tr>
         </table>
         <table>
