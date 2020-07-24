@@ -45,7 +45,7 @@ $(document).ready(function(){
     var maxc = 0;// max of conditional prob
     var old = 0;// stores old value of rho in case the user enters an incorrect one
     var des = 0; //0 = marginal x, 1 = marginal y, 2 = x|y at ymin, 3 = x|y at ymax, 4 = y|x at xmin, 5 = y|x at xmax, 6 = cdf x, 7 = cdf y
-    var numPoints = 250;// number of points per distribution, max = 500
+    var numPoints = 500;// number of points per distribution, max = 500
     var sigmaStep = 5;// bounds how many sigmas away are the distributions calculated
     var out = 0;// value to be displayed in the P box
     var des3d = 0;// 0 = bivariate PDF, 1 = bivariate CDF
@@ -155,7 +155,7 @@ $(document).ready(function(){
             px3 = (px1+px2)/2;
             $('#px3').replaceWith('<textarea id = "px3" onfocus="this.select()" rows="1" maxlength="4">' + px3 + '</textarea>');
         }
-        else if(px3 <= 0 && x(xdist == 39 || xdist == 40)){
+        else if(px3 <= 0 && (xdist == 39 || xdist == 40)){
             px3 = 1;
             $('#px3').replaceWith('<textarea id = "px3" onfocus="this.select()" rows="1" maxlength="4">' + px3 + '</textarea>');
         }
@@ -278,9 +278,10 @@ $(document).ready(function(){
         if(des == 0){shape = px1;scale = px2;x = [];fx = [];Fx = [];}
         else{shape = py1;scale = py2;y = [];fy = [];Fy = [];}
         var start = 0;
-        var end = 20;
-        var step = Math.abs((end-start)/numPoints);
+        if(shape < 1){start = 0.01}
         var tempdist = new GammaDistribution(shape, scale);
+        var end = tempdist.maxValue;
+        var step = Math.abs((end-start)/numPoints);
         for(var i = 0; i <= numPoints; i++){
             t.push(start+step*i);
             f.push(tempdist.density(t[i]));
@@ -297,10 +298,10 @@ $(document).ready(function(){
         if(des == 0){dof = px1;x = [];fx = [];Fx = [];}
         else{dof = py1;y = [];fy = [];Fy = [];}
         var start = 0;
-        if(dof == 1){start = 0.0001;}
-        var end = 20;
-        var step = Math.abs((end-start)/numPoints);
+        if(dof == 1){start = 0.01;}
         var tempdist = new ChiSquareDistribution(dof);
+        var end = tempdist.maxValue;
+        var step = Math.abs((end-start)/numPoints);
         for(var i = 0; i <= numPoints; i++){
             t.push(start+step*i);
             f.push(tempdist.density(t[i]));
@@ -316,10 +317,10 @@ $(document).ready(function(){
         var dof = 0;
         if(des == 0){dof = px1;x = [];fx = [];Fx = [];}
         else{dof = py1;y = [];fy = [];Fy = [];}
-        var start = -5;
-        var end = 5;
-        var step = Math.abs((end-start)/numPoints);
         var tempdist = new StudentDistribution(dof);
+        var start = tempdist.minValue;
+        var end = tempdist.maxValue;
+        var step = Math.abs((end-start)/numPoints);
         for(var i = 0; i <= numPoints; i++){
             t.push(start+step*i);
             f.push(tempdist.density(t[i]));
@@ -338,9 +339,9 @@ $(document).ready(function(){
         else{d1 = py1;d2 = py2;y = [];fy = [];Fy = [];}
         var start = 0;
         if(d1 == 1){start = 0.001;}
-        var end = 10;
-        var step = Math.abs((end-start)/numPoints);
         var tempdist = new FDistribution(d1, d2);
+        var end = tempdist.maxValue;
+        var step = Math.abs((end-start)/numPoints);
         for(var i = 0; i <= numPoints; i++){
             t.push(start+step*i);
             f.push(tempdist.density(t[i]));
@@ -379,9 +380,9 @@ $(document).ready(function(){
         if(des == 0){shape = px1;scale = px2;x = [];fx = [];Fx = [];}
         else{shape = py1;scale = py2;y = [];fy = [];Fy = [];}
         var start = 0;
-        var end = 5;
-        var step = Math.abs((end-start)/numPoints);
         var tempdist = new WeibullDistribution(shape, scale);
+        var end = tempdist.maxValue;
+        var step = Math.abs((end-start)/numPoints);
         for(var i = 0; i <= numPoints; i++){
             t.push(start+step*i);
             f.push(tempdist.density(t[i]));
@@ -418,10 +419,10 @@ $(document).ready(function(){
         var s = 0;
         if(des == 0){mu = px1;s = px2;x = [];fx = [];Fx = [];}
         else{mu = py1;s = py2;y = [];fy = [];Fy = [];}
-        var start = mu-sigmaStep*s;
-        var end = mu+sigmaStep*s;
-        var step = Math.abs((end-start)/numPoints);
         var tempdist = new LogisticDistribution(mu, s);
+        var start = tempdist.minValue;
+        var end = tempdist.maxValue;
+        var step = Math.abs((end-start)/numPoints);
         for(var i = 0; i <= numPoints; i++){
             t.push(start+step*i);
             f.push(tempdist.density(t[i]));
@@ -498,7 +499,7 @@ $(document).ready(function(){
         var sample = 0;
         if(des == 0){days = px1;sample = px2;x = [];fx = [];Fx = [];}
         else{days = py1;sample = py2;y = [];fy = [];Fy = [];}
-        var end = days;
+        var end = Math.min(days,sample);
         var tempdist = new BirthdayDistribution(days, sample);
         for(var i = 0; i <= end; i++){
             t.push(Math.floor(i));
@@ -626,7 +627,7 @@ $(document).ready(function(){
         else{term = py1;y = [];fy = [];Fy = [];}
         var start = 0;
         var end = term;
-        var step = Math.abs((end-start)/100);
+        var step = Math.abs((end-start)/numPoints);
         var tempdist = new IrwinHallDistribution(term);
         for(var i = 0; i < numPoints; i++){
             t.push(start+step*i);
@@ -663,8 +664,8 @@ $(document).ready(function(){
         var b = 0;
         if(des == 0){b = px1;x = [];fx = [];Fx = [];}
         else{b = py1;y = [];fy = [];Fy = [];}
-        var start = b;
-        var end = b+Math.floor(10*b);
+        var start = 0.1;
+        var end = 1;
         var step = Math.abs((end-start)/numPoints);
         var tempdist = new BenfordMantissaDistribution(b);
         for(var i = 0; i <= numPoints; i++){
@@ -679,12 +680,12 @@ $(document).ready(function(){
         var t = [];
         var f = [];
         var F = [];
-        var shape = 0.001;
+        var shape = 0;
         var scale = 0;
         if(des == 0){shape = px1;scale = px2;x = [];fx = [];Fx = [];}
         else{shape = py1;scale = py2;y = [];fy = [];Fy = [];}
         var start = 0;
-        var end = 3/scale;
+        var end = 4/scale;
         var step = Math.abs((end-start)/numPoints);
         var tempdist = new ExponentialLogarithmicDistribution(shape, scale);
         for(var i = 0; i <= numPoints; i++){
@@ -704,10 +705,10 @@ $(document).ready(function(){
         if(des == 0){a = px1;b = px2;x = [];fx = [];Fx = [];}
         else{a = py1;b = py2;y = [];fy = [];Fy = [];}
         var start = 0;
-        if(a < 1){start = 0.004;}
-        var end = 5;
-        var step = Math.abs((end-start)/numPoints);
+        if(a < 1){start = 0.01;}
         var tempdist = new BetaPrimeDistribution(a, b);
+        var end = tempdist.maxValue;
+        var step = Math.abs((end-start)/numPoints);
         for(var i = 0; i <= numPoints; i++){
             t.push(start+step*i);
             f.push(tempdist.density(t[i]));
@@ -742,9 +743,9 @@ $(document).ready(function(){
         else{scale = py1;shape = py2;y = [];fy = [];Fy = [];}
         var start = 0;
         if(shape < 1){start = 0.001;}
-        var end = 5*scale;
-        var step = Math.abs((end-start)/numPoints);
         var tempdist = new LogLogisticDistribution(scale, shape);
+        var end = tempdist.maxValue;
+        var step = Math.abs((end-start)/numPoints);
         for(var i = 0; i <= numPoints; i++){
             t.push(start+step*i);
             f.push(tempdist.density(t[i]));
@@ -835,7 +836,8 @@ $(document).ready(function(){
         if(des == 0){p = px1;kay = px2;x = [];fx = [];Fx = [];}
         else{p = py1;kay = py2;y = [];fy = [];Fy = [];}
         var tempdist = new NegativeBinomialDistribution(kay, p);
-        for(var i = 0; i <= 50; i++){
+        var end = tempdist.maxValue;
+        for(var i = 0; i <= end-kay; i++){
             t.push(i+kay);
             f.push(tempdist.density(t[i]));
             F.push(tempdist.CDF(t[i]));
@@ -1019,10 +1021,10 @@ $(document).ready(function(){
         var fish = 0;
         if(des == 0){mu = px1;sigma = px2;blob = px3;fish = px4;x = [];fx = [];Fx = [];}
         else{mu = py1;sigma = py2;blob = py3;fish = py4;y = [];fy = [];Fy = [];}
-        var start = mu-sigmaStep*sigma;
-        var end = mu+sigmaStep*sigma;
-        var step = Math.abs((end-start)/numPoints);
         var tempdist = new Distribution();
+        var start = tempdist.minValue;
+        var end = tempdist.maxValue;
+        var step = Math.abs((end-start)/numPoints);
         for(var i = 0; i <= numPoints; i++){
             t.push(start+step*i);
             f.push(tempdist.density(t[i]));
@@ -1107,10 +1109,15 @@ $(document).ready(function(){
     var findCDF = function(t, F, val){
         var min = t[0];
         var max = t[t.length-1];
-        if(val <= min){return F[0];}
-        else if(val >= max){return F[F.length-1];}
-        var temp = (val-min)/((max-min)/t.length);
-        return F[Math.floor(temp)];
+        if(val <= min){return 0;}
+        else if(val >= max){return 1;}
+        var temp = (val-min)/((max-min)/(t.length-1));
+        var temp1 = F[Math.floor(temp)];
+        var temp2 = F[Math.ceil(temp)];
+        if(temp1 < 0.0001 || temp2 < 0.0001){return 0;}
+        var step1 = (Math.ceil(temp)-Math.floor(temp))/Math.floor(temp);
+        var step2 = (temp2-temp1)/temp1;
+        return temp1+step1*step2;
     }
     var getDist = function(val, dir){//Gets the row/col at a particular point from b(x,y)
         if(dir == 1){
@@ -2446,6 +2453,7 @@ $(document).ready(function(){
                 break;
         }
     })
+    
                                                             //3D model
     var updatePlot = function(){// Uses Plotly to generate a 3d plot
         var toPlot = [];
@@ -2479,4 +2487,29 @@ $(document).ready(function(){
         dispI();
     }
     initial();//running on load
+    $('main').draggable();
+    $('#test').click(function(){
+        var temp69 = 0;
+        for (var i = 0; i < c.length;i++){
+            temp69 += c[i];
+        }
+        var temp420 = sumMat(b);
+        alert(temp69/temp420);
+        var min = x[0];
+        var max = x[x.length-1];
+        var val = xmin;
+        var temp = (val-min)/((max-min)/x.length);
+        var temp1 = fx[Math.floor(temp)];
+        var temp2 = fx[Math.ceil(temp)];
+        var step1 = (Math.ceil(temp)-Math.floor(temp))/Math.floor(temp);
+        var step2 = (temp2-temp1)/temp1;
+        alert(temp1+step1*step2);
+        val = xmax;
+        var temp = (val-min)/((max-min)/x.length);
+        var temp1 = fx[Math.floor(temp)];
+        var temp2 = fx[Math.ceil(temp)];
+        var step1 = (Math.ceil(temp)-Math.floor(temp))/Math.floor(temp);
+        var step2 = (temp2-temp1)/temp1;
+        alert(temp1+step1*step2);
+    })
 })

@@ -13,6 +13,7 @@
     <link rel="shortcut icon" href="../../../img/SOCR_Web_Icon.ico">
     <link rel="alternate" type="application/rss+xml" rel="tooltip" title="SOCR News" href="http://socr.umich.edu/html/feed.rss">
     <script type="text/javascript" src="./scripts/jquery-1.7.2.min.js"></script>
+    <script type = "text/javascript" src="./scripts/jquery-ui.js"></script>
     <script type="text/javascript" src="./scripts/jcanvas.js"></script>
     <script type="text/javascript" src="./scripts/plotly.min.js"></script>
     <script type="text/javascript" src="./scripts/distributions.js"></script>
@@ -253,7 +254,7 @@
             <li id = "47">Coupon Collector distribution: both m and k must be positive integers, but k must be no greater than m. Also, the X or Y limits must be non-negative</li>
             <li id = "48">Benford's Digit distribution: the value for b must be greater than 1. Also, the X or Y limits must be non-negative</li>
             <li id = "49">Beta Binomial distribution: the value for n must be a positive integer, while a and b must be positive real numbers. Also, the X or Y limits must be non-negative</li>
-            <li id = "49">Beta Negative Binomial distribution: the value for k must be a positive integer, the value for a must be greater than 2 whileb must be positive real numbers. Also, the X or Y limits must be non-negative</li>
+            <li id = "50">Beta Negative Binomial distribution: the value for k must be a positive integer, the value for a must be greater than 2 whileb must be positive real numbers. Also, the X or Y limits must be non-negative</li>
         </ul>
         <table>
             <tr><td colspan = "2"><h2>Distribution type</h2></td></tr>
@@ -277,7 +278,7 @@
                     <option value = "14">U-Quadratic</option>
                     <option value = "15">Arcsine</option>
                     <option value = "16">Semicircle</option>
-                    <option value = "17">Max Distane Walked</option>
+                    <option value = "17">Max Distance Walked</option>
                     <option value = "18">Final Position on a Walk</option>
                     <option value = "19">Cauchy</option>
                     <option value = "20">Hyperbolic Secant</option>
@@ -411,6 +412,7 @@
     </div></main>
     <button id = "show">Graph Settings</button>
     <button id = "showR">Methodology and Calculator Rules</button>
+    <button id = "test">Test</button>
     <table id = "res">
         <tr><td><h2>Probability Results</h2></td></tr>
         <tr><td><textarea id="pout" readonly></textarea></td></tr>

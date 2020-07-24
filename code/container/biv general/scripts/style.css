@@ -58,7 +58,7 @@ main{
     display: none;
     background-color: #eee;
     z-index: 4;
-    position: fixed;
+    position: absolute;
     max-width: 75vw;
     top: 5vh;
     left: 15vw;

@@ -344,7 +344,7 @@ $(document).ready(function(){
                 x2: 5, y2: -350
             }
         }).drawText({
-            text:min.toString(),
+            text:min.toFixed(2).toString(),
             fontFamily:'serif',
             fontSize: 20,
             x: 50, y:390,
@@ -360,7 +360,7 @@ $(document).ready(function(){
             strokeStyle: '#000',
             strokeWidth: 0
         }).drawText({
-            text:max.toString(),
+            text:max.toFixed(2).toString(),
             fontFamily:'serif',
             fontSize: 20,
             x: 550, y:390,
