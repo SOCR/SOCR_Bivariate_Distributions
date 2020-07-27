@@ -38,11 +38,8 @@ $(document).ready(function(){
     var ymin = -4;// input value of y min
     var ymax = 4;// input value of y max
     var rho = 0.5;// value of rho
-    var maxx = 0; // max value of X
-    var maxy = 0; // max value of Y
     var c = [];// conditional distribution stored here
     var C = [];// conditional CDF stored here
-    var maxc = 0;// max of conditional prob
     var old = 0;// stores old value of rho in case the user enters an incorrect one
     var des = 0; //0 = marginal x, 1 = marginal y, 2 = x|y at ymin, 3 = x|y at ymax, 4 = y|x at xmin, 5 = y|x at xmax, 6 = cdf x, 7 = cdf y
     var numPoints = 500;// number of points per distribution, max = 500
@@ -51,7 +48,6 @@ $(document).ready(function(){
     var des3d = 0;// 0 = bivariate PDF, 1 = bivariate CDF
     var starting = 0;// used for initial settings to be displayed
     var output = [];// String array to store history of outputs
-    var $graph = $('#graph');// Canvas for 2d graph
     var settingsOpen = false;// Logs if the settings menu is open
     var rulesOpen = false;// Logs of the rules window is open
     var instructions = [10, 10];// Logs what instructions are visible
@@ -440,9 +436,9 @@ $(document).ready(function(){
         if(des == 0){mu = px1;sigma = px2;x = [];fx = [];Fx = [];}
         else{mu = py1;sigma = py2;y = [];fy = [];Fy = [];}
         var start = 0.001;
-        var end = 5*Math.floor(Math.exp(mu)+1);
-        var step = Math.abs((end-start)/numPoints);
         var tempdist = new LogNormalDistribution(mu, sigma);
+        var end = tempdist.maxValue;
+        var step = Math.abs((end-start)/numPoints);
         for(var i = 0; i <= numPoints; i++){
             t.push(start+step*i);
             f.push(tempdist.density(t[i]));
@@ -963,12 +959,9 @@ $(document).ready(function(){
         var b = 0;
         if(des == 0){b = px1;x = [];fx = [];Fx = [];}
         else{b = py1;y = [];fy = [];Fy = [];}
-        var start = 1;
-        var end = b-1;
-        var step = Math.abs((end-start)/numPoints);
         var tempdist = new BenfordDigitDistribution(b);
-        for(var i = 0; i <= numPoints; i++){
-            t.push(start+step*i);
+        for(var i = 0; i < b; i++){
+            t.push(i-1);
             f.push(tempdist.density(t[i]));
         }
         F = makeCDF(f, step);
@@ -1099,13 +1092,6 @@ $(document).ready(function(){
         return F;
     }
                                                             //Auxillary functions
-    var makeDisp = function(raw,max){// Adjusts function values to fit graph size
-        var temp = [];
-        for (i = 0; i < raw.length; i++){
-            temp.push(raw[i]*350/max);
-        }
-        return temp;
-    }
     var findCDF = function(t, F, val){
         var min = t[0];
         var max = t[t.length-1];
@@ -1120,6 +1106,7 @@ $(document).ready(function(){
         return temp1+step1*step2;
     }
     var getDist = function(val, dir){//Gets the row/col at a particular point from b(x,y)
+        var min = 0;var max = 0;var delta = 0;
         if(dir == 1){
             min = y[0];
             max = y[y.length - 1];
@@ -1149,237 +1136,146 @@ $(document).ready(function(){
         output.unshift(txt);
         $('#pout').replaceWith('<textarea id="pout" readonly>' + output.join("\n") + '</textarea>');
     }
+    var makefuncut = function(time, dist, min, max){
+        var temp = [];
+        for (var i = 0; i < time.length; i++){
+            if(time[i] >= min && time[i] <= max){
+                temp.push(dist[i]);
+            }
+            else{temp.push(0);}
+        }
+        return temp;
+    }
     var updateGraph = function(){// Core function, coordinates other functions based on the radio selected
-        $graph.drawRect({fillStyle: 'white',strokeStyle: 'white',strokeWidth: 4,x: 150, y: 100,fromCenter: true,width: 1000,height: 1000});//clears canvas
         switch (des){
             case 0:// Marginal of X
-                drawAxis(0);
-                toDisp = makeDisp(fx,maxx);
-                drawData(toDisp);
+                var temp = makefuncut(x, fx, xmin, xmax);
+                drawData(x, fx, temp, 'X', 'P(x=X)');
                 out = findCDF(x, Fx, xmax) - findCDF(x, Fx, xmin);
                 updateOutput('P(' + xmin + ' < X < ' + xmax + ') = ' + out.toFixed(3));
-                shadeIn(x, xmin, xmax);
                 break;
             case 1:// Marginal of Y
-                drawAxis(1);
-                toDisp = makeDisp(fy,maxy);
-                drawData(toDisp);
+                var temp = makefuncut(y, fy, ymin, ymax);
+                drawData(y, fy, temp, 'Y', 'P(y=Y)');
                 out = findCDF(y, Fy, ymax) - findCDF(y, Fy, ymin);
                 updateOutput('P(' + ymin + ' < Y < ' + ymax + ') = ' + out.toFixed(3));
-                shadeIn(y, ymin, ymax);
                 break;
             case 2:// p(X|Y=ymin)
-                c = getDist(ymin, 0);
-                maxc = Math.max(...c);
-                drawAxis(2);
-                toDisp = makeDisp(c,maxc);
-                drawData(toDisp);
+                c = getDist(ymin, 1);
+                var temp = makefuncut(x, c, xmin, xmax);
+                drawData(x, c, temp, 'X', 'P(x=X|Y=Ymin)');
                 C = makeCDF(c,x[1]-x[0]);
                 out = findCDF(y, C, xmax) - findCDF(y, C, xmin);
                 out = out/C[c.length-1];
                 updateOutput('P(' + xmin + ' < X < ' + xmax + ' | Y = ' + ymin + ') = ' + out.toFixed(3));
-                shadeIn(x, xmin, xmax);
                 break;
             case 3:// p(X|Y=max)
-                c = getDist(ymax, 0);
-                maxc = Math.max(...c);
-                drawAxis(2);
-                toDisp = makeDisp(c,maxc);
-                drawData(toDisp);
+                c = getDist(ymax, 1);
+                var temp = makefuncut(x, c, xmin, xmax);
+                drawData(x, c, temp, 'X', 'P(x=X|Y=Ymax)');
                 C = makeCDF(c,x[1]-x[0]);
                 out = findCDF(y, C, xmax) - findCDF(y, C, xmin);
                 out = out/C[c.length-1];
                 updateOutput('P(' + xmin + ' < X < ' + xmax + ' | Y = ' + ymax + ') = ' + out.toFixed(3));
-                shadeIn(x, xmin, xmax);
                 break;
             case 4:// p(Y|X=min)
-                c = getDist(xmin, 1);
-                maxc = Math.max(...c);
-                drawAxis(3);
-                toDisp = makeDisp(c,maxc);
-                drawData(toDisp);
+                c = getDist(xmin,0);
+                var temp = makefuncut(y, c, ymin, ymax);
+                drawData(y, c, temp, 'Y', 'P(y=Y|X=Xmin)');
                 C = makeCDF(c,y[1]-y[0]);
                 out = findCDF(x, C, ymax) - findCDF(x, C, ymin);
                 out = out/C[c.length-1];
                 updateOutput('P(' + ymin + ' < Y < ' + ymax + ' | X = ' + xmin + ') = ' + out.toFixed(3));
-                shadeIn(y, ymin, ymax);
                 break;
             case 5:// p(Y|X=max)
-                c = getDist(xmax, 1);
-                maxc = Math.max(...c);
-                drawAxis(3);
-                toDisp = makeDisp(c,maxc);
-                drawData(toDisp);
+                c = getDist(xmax, 0);
+                var temp = makefuncut(y, c, ymin, ymax);
+                drawData(y, c, temp, 'Y', 'P(y=Y|X=Xmax)');
                 C = makeCDF(c,y[1]-y[0]);
                 out = findCDF(x, C, ymax) - findCDF(x, C, ymin);
                 out = out/C[c.length-1];
                 updateOutput('P(' + ymin + ' < Y < ' + ymax + ' | X = ' + xmax + ') = ' + out.toFixed(3));
-                shadeIn(y, ymin, ymax);
                 break;
             case 6:// CDF of X
-                drawAxis(4);
-                toDisp = makeDisp(Fx, 1);
-                drawData(toDisp);
+                var temp = makefuncut(x, Fx, xmin, xmax);
+                drawData(x, Fx, temp, 'X', 'P(x≤X)');
                 out = findCDF(x, Fx, xmax) - findCDF(x, Fx, xmin);
                 updateOutput('P(' + xmin + ' < X < ' + xmax + ') = ' + out.toFixed(3));
-                shadeIn(x, xmin, xmax);
                 break;
             case 7:// CDF of Y
-                drawAxis(5);
-                toDisp = makeDisp(Fy, 1);
-                drawData(toDisp);
+                var temp = makefuncut(y, Fy, ymin, ymax);
+                drawData(y, Fy, temp, 'Y', 'P(y≤Y)');
                 out = findCDF(y, Fy, ymax) - findCDF(y, Fy, ymin);
                 updateOutput('P(' + ymin + ' < Y < ' + ymax + ') = ' + out.toFixed(3));
-                shadeIn(py1, py2, ymin, ymax);
                 break;
         }
     }
-    var drawAxis = function(dist){// Draws axis on canvas
-        var temp = [];
-        if(dist == 0){temp = x;tall = maxx;}
-        else if(dist == 1){temp = y; tall = maxy;}
-        else if(dist == 2){temp = x; tall = maxc;}
-        else if(dist == 3){temp = y; tall = maxc;}
-        else if(dist == 4){temp = x; tall = 1;}
-        else if(dist == 5){temp = y; tall = 1;}
-        var min = temp[0];
-        var max = temp[temp.length - 1];
-        $graph.drawPath({
-            strokeStyle: '#000',
-            strokeWidth: 1,
-            x: 50, y: 370,
-            p1: {
-                type: 'line',
-                rounded: true,
-                endArrow: false,
-                x1: -5, y1: 0,
-                x2: 510, y2: 0
+    var drawData = function(time, fun, funcut, xt, yt){// Draws the data on canvas
+        var data = [];
+        if(time.length > 100){
+            data = [{
+                x: time,
+                y: fun,
+                mode: 'lines',
+                type: 'scatter',
+                line: {color: 'rgb(0, 0, 255)'},
+                name: ''
             },
-            p2: {
-                type: 'line',
-                rounded: true,
-                endArrow: false,
-                x1: 0, y1: 5,
-                x2: 0, y2: -360
-            },
-            p3: {
-                type: 'line',
-                rounded: true,
-                endArrow: false,
-                x1: 500, y1: 5,
-                x2: 500, y2: -5
-            },
-            p4: {
-                type: 'line',
-                rounded: true,
-                endArrow: false,
-                x1: -5, y1: -350,
-                x2: 5, y2: -350
+            {
+                x: time,
+                y: funcut,
+                fill: 'tozeroy',
+                fillcolor: '#ffaaaa',
+                type: 'scatter',
+                line: {color: 'rgb(0, 0, 255)'},
+                mode: 'none',
+                name: '',
+                hoverinfo:'none'
+            }];
+        }
+        else{
+            var temp = [];
+            for (var i = 0; i < time.length; i++){
+                if(funcut[i] == 0){temp.push('rgb(255,255,255)')}
+                else{temp.push('rgb(255,0,0)');}
             }
-        }).drawText({
-            text:min.toFixed(2).toString(),
-            fontFamily:'serif',
-            fontSize: 20,
-            x: 50, y:390,
-            fillStyle: '#000',
-            strokeStyle: '#000',
-            strokeWidth: 0
-        }).drawText({
-            text:'0',
-            fontFamily:'serif',
-            fontSize: 20,
-            x: 25, y:370,
-            fillStyle: '#000',
-            strokeStyle: '#000',
-            strokeWidth: 0
-        }).drawText({
-            text:max.toFixed(2).toString(),
-            fontFamily:'serif',
-            fontSize: 20,
-            x: 550, y:390,
-            fillStyle: '#000',
-            strokeStyle: '#000',
-            strokeWidth: 0
-        }).drawText({
-            text:tall.toFixed(3).toString(),
-            fontFamily:'serif',
-            fontSize: 20,
-            x: 25, y:20,
-            fillStyle: '#000',
-            strokeStyle: '#000',
-            strokeWidth: 0
-        })
-        for (var i = 10; i < 510; i+=10){
-            $graph.drawPath({
-                strokeStyle: '#ccc',
-                strokeWidth: 1,
-                x: 50, y: 370,
-                p1: {
-                    type: 'line',
-                    rounded: true,
-                    endArrow: false,
-                    x1: i, y1: 5,
-                    x2: i, y2: -360
-                }
-            })
-        }
-        for (var i = 10; i < 360; i+=10){
-            $graph.drawPath({
-                strokeStyle: '#ccc',
-                strokeWidth: 1,
-                x: 50, y: 370,
-                p1: {
-                    type: 'line',
-                    rounded: true,
-                    endArrow: false,
-                    x1: -5, y1: -i,
-                    x2: 510, y2: -i
-                }
-            })
-        }
-    }
-    var drawData = function(data){// Draws the data on canvas
-        var step = Math.round(500/(data.length-1));
-        for (var i = 0; i < data.length; i++){
-            $graph.drawPath({
-                strokeStyle: '#00F',
-                strokeWidth: 1,
-                x: 50, y: 370,
-                p1:{
-                    type: 'line',
-                    rounded: false,
-                    endArrow: false,
-                    x1:i*step,y1:-data[i],
-                    x2:(i+1)*step,y2:-data[i+1]
-                }
-            })
-        }
-    }
-    var shadeIn = function(t, min, max){//Shades in a specified region of graph
-        var lb = t[0];
-        var ub = t[t.length-1];
-        var delta = Math.abs((ub-lb)/500);
-        var temp = 0;
-        var i = 50;
-        if(min < lb){min = lb};
-        if(max > ub){max = ub};
-        for (var i = 0; i <= 500; i++){
-            if(lb+i*delta <= max && lb+i*delta >= min){
-                temp = (i%Math.floor(500/(t.length-1)))*((toDisp[Math.floor(i*(t.length-1)/500)+1]-toDisp[Math.floor(i*(t.length-1)/500)])*((t.length-1)/500)) + toDisp[Math.floor(i*(t.length-1)/500)];
-                $graph.drawPath({
-                    strokeStyle: 'rgba(255, 0, 0, 0.5)',
-                    strokeWidth: 1,
-                    x: 50, y: 370,
-                    p1:{
-                        type: 'line',
-                        rounded: false,
-                        endArrow: false,
-                        x1:i,y1:0,
-                        x2:i,y2:-temp
+            data = [{
+                x: time,
+                y: fun,
+                type: 'bar',
+                text: time,
+                marker: {
+                    color: temp,
+                    opacity: 1,
+                    line: {
+                      color: 'rgb(0,0,255)',
+                      width: 1.5
                     }
-                })
-            }
+                  },
+                name: ''
+            }];
         }
+        var layout = {
+            autosize: true,
+            margin: {
+                l: 0,
+                r: 0,
+                b: 0,
+                t: 0,
+                pad: 0
+            },
+            xaxis: {
+              title: xt,
+              showticklabels: true,
+            },
+            yaxis: {
+              title: yt,
+            },
+            showlegend: false,
+            barmode: 'relative'
+        };
+        Plotly.newPlot('graph', data, layout);
+        Plotly.relayout('graph', {'xaxis.autorange': true,'yaxis.autorange': true});
     }
     var doAll = function(){
         old = rho;

@@ -14,7 +14,6 @@
     <link rel="alternate" type="application/rss+xml" rel="tooltip" title="SOCR News" href="http://socr.umich.edu/html/feed.rss">
     <script type="text/javascript" src="./scripts/jquery-1.7.2.min.js"></script>
     <script type = "text/javascript" src="./scripts/jquery-ui.js"></script>
-    <script type="text/javascript" src="./scripts/jcanvas.js"></script>
     <script type="text/javascript" src="./scripts/plotly.min.js"></script>
     <script type="text/javascript" src="./scripts/distributions.js"></script>
     <script type="text/javascript" src="./scripts/multi.js"></script>
@@ -180,6 +179,7 @@
             <li>You can control the bivariate normal distribution in 3D by clicking and dragging on the graph, zooling in and out, as well as taking a picture</li>
             <li>Probability Results are reported in the <b>Probability</b> section</li>
             <li>This graphical bivariate Normal probability calculator shows visually the correspondence between the graphical area representation and the numeric (PDF/CDF) results. However, the reported probabilities are approximate (accuracy 10<sup>-3</sup> for Results section and the 2D graph, 10<sup>-2</sup> for 3D bivariate plot) due to the finite viewing window of the infinitely supported Normal distribution, and the limited numerical precision of the inputs (domain) and outputs (range). Users that require high-precision calculations are encouraged to use the <a href="https://socr.umich.edu/Applets/index.html#High-Precision_Distribution_Calculators">SOCR high-precision numerical probability calculators</a></li>
+            <li>Also see the <a href = "https://socr.umich.edu/HTML5/BivariateNormal/index.html">first verison of the BVN Distribution Calculator</a></li>
         </ul>
     </header>
     <div id = "backdim"></div>
@@ -420,7 +420,7 @@
     <div id = "graphs">
         <div>
             <h2 id = "flattitle"></h2>
-            <canvas id = "graph" width = "570" height = "400"><p>It seems that the graph cannot load due to the use of assistive technologies, or your browser cannot support Canvas API. We are sorry for any inconveniences</p></canvas>
+            <div id = "graph"></div>
         </div>
         <div>
             <h2 id = "surftitle"></h2>

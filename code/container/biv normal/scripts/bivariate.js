@@ -209,16 +209,24 @@ $(document).ready(function(){
         }
         return temp;
     }
-    var getDist = function(mu, sigma, val, dir){//requires mu/sigma of x or y, val = value of y or x at which to take distribution from, dir = 0 for x, 1 for y
+    var getDist = function(val, dir){//requires mu/sigma of x or y, val = value of y or x at which to take distribution from, dir = 0 for x, 1 for y
         //Gets the row/col at a particular point from f(x,y)
-        var lb = mu-sigmaStep*sigma;
-        var ub = mu+sigmaStep*sigma;
-        var delta = Math.abs((ub-lb)/numPoints);
-        if(val <= lb && dir == 0){return z[0];}
-        if(val <= lb){return getCol(0);}
-        if(val >= ub && dir == 0){return z[numPoints-1];}
-        if(val >= ub){return getCol(numPoints-1);}
-        var loc = Math.floor((val-lb)/delta);
+        var min = 0;var max = 0;var delta = 0;
+        if(dir == 1){
+            min = t1[0];
+            max = t1[t1.length - 1];
+            delta = t1[1]-t1[0];
+        }
+        else{
+            min = t2[0];
+            max = t2[t2.length - 1];
+            delta = t2[1]-t2[0];
+        }
+        if(val <= min && dir == 0){return z[0];}
+        if(val <= min){return getCol(0);}
+        if(val >= max && dir == 0){return z[t1.length-1];}
+        if(val >= max){return getCol(t2.length-1);}
+        var loc = Math.floor((val-min)/delta);//fix
         if(dir == 0){return z[loc];}
         return getCol(loc);
     }
@@ -253,7 +261,7 @@ $(document).ready(function(){
                 shadeIn(muy, sigmay, ymin, ymax);
                 break;
             case 2:// p(X|Y=ymin)
-                c = getDist(mux, sigmax, ymin, 0);
+                c = getDist(mux, sigmax, ymin, 1);
                 maxc = Math.max(...c);
                 drawAxis(mux-sigmaDisp*sigmax, mux+sigmaDisp*sigmax, maxc);
                 toDisp = makeDisp(c,maxc);
@@ -263,7 +271,7 @@ $(document).ready(function(){
                 shadeIn(mux, sigmax, xmin, xmax);
                 break;
             case 3:// p(X|Y=max)
-                c = getDist(mux, sigmax, ymax, 0);
+                c = getDist(mux, sigmax, ymax, 1);
                 maxc = Math.max(...c);
                 drawAxis(mux-sigmaDisp*sigmax, mux+sigmaDisp*sigmax, maxc);
                 toDisp = makeDisp(c,maxc);
@@ -273,7 +281,7 @@ $(document).ready(function(){
                 shadeIn(mux, sigmax, xmin, xmax);
                 break;
             case 4:// p(Y|X=min)
-                c = getDist(muy, sigmay, xmin, 1);
+                c = getDist(muy, sigmay, xmin, 2);
                 maxc = Math.max(...c);
                 drawAxis(muy-sigmaDisp*sigmay, muy+sigmaDisp*sigmay, maxc);
                 toDisp = makeDisp(c,maxc);
@@ -283,7 +291,7 @@ $(document).ready(function(){
                 shadeIn(muy, sigmay, ymin, ymax);
                 break;
             case 5:// p(Y|X=max)
-                c = getDist(muy, sigmay, xmax, 1);
+                c = getDist(muy, sigmay, xmax, 2);
                 maxc = Math.max(...c);
                 drawAxis(muy-sigmaDisp*sigmay, muy+sigmaDisp*sigmay, maxc);
                 toDisp = makeDisp(c,maxc);

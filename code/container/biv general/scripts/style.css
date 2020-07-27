@@ -24,12 +24,6 @@ textarea{
     overflow: hidden;
 }
 
-#graph{
-    max-width: 570px;
-    height: 400px;
-    border: 1px solid black;
-    margin-top: 1em;
-}
 
 .svg-container{
     width: 500px !important;
