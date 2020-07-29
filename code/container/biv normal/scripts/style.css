@@ -24,13 +24,6 @@ textarea{
     overflow: hidden;
 }
 
-#graph{
-    max-width: 570px;
-    height: 400px;
-    border: 1px solid black;
-    margin-top: 1em;
-}
-
 .svg-container{
     width: 500px !important;
     height: 400px;
@@ -86,6 +79,11 @@ main{
     z-index: 5;
     margin-left: 0.5em;
     margin-bottom: 0px;
+}
+
+#graph{
+    max-height: 400px;
+    max-width: 500px;
 }
 
 #close{

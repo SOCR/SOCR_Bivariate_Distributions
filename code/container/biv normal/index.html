@@ -13,7 +13,6 @@
     <link rel="shortcut icon" href="../../../img/SOCR_Web_Icon.ico">
     <link rel="alternate" type="application/rss+xml" rel="tooltip" title="SOCR News" href="http://socr.umich.edu/html/feed.rss">
     <script type="text/javascript" src="./scripts/jquery-1.7.2.min.js"></script>
-    <script type="text/javascript" src="./scripts/jcanvas.js"></script>
     <script type="text/javascript" src="./scripts/plotly.min.js"></script>
     <script type="text/javascript" src="./scripts/bivariate.js"></script>
     <link href="./scripts/style.css" rel="stylesheet">
@@ -248,7 +247,7 @@
         <tr><td><textarea id="pout" readonly></textarea></td></tr>
     </table>
     <div id = "graphs">
-        <canvas id = "graph" width = "570" height = "400"><p>It seems that the graph cannot load due to the use of assistive technologies, or your browser cannot support Canvas API. We are sorry for any inconveniences</p></canvas>
+        <div id = "graph"></div>
         <div id = "surfacePlot"></div>
     </div>
 </div>

@@ -228,7 +228,6 @@ $(document).ready(function(){
         }
     }
                                                             //Distributions
-    //Don't exist: geometric, levy, landau, Rademacher, Rayleigh, Rice, von-Mises, wald, erlang, makeham, hypoexponential, hyperexponential, muth, error, minimax, idb, tsp, lomax, Kolmogorov-Smirnov, power-function, Fisher-Tippett, Gibrat's, Gompertz, gamma-Poisson
     var normal = function(des){//Normal
         var t = [];
         var f = [];
@@ -246,6 +245,7 @@ $(document).ready(function(){
             f.push(tempdist.density(t[i]));
             F.push(tempdist.CDF(t[i]));
         }
+        //F = makeCDF(f, step);
         if(des == 0){x = t; fx = f; Fx = F}
         else{y = t; fy = f; Fy = F;}
     }
@@ -657,13 +657,13 @@ $(document).ready(function(){
         var t = [];
         var f = [];
         var F = [];
-        var b = 0;
-        if(des == 0){b = px1;x = [];fx = [];Fx = [];}
-        else{b = py1;y = [];fy = [];Fy = [];}
+        var beta = 0;
+        if(des == 0){beta = px1;x = [];fx = [];Fx = [];}
+        else{beta = py1;y = [];fy = [];Fy = [];}
         var start = 0.1;
         var end = 1;
         var step = Math.abs((end-start)/numPoints);
-        var tempdist = new BenfordMantissaDistribution(b);
+        var tempdist = new BenfordMantissaDistribution(beta);
         for(var i = 0; i <= numPoints; i++){
             t.push(start+step*i);
             f.push(tempdist.density(t[i]));
@@ -697,12 +697,12 @@ $(document).ready(function(){
         var f = [];
         var F = [];
         var a = 0;
-        var b = 0;
-        if(des == 0){a = px1;b = px2;x = [];fx = [];Fx = [];}
-        else{a = py1;b = py2;y = [];fy = [];Fy = [];}
+        var beta = 0;
+        if(des == 0){a = px1;beta = px2;x = [];fx = [];Fx = [];}
+        else{a = py1;beta = py2;y = [];fy = [];Fy = [];}
         var start = 0;
         if(a < 1){start = 0.01;}
-        var tempdist = new BetaPrimeDistribution(a, b);
+        var tempdist = new BetaPrimeDistribution(a, beta);
         var end = tempdist.maxValue;
         var step = Math.abs((end-start)/numPoints);
         for(var i = 0; i <= numPoints; i++){
@@ -791,13 +791,13 @@ $(document).ready(function(){
         var f = [];
         var F = [];
         var a = 0;
-        var b = 0;
-        if(des == 0){a = px1;b = px2;x = [];fx = [];Fx = [];}
-        else{a = py1;b = py2;y = [];fy = [];Fy = [];}
+        var beta = 0;
+        if(des == 0){a = px1;beta = px2;x = [];fx = [];Fx = [];}
+        else{a = py1;beta = py2;y = [];fy = [];Fy = [];}
         var start = a;
-        var end = b;
+        var end = beta;
         var step = Math.abs((end-start)/numPoints);
-        var tempdist = new UQuadraticDistribution(a, b);
+        var tempdist = new UQuadraticDistribution(a, beta);
         for(var i = 0; i <= numPoints; i++){
             t.push(start+step*i);
             f.push(tempdist.density(t[i]));
@@ -861,7 +861,7 @@ $(document).ready(function(){
         if(des == 0){x = t; fx = f; Fx = F}
         else{y = t; fy = f; Fy = F;}
     }
-    var polya = function(des){//Polya - janky code in distributions.js, not in use
+    var polya = function(des){//Polya - janky code in distributions.js, do not use
         var t = [];
         var f = [];
         var F = [];
@@ -956,10 +956,10 @@ $(document).ready(function(){
         var t = [];
         var f = [];
         var F = [];
-        var b = 0;
-        if(des == 0){b = px1;x = [];fx = [];Fx = [];}
-        else{b = py1;y = [];fy = [];Fy = [];}
-        var tempdist = new BenfordDigitDistribution(b);
+        var beta = 0;
+        if(des == 0){beta = px1;x = [];fx = [];Fx = [];}
+        else{beta = py1;y = [];fy = [];Fy = [];}
+        var tempdist = new BenfordDigitDistribution(beta);
         for(var i = 0; i < b; i++){
             t.push(i-1);
             f.push(tempdist.density(t[i]));
@@ -974,10 +974,10 @@ $(document).ready(function(){
         var F = [];
         var n = 0;
         var a = 0;
-        var b = 0;
-        if(des == 0){n = px1;a = px2;b = px3;x = [];fx = [];Fx = [];}
-        else{n = py1;a = py2;b = py3;y = [];fy = [];Fy = [];}
-        var tempdist = new BetaBinomialDistribution(a, b, n);
+        var beta = 0;
+        if(des == 0){n = px1;a = px2;beta = px3;x = [];fx = [];Fx = [];}
+        else{n = py1;a = py2;beta = py3;y = [];fy = [];Fy = [];}
+        var tempdist = new BetaBinomialDistribution(a, beta, n);
         for(var i = 0; i <= n; i++){
             t.push(i);
             f.push(tempdist.density(t[i]));
@@ -992,10 +992,10 @@ $(document).ready(function(){
         var F = [];
         var kay = 0;
         var a = 0;
-        var b = 0;
-        if(des == 0){kay = px1;a = px2;b = px3;x = [];fx = [];Fx = [];}
-        else{kay = py1;a = py2;b = py3;y = [];fy = [];Fy = [];}
-        var tempdist = new BetaNegativeBinomialDistribution(a, b, kay);
+        var beta = 0;
+        if(des == 0){kay = px1;a = px2;beta = px3;x = [];fx = [];Fx = [];}
+        else{kay = py1;a = py2;beta = py3;y = [];fy = [];Fy = [];}
+        var tempdist = new BetaNegativeBinomialDistribution(a, beta, kay);
         for(var i = 0; i < (tempdist.maxValue-kay); i++){
             t.push(i+kay);
             f.push(tempdist.density(t[i]));
@@ -1029,7 +1029,7 @@ $(document).ready(function(){
     }
                                                             //Bivariate making
     var makeB = function(){
-        //finding kappa
+        //FGM copula prep - finding kappa
         var deltax = x[1]-x[0];
         var deltay = y[1]-y[0];
         var temp1 = 0;
@@ -1045,21 +1045,50 @@ $(document).ready(function(){
         //making b,B
         b = [];
         B = [];
+        copula = 0;
         for (var i = 0; i < x.length; i++){
             var temp3 = [];
-            var temp4 = [];
             var temp5 = 0;
             for (var j = 0; j < y.length; j++){
-                temp5 = fx[i]*fy[j]*(1+kappa*(2*Fx[i]-1)*(2*Fy[j]-1));
+                //FGM copula
+                //copula = 1+kappa*(2*Fx[i]-1)*(2*Fy[j]-1);
+                //Exponential copula
+                copula = (1/(1-rho))*(2/(1-rho))*Math.sqrt(rho*Math.log(1-Fx[i])*Math.log(1-Fy[j]))*Math.exp((rho/(1-rho))*(Math.log(1-Fx[i])+Math.log(1-Fy[j])));
+                temp5 = fx[i]*fy[j]*copula;
                 if(temp5 < 0){temp5 = 0;}
                 temp3.push(temp5);
-                temp4.push(Fx[i]*Fy[j]*(1+kappa*(1-Fx[i])*(1-Fy[j])));
             }
             b.push(temp3);
-            B.push(temp4);
+        }
+        makeBigB();
+    }
+    var makeBigB = function(){//Makes CDF of b
+        var temp = [];
+        var temp1 = 0;
+        var temp2 = [];
+        for (var j = 0; j < y.length; j++){
+            temp2.push(b[0][j]);
+        }
+        var temp3 = 0;
+        for (var i = 0; i < x.length; i++){
+            temp = [];
+            temp1 = 0;
+            for (var j = 0; j < y.length; j++){
+                temp1 += b[i][j];
+                temp2[j] += temp1;
+                temp3 = temp2[j];
+                temp.push(temp3);
+            }
+            B.push(temp);
+        }
+        var scale = B[x.length-1][y.length-1];
+        for (var i = 0; i < x.length; i++){
+            for (var j = 0; j < y.length; j++){
+                B[i][j] = B[i][j]/scale;
+            }
         }
     }
-    var makebCut = function(){
+    var makebCut = function(){//makes a cut version of b, bounded by x and y min and max
         bCut = [];
         for (var i = 0; i < x.length; i++){
             var temp = [];
@@ -1073,7 +1102,7 @@ $(document).ready(function(){
         if(isNaN(temp1)){temp1 = 0;}
         updateOutput('P(' + xmin + ' < X < ' + xmax + ' ∩ ' + ymin + ' < Y < ' + ymax + ') = ' + temp1.toFixed(3));
     }
-    var sumMat = function(mat){
+    var sumMat = function(mat){//Sums a matrix
         var temp = 0;
         for (var i = 0; i < x.length; i++){
             for (var j = 0; j < y.length; j++){
@@ -1092,7 +1121,7 @@ $(document).ready(function(){
         return F;
     }
                                                             //Auxillary functions
-    var findCDF = function(t, F, val){
+    var findCDF = function(t, F, val){//Finds value of CDF given a t and F array at at given value
         var min = t[0];
         var max = t[t.length-1];
         if(val <= min){return 0;}
@@ -1105,9 +1134,15 @@ $(document).ready(function(){
         var step2 = (temp2-temp1)/temp1;
         return temp1+step1*step2;
     }
+    var scaleC = function(){
+        var scale = C[C.length-1];
+        for (var i = 0; i < C.length; i++){
+            C[i] = C[i]/scale;
+        }
+    }
     var getDist = function(val, dir){//Gets the row/col at a particular point from b(x,y)
         var min = 0;var max = 0;var delta = 0;
-        if(dir == 1){
+        if(dir == 0){
             min = y[0];
             max = y[y.length - 1];
             delta = y[1]-y[0];
@@ -1117,12 +1152,12 @@ $(document).ready(function(){
             max = x[x.length - 1];
             delta = x[1]-x[0];
         }
-        if(val <= min && dir == 0){return b[0];}
+        if(val <= min && dir == 1){return b[0];}
         if(val <= min){return getCol(0);}
-        if(val >= max && dir == 0){return b[x.length-1];}
+        if(val >= max && dir == 1){return b[x.length-1];}
         if(val >= max){return getCol(y.length-1);}
         var loc = Math.floor((val-min)/delta);//fix
-        if(dir == 0){return b[loc];}
+        if(dir == 1){return b[loc];}
         return getCol(loc);
     }
     var getCol = function(col){//Returns a column from b(x,y)
@@ -1132,11 +1167,11 @@ $(document).ready(function(){
         }
         return temp;
     }
-    var updateOutput = function(txt){
+    var updateOutput = function(txt){//Updates the output box
         output.unshift(txt);
         $('#pout').replaceWith('<textarea id="pout" readonly>' + output.join("\n") + '</textarea>');
     }
-    var makefuncut = function(time, dist, min, max){
+    var makefuncut = function(time, dist, min, max){//Makes a cut version of the 1D function for the display
         var temp = [];
         for (var i = 0; i < time.length; i++){
             if(time[i] >= min && time[i] <= max){
@@ -1161,39 +1196,40 @@ $(document).ready(function(){
                 updateOutput('P(' + ymin + ' < Y < ' + ymax + ') = ' + out.toFixed(3));
                 break;
             case 2:// p(X|Y=ymin)
-                c = getDist(ymin, 1);
+                c = getDist(ymin, 0);
                 var temp = makefuncut(x, c, xmin, xmax);
-                drawData(x, c, temp, 'X', 'P(x=X|Y=Ymin)');
                 C = makeCDF(c,x[1]-x[0]);
+                scaleC();
+                drawData(x, c, temp, 'X', 'P(x=X|Y=Ymin)');
                 out = findCDF(y, C, xmax) - findCDF(y, C, xmin);
-                out = out/C[c.length-1];
                 updateOutput('P(' + xmin + ' < X < ' + xmax + ' | Y = ' + ymin + ') = ' + out.toFixed(3));
                 break;
             case 3:// p(X|Y=max)
-                c = getDist(ymax, 1);
+                c = getDist(ymax, 0);
                 var temp = makefuncut(x, c, xmin, xmax);
                 drawData(x, c, temp, 'X', 'P(x=X|Y=Ymax)');
                 C = makeCDF(c,x[1]-x[0]);
+                scaleC();
                 out = findCDF(y, C, xmax) - findCDF(y, C, xmin);
-                out = out/C[c.length-1];
                 updateOutput('P(' + xmin + ' < X < ' + xmax + ' | Y = ' + ymax + ') = ' + out.toFixed(3));
                 break;
             case 4:// p(Y|X=min)
-                c = getDist(xmin,0);
+                c = getDist(xmin,1);
                 var temp = makefuncut(y, c, ymin, ymax);
                 drawData(y, c, temp, 'Y', 'P(y=Y|X=Xmin)');
                 C = makeCDF(c,y[1]-y[0]);
+                scaleC();
                 out = findCDF(x, C, ymax) - findCDF(x, C, ymin);
-                out = out/C[c.length-1];
                 updateOutput('P(' + ymin + ' < Y < ' + ymax + ' | X = ' + xmin + ') = ' + out.toFixed(3));
                 break;
             case 5:// p(Y|X=max)
-                c = getDist(xmax, 0);
+                c = getDist(xmax, 1);
                 var temp = makefuncut(y, c, ymin, ymax);
                 drawData(y, c, temp, 'Y', 'P(y=Y|X=Xmax)');
                 C = makeCDF(c,y[1]-y[0]);
+                scaleC();
                 out = findCDF(x, C, ymax) - findCDF(x, C, ymin);
-                out = out/C[c.length-1];
+                scaleC();
                 updateOutput('P(' + ymin + ' < Y < ' + ymax + ' | X = ' + xmax + ') = ' + out.toFixed(3));
                 break;
             case 6:// CDF of X
@@ -1277,7 +1313,7 @@ $(document).ready(function(){
         Plotly.newPlot('graph', data, layout);
         Plotly.relayout('graph', {'xaxis.autorange': true,'yaxis.autorange': true});
     }
-    var doAll = function(){
+    var doAll = function(){//Does everything
         old = rho;
         px1 = Number($('#px1').val());
         px2 = Number($('#px2').val());
@@ -1788,7 +1824,7 @@ $(document).ready(function(){
         $('#backdim').hide(1000);
         settingsOpen = false;
     }
-    var dispI = function(){
+    var dispI = function(){//Updates instructions in the Graph settings window
         for (var i = 10; i < distTitle.length+10; i++){
             if(i == instructions[0] || i == instructions[1]){
                 $('#' + i).show();
@@ -1798,7 +1834,7 @@ $(document).ready(function(){
             }
         }
     }
-    var updateTitles = function(){
+    var updateTitles = function(){//Updates graph titles
         $('#flattitle').replaceWith('<h2 id = "flattitle">' + flattitle[des] + '</h2>');
         $('#surftitle').replaceWith('<h2 id = "surftitle">' + surftitle[des3d] + ': X - ' + distTitle[xdist] + ', Y - ' + distTitle[ydist] + '</h2>');
     }
@@ -1851,7 +1887,7 @@ $(document).ready(function(){
                 $('#x4').replaceWith('<td id = "x4">N/A</td>');
                 break;
             case 1:
-                $('#x1').replaceWith('<td id = "x1">&lambda;<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>');
+                $('#x1').replaceWith('<td id = "x1">&lambda;<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
                 $('#x2').replaceWith('<td id = "x2">N/A</td>');
                 $('#x3').replaceWith('<td id = "x3">N/A</td>');
                 $('#x4').replaceWith('<td id = "x4">N/A</td>');
@@ -2108,7 +2144,7 @@ $(document).ready(function(){
                 $('#y4').replaceWith('<td id = "y4">N/A</td>');
                 break;
             case 1:
-                $('#y1').replaceWith('<td id = "y1">&lambda;<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>');
+                $('#y1').replaceWith('<td id = "y1">&lambda;<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
                 $('#y2').replaceWith('<td id = "y2">N/A</td>');
                 $('#y3').replaceWith('<td id = "y3">N/A</td>');
                 $('#y4').replaceWith('<td id = "y4">N/A</td>');
