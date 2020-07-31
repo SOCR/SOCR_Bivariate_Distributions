@@ -1028,9 +1028,23 @@ $(document).ready(function(){
         else{y = t; fy = f; Fy = F;}
     }
                                                             //Bivariate making
+    var erfi = function(inputX){//Inverse Error Function, code by Lance Pitt found on Stack Overflow: https://stackoverflow.com/questions/12556685/is-there-a-javascript-implementation-of-the-inverse-error-function-akin-to-matl
+        var _a = ((8*(Math.PI - 3)) / ((3*Math.PI)*(4 - Math.PI)));
+        var _x = parseFloat(inputX);
+        var signX = ((_x < 0) ? -1.0 : 1.0 );
+        var oneMinusXsquared = 1.0 - (_x * _x);
+        var LNof1minusXsqrd  = Math.log( oneMinusXsquared );
+        var PI_times_a       = Math.PI * _a ;
+        var firstTerm  = Math.pow(((2.0 / PI_times_a) + (LNof1minusXsqrd / 2.0)), 2);
+        var secondTerm = (LNof1minusXsqrd / _a);
+        var thirdTerm  = ((2 / PI_times_a) + (LNof1minusXsqrd / 2.0));
+        var primaryComp = Math.sqrt( Math.sqrt( firstTerm - secondTerm ) - thirdTerm );
+        var scaled_R = signX * primaryComp ;
+        return scaled_R ;
+    }
     var makeB = function(){
         //FGM copula prep - finding kappa
-        var deltax = x[1]-x[0];
+        /*var deltax = x[1]-x[0];
         var deltay = y[1]-y[0];
         var temp1 = 0;
         for (var i = 0; i < x.length; i++){
@@ -1041,19 +1055,25 @@ $(document).ready(function(){
             temp2 += deltay*y[i]*fy[i]*(2*Fy[i]-1);
         }
         kappa = (temp1*temp2)/(rho*px2*py2);
-        kappa = 1/kappa;
+        kappa = 1/kappa;*/
         //making b,B
         b = [];
         B = [];
         copula = 0;
+        var ay = 0;
+        var bee = 0;
         for (var i = 0; i < x.length; i++){
             var temp3 = [];
             var temp5 = 0;
             for (var j = 0; j < y.length; j++){
-                //FGM copula
+                    //FGM copula
                 //copula = 1+kappa*(2*Fx[i]-1)*(2*Fy[j]-1);
-                //Exponential copula
-                copula = (1/(1-rho))*(2/(1-rho))*Math.sqrt(rho*Math.log(1-Fx[i])*Math.log(1-Fy[j]))*Math.exp((rho/(1-rho))*(Math.log(1-Fx[i])+Math.log(1-Fy[j])));
+                    //Exponential copula
+                //copula = (1/(1-rho))*(2/(1-rho))*Math.sqrt(rho*Math.log(1-Fx[i])*Math.log(1-Fy[j]))*Math.exp((rho/(1-rho))*(Math.log(1-Fx[i])+Math.log(1-Fy[j])));
+                    //Gaussian
+                ay = Math.sqrt(2)*erfi(2*Fx[i]-1);
+                bee = Math.sqrt(2)*erfi(2*Fy[j]-1);
+                copula = (1/(Math.sqrt(1-rho*rho)))*Math.exp(-1*((ay*ay+bee*bee)*rho*rho-2*rho*ay*bee)/(2*(1-rho*rho)));
                 temp5 = fx[i]*fy[j]*copula;
                 if(temp5 < 0){temp5 = 0;}
                 temp3.push(temp5);
@@ -1201,7 +1221,7 @@ $(document).ready(function(){
                 C = makeCDF(c,x[1]-x[0]);
                 scaleC();
                 drawData(x, c, temp, 'X', 'P(x=X|Y=Ymin)');
-                out = findCDF(y, C, xmax) - findCDF(y, C, xmin);
+                out = findCDF(x, C, xmax) - findCDF(x, C, xmin);
                 updateOutput('P(' + xmin + ' < X < ' + xmax + ' | Y = ' + ymin + ') = ' + out.toFixed(3));
                 break;
             case 3:// p(X|Y=max)
@@ -1210,7 +1230,7 @@ $(document).ready(function(){
                 drawData(x, c, temp, 'X', 'P(x=X|Y=Ymax)');
                 C = makeCDF(c,x[1]-x[0]);
                 scaleC();
-                out = findCDF(y, C, xmax) - findCDF(y, C, xmin);
+                out = findCDF(x, C, xmax) - findCDF(x, C, xmin);
                 updateOutput('P(' + xmin + ' < X < ' + xmax + ' | Y = ' + ymax + ') = ' + out.toFixed(3));
                 break;
             case 4:// p(Y|X=min)
@@ -1219,7 +1239,7 @@ $(document).ready(function(){
                 drawData(y, c, temp, 'Y', 'P(y=Y|X=Xmin)');
                 C = makeCDF(c,y[1]-y[0]);
                 scaleC();
-                out = findCDF(x, C, ymax) - findCDF(x, C, ymin);
+                out = findCDF(y, C, ymax) - findCDF(y, C, ymin);
                 updateOutput('P(' + ymin + ' < Y < ' + ymax + ' | X = ' + xmin + ') = ' + out.toFixed(3));
                 break;
             case 5:// p(Y|X=max)
@@ -1228,7 +1248,7 @@ $(document).ready(function(){
                 drawData(y, c, temp, 'Y', 'P(y=Y|X=Xmax)');
                 C = makeCDF(c,y[1]-y[0]);
                 scaleC();
-                out = findCDF(x, C, ymax) - findCDF(x, C, ymin);
+                out = findCDF(y, C, ymax) - findCDF(y, C, ymin);
                 scaleC();
                 updateOutput('P(' + ymin + ' < Y < ' + ymax + ' | X = ' + xmax + ') = ' + out.toFixed(3));
                 break;

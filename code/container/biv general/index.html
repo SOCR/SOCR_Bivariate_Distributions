@@ -186,17 +186,23 @@
     <div id = "rules">
         <button id = "closeR">&times;</button>
         <h2>Methodology</h2>
-        <p>The Joint Bivariate Distribution is formed by using the Farlie–Gumbel–Morgenstern copula that combines the X and Y distributions. The steps taken by the calculator are outlined below:</p>
+        <p>The Joint Bivariate Distribution is formed by using the Gaussian copula that combines the X and Y distributions. The steps taken by the calculator are outlined below:</p>
         <ol>
-            <li>All continuous distribution are discretized, turning into discrete arrays with 250 points</li>
-            <li>&kappa; is calculated from the values of &rho; and the standard deviations of both distributions using the following formula: <img src="./img/kappa.PNG" /></li>
-            <li>Using the value for &kappa;, the Joint Bivariate PDF is calculated using the following formula: <img src = "./img/b.PNG"/></li>
-            <li>Finally, the Joint Bivariate CDF is calculated using the following formula: <img src = "./img/bigb.PNG"/></li>
+            <li>All continuous distribution are discretized, turning into discrete arrays with 500 points</li>
+            <li>Intermediate variables "a" and "b" are calculated using the individual cumulative distributions and the inverse error function (erf<sup>-1</sup>) using the following formula: <img src="./img/kappa.PNG" /></li>
+            <li>Using the values for "a" and "b", the Joint Bivariate PDF "z" is calculated using the following formula: <img src = "./img/b.PNG"/></li>
+            <li>Finally, the Joint Bivariate CDF is calculated from the bivariate PDF by integration.</li>
+            <li>The Gaussian copula equations were taken from <a href = "https://en.wikipedia.org/wiki/Copula_(probability_theory)#List_of_copula_density_functions_and_applications">here</a></li>
         </ol>
         <br>
         <h2>Calculator Rules</h2>
         <ul>
-            <li>While this calculator allows discrete and continuous probabilities to be used together simultaneously, using discrete functions may produce minor visual errors. They will not impact the overall calculations, but an occasional red streak or slight discrepancy between the red area and the blue line can be visible on the 2D graph</li>
+            <li>This calculator has been tested for accuracy and the following results were obtained:</li>
+            <li style="list-style: none;"><ul>
+                <li>Marginal Distributions: accurate to within 0.001. Main error contributing factor: discretization of continuous functions</li>
+                <li>Conditional Distributions: accurate to within 0.005. Main error contributing factor: copula calculations</li>
+                <li>Joint Distributions (P(X ∩ Y)): accurate to within 0.005. Main error contributing factor: copula calculations</li>
+            </ul></li>
             <li>The calculator has certain limitations on the variables and min/max values, so if those limitats are exceeded then calculator will restore the incorrect values to default</li>
             <li>Each distribution's limits are described under the <b>Rules</b> section in the <b>Graph Settings</b> tab</li>
             <li>The calculator supports up to 4 different variables for both X and Y. Some of those variables are not used for every distribution, so an "N/A" will appear instead of an entry field. For example, the normal distribution only needs 2 variables to be entered, so the other two will be N/A for entry</li>
@@ -261,93 +267,93 @@
             <tr>
                 <td>Distribution X</td>
                 <td><select id = "xdist">
-                    <option value = "0" selected>Normal</option>
-                    <option value = "1">Poisson</option>
-                    <option value = "2">Gamma</option>
-                    <option value = "3">Chi-Square</option>
-                    <option value = "4">Student's t</option>
-                    <option value = "5">F-distribution</option>
-                    <option value = "6">Beta</option>
-                    <option value = "7">Weibull</option>
-                    <option value = "8">Pareto</option>
-                    <option value = "9">Logistic</option>
-                    <option value = "10">Log-normal</option>
-                    <option value = "11">Gumbel</option>
-                    <option value = "12">Uniform</option>
-                    <option value = "13">Birthday</option>
-                    <option value = "14">U-Quadratic</option>
                     <option value = "15">Arcsine</option>
-                    <option value = "16">Semicircle</option>
-                    <option value = "17">Max Distance Walked</option>
-                    <option value = "18">Final Position on a Walk</option>
-                    <option value = "19">Cauchy</option>
-                    <option value = "20">Hyperbolic Secant</option>
-                    <option value = "21">Irwin-Hall</option>
-                    <option value = "22">Laplace</option>
-                    <option value = "23">Benford-Mantissa</option>
-                    <option value = "24">Exponential-Logarithmic</option>
-                    <option value = "25">Beta Prime</option>
-                    <option value = "26">Zeta</option>
-                    <option value = "27">Log Logistic</option>
-                    <option value = "28">Maxwell-Boltzmann</option>
-                    <option value = "29">Logarithmic</option>
-                    <option value = "30">Binomial</option>
-                    <option value = "31">Negative Binomial</option>
-                    <option value = "32">Hypergeometric</option>
-                    <!--<option value = "33">Polya</option>-->
-                    <option value = "34">Finite Order</option>
-                    <option value = "35">Matching Hats</option>
-                    <option value = "36">Triangular</option>
-                    <option value = "37">Coupon Collector</option>
                     <option value = "38">Benford's Digit</option>
+                    <option value = "23">Benford-Mantissa</option>
+                    <option value = "6">Beta</option>
                     <option value = "39">Beta Binomial</option>
                     <option value = "40">Beta Negative Binomial</option>
+                    <option value = "25">Beta Prime</option>
+                    <option value = "30">Binomial</option>
+                    <option value = "13">Birthday</option>
+                    <option value = "19">Cauchy</option>
+                    <option value = "3">Chi-Square</option>
+                    <option value = "37">Coupon Collector</option>
+                    <option value = "24">Exponential-Logarithmic</option>
+                    <option value = "5">F-distribution</option>
+                    <option value = "18">Final Position on a Walk</option>
+                    <option value = "34">Finite Order</option>
+                    <option value = "2">Gamma</option>
+                    <option value = "11">Gumbel</option>
+                    <option value = "20">Hyperbolic Secant</option>
+                    <option value = "32">Hypergeometric</option>
+                    <option value = "21">Irwin-Hall</option>
+                    <option value = "22">Laplace</option>
+                    <option value = "29">Logarithmic</option>
+                    <option value = "9">Logistic</option>
+                    <option value = "27">Log Logistic</option>
+                    <option value = "10">Log-normal</option>
+                    <option value = "35">Matching Hats</option>
+                    <option value = "17">Max Distance Walked</option>
+                    <option value = "28">Maxwell-Boltzmann</option>
+                    <option value = "31">Negative Binomial</option>
+                    <option value = "0" selected>Normal</option>
+                    <option value = "8">Pareto</option>
+                    <option value = "1">Poisson</option>
+                    <!--<option value = "33">Polya</option>-->
+                    <option value = "16">Semicircle</option>
+                    <option value = "4">Student's t</option>
+                    <option value = "36">Triangular</option>
+                    <option value = "12">Uniform</option>
+                    <option value = "14">U-Quadratic</option>
+                    <option value = "7">Weibull</option>
+                    <option value = "26">Zeta</option>
                 </select></td>
             </tr>
             <tr>
                 <td>Distribution Y</td>
                 <td><select id = "ydist">
-                    <option value = "0" selected>Normal</option>
-                    <option value = "1">Poisson</option>
-                    <option value = "2">Gamma</option>
-                    <option value = "3">Chi-Square</option>
-                    <option value = "4">Student's t</option>
-                    <option value = "5">F-distribution</option>
-                    <option value = "6">Beta</option>
-                    <option value = "7">Weibull</option>
-                    <option value = "8">Pareto</option>
-                    <option value = "9">Logistic</option>
-                    <option value = "10">Log-normal</option>
-                    <option value = "11">Gumbel</option>
-                    <option value = "12">Uniform</option>
-                    <option value = "13">Birthday</option>
-                    <option value = "14">U-Quadratic</option>
                     <option value = "15">Arcsine</option>
-                    <option value = "16">Semicircle</option>
-                    <option value = "17">Max Distane Walked</option>
-                    <option value = "18">Final Position on a Walk</option>
-                    <option value = "19">Cauchy</option>
-                    <option value = "20">Hyperbolic Secant</option>
-                    <option value = "21">Irwin-Hall</option>
-                    <option value = "22">Laplace</option>
-                    <option value = "23">Benford-Mantissa</option>
-                    <option value = "24">Exponential-Logarithmic</option>
-                    <option value = "25">Beta Prime</option>
-                    <option value = "26">Zeta</option>
-                    <option value = "27">Log Logistic</option>
-                    <option value = "28">Maxwell-Boltzmann</option>
-                    <option value = "29">Logarithmic</option>
-                    <option value = "30">Binomial</option>
-                    <option value = "31">Negative Binomial</option>
-                    <option value = "32">Hypergeometric</option>
-                    <!--<option value = "33">Polya</option>-->
-                    <option value = "34">Finite Order</option>
-                    <option value = "35">Matching Hats</option>
-                    <option value = "36">Triangular</option>
-                    <option value = "37">Coupon Collector</option>
                     <option value = "38">Benford's Digit</option>
+                    <option value = "23">Benford-Mantissa</option>
+                    <option value = "6">Beta</option>
                     <option value = "39">Beta Binomial</option>
                     <option value = "40">Beta Negative Binomial</option>
+                    <option value = "25">Beta Prime</option>
+                    <option value = "30">Binomial</option>
+                    <option value = "13">Birthday</option>
+                    <option value = "19">Cauchy</option>
+                    <option value = "3">Chi-Square</option>
+                    <option value = "37">Coupon Collector</option>
+                    <option value = "24">Exponential-Logarithmic</option>
+                    <option value = "5">F-distribution</option>
+                    <option value = "18">Final Position on a Walk</option>
+                    <option value = "34">Finite Order</option>
+                    <option value = "2">Gamma</option>
+                    <option value = "11">Gumbel</option>
+                    <option value = "20">Hyperbolic Secant</option>
+                    <option value = "32">Hypergeometric</option>
+                    <option value = "21">Irwin-Hall</option>
+                    <option value = "22">Laplace</option>
+                    <option value = "29">Logarithmic</option>
+                    <option value = "9">Logistic</option>
+                    <option value = "27">Log Logistic</option>
+                    <option value = "10">Log-normal</option>
+                    <option value = "35">Matching Hats</option>
+                    <option value = "17">Max Distance Walked</option>
+                    <option value = "28">Maxwell-Boltzmann</option>
+                    <option value = "31">Negative Binomial</option>
+                    <option value = "0" selected>Normal</option>
+                    <option value = "8">Pareto</option>
+                    <option value = "1">Poisson</option>
+                    <!--<option value = "33">Polya</option>-->
+                    <option value = "16">Semicircle</option>
+                    <option value = "4">Student's t</option>
+                    <option value = "36">Triangular</option>
+                    <option value = "12">Uniform</option>
+                    <option value = "14">U-Quadratic</option>
+                    <option value = "7">Weibull</option>
+                    <option value = "26">Zeta</option>
                 </select></td>
             </tr>
         </table>

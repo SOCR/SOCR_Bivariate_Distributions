@@ -251,7 +251,7 @@ $(document).ready(function(){
                 var temp = makefuncut(t2, y, ymin, ymax);
                 drawData(t2, y, temp, 'Y', 'P(y=Y)');
                 out = CDF(muy, sigmay, ymax) - CDF(muy, sigmay, ymin);
-                $('#pout').replaceWith('P(' + ymin + ' < Y < ' + ymax + ') = ' + out.toFixed(3));
+                updateOutput('P(' + ymin + ' < Y < ' + ymax + ') = ' + out.toFixed(3));
                 break;
             case 2:// p(X|Y=ymin)
                 c = getDist(ymin, 0);
@@ -280,7 +280,6 @@ $(document).ready(function(){
                 drawData(t2, c, temp, 'Y', 'P(y=Y|X=Xmax)');
                 out = CDF((muy + rho*(sigmay/sigmax)*(xmax-mux)), sigmay*Math.sqrt(1-rho*rho), ymax) - CDF((muy + rho*(sigmay/sigmax)*(xmax-mux)), sigmay*Math.sqrt(1-rho*rho), ymin);
                 updateOutput('P(' + ymin + ' < Y < ' + ymax + ' | X = ' + xmax + ') = ' + out.toFixed(3));
-                shadeIn(muy, sigmay, ymin, ymax);
                 break;
             case 6:// CDF of X
                 var cdf = makeCDF(mux, sigmax);
