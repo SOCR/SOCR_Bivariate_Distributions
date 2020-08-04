@@ -1275,46 +1275,38 @@ function HypergeometricDistribution(population, red, sample){
 HypergeometricDistribution.prototype = new Distribution();
 
 //Polya distribution
-function PolyaDistribution(red, green, add, trials){
-	this.red = red;
-	this.green = green;
-	this.add = add;
-	this.trials = trials;
+function PolyaDistribution(r, p){// p is probability of success
+	this.r = r;
+	this.p = p;
 	this.type = 0;
-	this.minValue = 0;
-	this.maxValue = this.trials;
+	this.mu = ((1-this.p)*this.r)/this.p;
+	this.sigma = ((1-this.p)*this.r)/Math.pow(this.p,2);
+	this.minValue = r;
+	this.maxValue = r+2*this.sigma;
 	this.step = 1;
 	this.data = new Data(this.minValue, this.maxValue, this.step);
 	
 	//Methods
 	this.density = function(x){
-		var m = this.red + this.green;
-		var prod1 = 1, prod2 = 1;
-		for (var i = 0; i < x; i++) prod1 = prod1 * (this.trials - i) * (this.red + i * this.add) / ((m + i * this.add) * (x - i));
-		for (var j = 0; j < n - x; j++) prod2 = prod2 * (b + j * c) / (m + (x + j) * c);
-		return prod1 * prod2;
+		return binomial(x-1,this.r-1)*Math.pow(this.p,this.r)*Math.pow((1-this.p),(x-this.r));
 	};
 	
 	this.mean = function(){
-		return this.trials * this.red / (this.red + this.green);
+		return this.mu;
 	};
 	
 	this.variance = function(){
-		var p = this.red / (this.red + this.green);
-		var r = this.add / (this.red + this.green + this.add);
-		return this.trials * p * (1 - p) * (1 + (this.trials - 1) * r);
+		return this.sigma*this.sigma;
 	};
 	
 	this.simulate = function(){
-		var successes = 0, totalRed = this.red, totalGreen = this.green;
-		var p;
-		for (var i = 1; i <= n; i++){
-			p = totalRed / (totalRed + totalGreen);
+		var successes = 0;
+		var p = this.p;
+		var r = this.r;
+		for (var i = 1; i <= 200; i++){
 			if (Math.random() < p) {
 				successes++;
-				totalRed = totalRed + this.add;
 			}
-			else totalGreen = totalGreen + this.add;
 		}
 		this.setValue(successes);
 		return successes;

@@ -105,7 +105,7 @@ $(document).ready(function(){
             px2 = px1 + 5;
             $('#px2').replaceWith('<textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">' + px2 + '</textarea>');
         }
-        else if((xdist == 32 || xdist == 33 || xdist == 34 || xdist == 37) && px2 > px1){
+        else if((xdist == 32 || xdist == 34 || xdist == 37) && px2 > px1){
             px2 = px1;
             $('#px2').replaceWith('<textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">' + px2 + '</textarea>');
         }
@@ -117,6 +117,10 @@ $(document).ready(function(){
             px2 = 3;
             $('#px2').replaceWith('<textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">' + px2 + '</textarea>');
         }
+        else if(xdist == 33 && (px2 < 0 || px2 > 1)){
+            px2 = 0.5;
+            $('#px2').replaceWith('<textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">' + px2 + '</textarea>');
+        }
         //PY2
         if(isNaN(py2) || (py2 <= 0 && (ydist == 0 || ydist == 2 || ydist == 5 || ydist == 6 || ydist == 7 || ydist == 8 || ydist == 9 || ydist == 10 || ydist == 11 || ydist == 13 || ydist == 20 || ydist == 22 || ydist == 24 || ydist == 25 || ydist == 27 || ydist == 30 || ydist == 31 || ydist == 37 || ydist == 39))){
             py2 = 1;
@@ -126,7 +130,7 @@ $(document).ready(function(){
             py2 = py1 + 5;
             $('#py2').replaceWith('<textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">' + py2 + '</textarea>');
         }
-        else if((ydist == 32 || ydist == 33 || ydist == 34 || ydist == 37) && py2 > py1){
+        else if((ydist == 32 || ydist == 34 || ydist == 37) && py2 > py1){
             py2 = py1;
             $('#py2').replaceWith('<textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">' + py2 + '</textarea>');
         }
@@ -138,8 +142,12 @@ $(document).ready(function(){
             py2 = 3;
             $('#py2').replaceWith('<textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">' + py2 + '</textarea>');
         }
+        else if(ydist == 33 && (py2 < 0 || py2 > 1)){
+            py2 = 0.5;
+            $('#py2').replaceWith('<textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">' + py2 + '</textarea>');
+        }
         //PX3
-        if((xdist == 32 || xdist == 33) && px3 > px1){
+        if((xdist == 32) && px3 > px1){
             px3 = px1;
             $('#px3').replaceWith('<textarea id = "px3" onfocus="this.select()" rows="1" maxlength="4">' + px3 + '</textarea>');
         }
@@ -156,7 +164,7 @@ $(document).ready(function(){
             $('#px3').replaceWith('<textarea id = "px3" onfocus="this.select()" rows="1" maxlength="4">' + px3 + '</textarea>');
         }
         //PY3
-        if((ydist == 32 || ydist == 33) && py3 > py1){
+        if((ydist == 32) && py3 > py1){
             py3 = py1;
             $('#py3').replaceWith('<textarea id = "py3" onfocus="this.select()" rows="1" maxlength="4">' + py3 + '</textarea>');
         }
@@ -173,7 +181,7 @@ $(document).ready(function(){
             $('#py3').replaceWith('<textarea id = "py3" onfocus="this.select()" rows="1" maxlength="4">' + py3 + '</textarea>');
         }
         //PX4
-        if((xdist == 32 || xdist == 33) && px4 > px1){
+        if((xdist == 32) && px4 > px1){
             px4 = px1;
             $('#px4').replaceWith('<textarea id = "px4" onfocus="this.select()" rows="1" maxlength="4">' + px4 + '</textarea>');
         }
@@ -865,18 +873,16 @@ $(document).ready(function(){
         var t = [];
         var f = [];
         var F = [];
-        var trials = 0;
-        var red = 0;
-        var green = 0;
-        var add = 0;
-        if(des == 0){trials = px1;red = px2;green = px3;add = px4;x = [];fx = [];Fx = [];}
-        else{trials = py1;red = py2;green = py3;add = py4;y = [];fy = [];Fy = [];}
-        var tempdist = new PolyaDistribution(red, green, add, trials);
-        for(var i = 0; i <= 50; i++){
-            t.push(i);
+        var r = 0;
+        var p = 0;
+        if(des == 0){r = px1;p = px2;x = [];fx = [];Fx = [];}
+        else{r = py1;p = py2;y = [];fy = [];Fy = [];}
+        var tempdist = new PolyaDistribution(r, p);
+        for(var i = 0; i <= tempdist.maxValue-r; i++){
+            t.push(i+r);
             f.push(tempdist.density(t[i]));
-            F.push(tempdist.CDF(t[i]));
         }
+        F = makeCDF(f, 1);
         if(des == 0){x = t; fx = f; Fx = F}
         else{y = t; fy = f; Fy = F;}
     }
@@ -1546,9 +1552,8 @@ $(document).ready(function(){
                 break;
             case 33:
                 px1 = Math.floor(px1);
-                px2 = Math.floor(px2);
-                px3 = Math.floor(px3);
-                px4 = Math.floor(px4);
+                px3 = 1;
+                px4 = 1;
                 polya(0);
                 break;
             case 34:
@@ -1786,9 +1791,8 @@ $(document).ready(function(){
                 break;
             case 33:
                 py1 = Math.floor(py1);
-                py2 = Math.floor(py2);
-                py3 = Math.floor(py3);
-                py4 = Math.floor(py4);
+                py3 = 1;
+                py4 = 1;
                 polya(1);
                 break;
             case 34:
@@ -2099,10 +2103,10 @@ $(document).ready(function(){
                 $('#x4').replaceWith('<td id = "x4">N/A</td>');
                 break;
             case 33:
-                $('#x1').replaceWith('<td id = "x1">N<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
-                $('#x2').replaceWith('<td id = "x2">r<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
-                $('#x3').replaceWith('<td id = "x3">g<sub>X</sub> = <textarea id = "px3" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
-                $('#x4').replaceWith('<td id = "x4">Add<sub>X</sub> = <textarea id = "px4" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x1').replaceWith('<td id = "x1">r<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#x2').replaceWith('<td id = "x2">p<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">0.5</textarea></td>');
+                $('#x3').replaceWith('<td id = "x3">N/A</td>');
+                $('#x4').replaceWith('<td id = "x4">N/A</td>');
                 break;
             case 34:
                 $('#x1').replaceWith('<td id = "x1">m<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
@@ -2356,10 +2360,10 @@ $(document).ready(function(){
                 $('#y4').replaceWith('<td id = "y4">N/A</td>');
                 break;
             case 33:
-                $('#y1').replaceWith('<td id = "y1">N<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
-                $('#y2').replaceWith('<td id = "y2">r<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
-                $('#y3').replaceWith('<td id = "y3">g<sub>Y</sub> = <textarea id = "py3" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
-                $('#y4').replaceWith('<td id = "y4">Add<sub>Y</sub> = <textarea id = "py4" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y1').replaceWith('<td id = "y1">r<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#y2').replaceWith('<td id = "y2">p<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">0.5</textarea></td>');
+                $('#y3').replaceWith('<td id = "y3">N/A</td>');
+                $('#y4').replaceWith('<td id = "y4">N/A</td>');
                 break;
             case 34:
                 $('#y1').replaceWith('<td id = "y1">m<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
