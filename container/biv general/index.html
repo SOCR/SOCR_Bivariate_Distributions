@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8" content="">
+    <meta name="description" content="Statistics Online Computational Resource">
+    <meta name="author" content="Ivo Dinov - http://www.socr.umich.edu">
+    <meta name="keywords" content="Statistics Online Computational Resources">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="../../../css/bootstrap.css" rel="stylesheet">
+    <link href="../../../js/bootstrap-responsive.css" rel="stylesheet">
+    <link href="./scripts/SOCR_Tools_style.css" rel="stylesheet">
+    <link rel="shortcut icon" href="../../../img/SOCR_Web_Icon.ico">
+    <link rel="alternate" type="application/rss+xml" rel="tooltip" title="SOCR News" href="http://socr.umich.edu/html/feed.rss">
+    <script type="text/javascript" src="./scripts/jquery-1.7.2.min.js"></script>
+    <script type = "text/javascript" src="./scripts/jquery-ui.js"></script>
+    <script type="text/javascript" src="./scripts/plotly.min.js"></script>
+    <script type="text/javascript" src="./scripts/distributions.js"></script>
+    <script type="text/javascript" src="./scripts/multi.js"></script>
+    <link href="./scripts/style.css" rel="stylesheet">
+    <title>Bivariate Distribution Calculator</title>
+</head>
+<body>
+    <div id = "pageContainer">
+    <header>
+        <div class="navbar navbar-inverse navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container-fluid">
+                    <a class="btn btn-navbar" data-toggle="collapse"
+                        data-target=".nav-collapse"> <span class="icon-bar"></span> <span
+                        class="icon-bar"></span> <span class="icon-bar"></span>
+                    </a> <a class="brand" href="../../index.html" rel="tooltip"
+                        title="Statistics Online Computational Resource">SOCR</a>
+                    <div class="nav-collapse collapse">
+                        <p class="navbar-text pull-right">
+                            <a href="http://socr.umich.edu/html/feed.rss" class="btn icon rss">
+                                <i class="icon-bullhorn"></i>RSS
+                            </a>
+                        </p>
+                        <ul class="nav">
+                            <!-- <li class="active"><a href="#">Home</a></li>  -->
+                            <li class="dropdown"><a class="dropdown-toggle" id="drop5"
+                                role="button" data-toggle="dropdown" href="#" rel="tooltip"
+                                title="Learn about the SOCR Resource">About<b class="caret"></b></a>
+                                <ul id="menu3" class="dropdown-menu" role="menu"
+                                    aria-labelledby="drop5">
+                                    <li><a tabindex="-1"
+                                        href="http://www.socr.umich.edu/html/SOCR_About.html">About
+                                            SOCR</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://wiki.socr.umich.edu/index.php/SOCR_News">News
+                                            and Events</a></li>
+                                    <li><a tabindex="-1" href="http://socr.umich.edu/people">SOCR
+                                            Team</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://www.socr.umich.edu/html/SOCR_UserGoogleMap.html">Geo-Map</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://www.socr.umich.edu/html/SOCR_Contact.html">Contact</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://wiki.socr.umich.edu/index.php/SOCR_News">News/Events</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://socr.umich.edu/html/SOCR_Publications.html">Publications</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://socr.umich.edu/html/SOCR_Recognitions.html">Recognitions</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://www.socr.umich.edu/docs/SOCR_Brochure_UMich.pdf">Brochure</a></li>
+                                    <li class="divider"></li>
+                                    <li><a tabindex="-1"
+                                        href="http://socr.umich.edu/html/SOCR_Funding.html">Funding</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://www.SOCR.umich.edu/html/SOCR_Support.html">Donations</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://socr.umich.edu/html/SOCR_Acknowledgments.html">Acknowledgments</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://socr.umich.edu/html/SOCR_CitingLicense.html">Citing/Licences</a></li>
+                                    <li class="divider"></li>
+                                    <li><a tabindex="-1" href="http://wiki.socr.umich.edu/">SOCR
+                                            Wiki</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://wiki.socr.umich.edu/index.php/SOCR_Servers">SOCR
+                                            Servers</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://www.socr.umich.edu/docs/SOCR_Documentation.html">Documentation</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://socr.umich.edu/html/SOCR_Download.html">Download</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://www.socr.umich.edu/html/SOCR_Languages.html">Language
+                                            Translation</a></li>
+                                    <li class="divider"></li>
+                                    <li><a tabindex="-1"
+                                        href="http://socr.umich.edu/html/Navigators.html" rel="tooltip"
+                                        title="SOCR Resource Graphical Navigator"> SOCR Resource
+                                            Navigator</a></li>
+    
+                                </ul></li>
+                            <li><a
+                                href="http://www.socr.umich.edu/html/SOCR_Contact.html"
+                                rel="tooltip" title="Contact the SOCR Resource">Contact</a></li>
+                            <li class="dropdown"><a class="dropdown-toggle" id="drop5"
+                                role="button" data-toggle="dropdown" href="#" rel="tooltip"
+                                title="Use these tools if your browser is Java/JVM 1.6+ enabled!">
+                                    Java Applets<b class="caret"></b>
+                            </a>
+                                <ul id="menu3" class="dropdown-menu" role="menu"
+                                    aria-labelledby="drop5">
+                                    <li><a tabindex="-1" href="#" rel="tooltip"
+                                        title="Use these tools if your browser is Java/JVM 1.6+ enabled!">Java
+                                            1.6 Applets</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://socr.umich.edu/html/dist/">Distributions</a></li>
+                                    <li><a tabindex="-1" href="http://socr.umich.edu/html/exp">Experiments</a></li>
+                                    <li><a tabindex="-1" href="http://socr.umich.edu/html/mod">Modeler</a></li>
+                                    <li><a tabindex="-1" href="http://socr.umich.edu/html/ana">Analyses</a></li>
+                                    <li><a tabindex="-1" href="http://socr.umich.edu/html/cha">Charts</a></li>
+                                    <li><a tabindex="-1" href="http://socr.umich.edu/html/gam">Games</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://socr.ucla.edu/webstart/index.html">Web-Start</a></li>
+                                    <li class="divider"></li>
+                                    <li><a tabindex="-1"
+                                        href="http://socr.ucla.edu/legacy/htmls/" rel="tooltip"
+                                        title="For older Java/JVM 1.5 enabled Browsers Use the links below!">Legacy
+                                            Java 1.5 Applets</a></li>
+                                </ul></li>
+                            <li class="dropdown"><a class="dropdown-toggle" id="drop5"
+                                role="button" data-toggle="dropdown" href="#" rel="tooltip"
+                                title="A collection of portable modern HTML5 Webapps">Webapps<b
+                                    class="caret"></b></a>
+                                <ul id="menu3" class="dropdown-menu" role="menu"
+                                    aria-labelledby="drop5">
+                                    <li><a tabindex="-1" href="http://www.distributome.org/V3">Distributome
+                                            Navigator</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://www.distributome.org/tools.html">Distributome
+                                            Webapps</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://socr.umich.edu/HTML5/BivariateNormal/">Bivariate
+                                            Normal Distribution Calculator</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://socr.umich.edu/HTML5/charts/ViolinChart/">Violin
+                                            Chart</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://socr.umich.edu/HTML5/Resampling_Webapp/">Randomization
+                                            and Resampling Webapp</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://socr.umich.edu/Applets/index.html#Tables">Probability
+                                            Tables</a></li>
+                                    <li><a tabindex="-1" href="http://socr.umich.edu/HTML5/">Other
+                                            SOCR HTML5 Webapps</a></li>
+                                </ul></li>
+                            <li class="dropdown"><a class="dropdown-toggle" id="drop5"
+                                role="button" data-toggle="dropdown" href="#" rel="tooltip"
+                                title="Additional SOCR Resources">More<b class="caret"></b></a>
+                                <ul id="menu3" class="dropdown-menu" role="menu"
+                                    aria-labelledby="drop5">
+                                    <li><a tabindex="-1"
+                                        href="http://socr.umich.edu/Applets/index.html#High-Precision_Distribution_Calculators">High-Precision
+                                            Calculators</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://socr.umich.edu/Applets/index.html#Tables">Probability
+                                            Tables</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://socr.umich.edu/Applets/index.html#Function_and_Image-Processing_Tools">Function
+                                            and Image-Processing Applets</a></li>
+                                    <li><a tabindex="-1"
+                                        href="http://socr.umich.edu/Applets/index.html#Other_Interesting_Java_Applets">Other
+                                            Java Applets</a></li>
+                                </ul></li>
+                        </ul>
+                    </div><!--/.nav-collapse -->
+                </div>
+            </div>
+        </div>
+        <h1>Bivariate Distribution 3D Interactive Calculator</h1>
+        <h2>Instructions</h2>
+        <ul>
+            <li><b>Requirements</b> - modern web-browser with HTML and JavaScript support</li>
+            <li>See the <a href="http://wiki.stat.ucla.edu/socr/index.php/SOCR_BivariateNormal_JS_Activity">SOCR Bivariate Normal Distribution Activity</a></li>
+            <li>Click the <b>Graph Settings</b> button to open an overlay window for controlling the distribution parameters.</li>
+            <li>You can control the bivariate normal distribution in 3D by clicking and dragging on the graph, zooling in and out, as well as taking a picture</li>
+            <li>Probability Results are reported in the <b>Probability</b> section</li>
+            <li>This graphical bivariate Normal probability calculator shows visually the correspondence between the graphical area representation and the numeric (PDF/CDF) results. However, the reported probabilities are approximate (accuracy 10<sup>-3</sup> for Results section and the 2D graph, 10<sup>-2</sup> for 3D bivariate plot) due to the finite viewing window of the infinitely supported Normal distribution, and the limited numerical precision of the inputs (domain) and outputs (range). Users that require high-precision calculations are encouraged to use the <a href="https://socr.umich.edu/Applets/index.html#High-Precision_Distribution_Calculators">SOCR high-precision numerical probability calculators</a></li>
+            <li>Also see the <a href = "https://socr.umich.edu/HTML5/BivariateNormal/index.html">first verison of the BVN Distribution Calculator</a></li>
+        </ul>
+    </header>
+    <div id = "backdim"></div>
+    <div id = "rules">
+        <button id = "closeR">&times;</button>
+        <h2>Methodology</h2>
+        <p>The Joint Bivariate Distribution is formed by using the Gaussian copula that combines the X and Y distributions. The steps taken by the calculator are outlined below:</p>
+        <ol>
+            <li>All continuous distribution are discretized, turning into discrete arrays with 500 points</li>
+            <li>Intermediate variables "a" and "b" are calculated using the individual cumulative distributions and the inverse error function (erf<sup>-1</sup>) using the following formula: <img src="./img/kappa.PNG" /></li>
+            <li>Using the values for "a" and "b", the Joint Bivariate PDF "z" is calculated using the following formula: <img src = "./img/b.PNG"/></li>
+            <li>Finally, the Joint Bivariate CDF is calculated from the bivariate PDF by integration.</li>
+            <li>The Gaussian copula equations were taken from <a href = "https://en.wikipedia.org/wiki/Copula_(probability_theory)#List_of_copula_density_functions_and_applications">here</a></li>
+        </ol>
+        <br>
+        <h2>Calculator Rules</h2>
+        <ul>
+            <li>This calculator has been tested for accuracy and the following results were obtained:</li>
+            <li style="list-style: none;"><ul>
+                <li>Marginal Distributions: accurate to within 0.001. Main error contributing factor: discretization of continuous functions</li>
+                <li>Conditional Distributions: accurate to within 0.005. Main error contributing factor: copula calculations</li>
+                <li>Joint Distributions (P(X ∩ Y)): accurate to within 0.005. Main error contributing factor: copula calculations</li>
+            </ul></li>
+            <li>The calculator has certain limitations on the variables and min/max values, so if those limitats are exceeded then calculator will restore the incorrect values to default</li>
+            <li>Each distribution's limits are described under the <b>Rules</b> section in the <b>Graph Settings</b> tab</li>
+            <li>The calculator supports up to 4 different variables for both X and Y. Some of those variables are not used for every distribution, so an "N/A" will appear instead of an entry field. For example, the normal distribution only needs 2 variables to be entered, so the other two will be N/A for entry</li>
+        </ul>
+    </div>
+    <main><div id="mainContainer">
+        <button id = "close">&times;</button>
+        <h2>Instructions</h2>
+        <ul>
+            <li>Use the <b>Distribution type</b> section to select what distributions you would like to be displayed</li>
+            <li>Use the <b>Variable Settings</b> section to input the distribution parameters and correlation coefficient</li>
+            <li>Use the <b>Control</b> section to input appropriate bivariate limits for X and Y variables</li>
+            <li>Use the <b>Graph Settings</b> sections to indicate what type of Marginal Distribution and Joint Bivariate Distribution to view. You can select to view either the Marginal functions of each variable, the Conditional distributions at the limits of variables, or the CDF functions for the Marginal Distribution graph, while the PDF and the CDF are available for the Joint Bivariate Distribution plot.</li>
+            <li>Once done, click the <b>X</b> button to close the Graph Settings Section. The graph may take a few seconds to update.</li>
+        </ul>
+        <h2>Rules</h2>
+        <ul>
+            <li id = "10">Normal Distribution: mean can take any value, but the standard deviation must be greater than 0</li>
+            <li id = "11">Poisson Distribution limits: the value of lambda must be a non-negative number. Also, the X or Y limits must also be non-negative</li>
+            <li id = "12">Gamma Distribution: both the shape (k) and the scale (&theta;) values must be greater than 0. Also, the X or Y limits must also be non-negative</li>
+            <li id = "13">Chi-Square Distribution: the number of degrees of freedom must be a natural number. Also, the X or Y limits must also be non-negative</li>
+            <li id = "14">Student's t-distribution: the number of degrees of freedom must be a positive number</li>
+            <li id = "15">F-distribution: the values for the degrees of freedom D1 and D2 must be positive integers. Also, the X or Y limits must also be non-negative</li>
+            <li id = "16">Beta Distribution: the values for &alpha; and &beta; must be positive numbers. Also, the limits must be within the 0 to 1 range</li>
+            <li id = "17">Weibull Distribution: the values for the shape (k) and scale (&lambda;) must be greater than 0. Also, the X or Y limits must also be non-negative</li>
+            <li id = "18">Pareto distribution: the values for the shape (&alpha;) and scale (Xm or Ym) must be greater than 0. Also, the X or Y limits must also be non-negative</li>
+            <li id = "19">Logistic distribution: while the value for the location (&mu;) may be any real number, the value for s must be greater than 0</li>
+            <li id = "20">Log-normal distribution: &mu; must be a non-negative value and &sigma; must be breater than 0. Also, the X or Y limits must also be non-negative</li>
+            <li id = "21">Gumbel distribution: while the value for the location (&mu;) may be any real number, the value for scale (&beta;) must be greater than 0</li>
+            <li id = "22">Uniform distribution: while the values for both a and b can be any real number, b must be greater than a. Also, the limits for X or Y must be no less than a-2 and no greater than b+2</li>
+            <li id = "23">Birthday distribution: the value for days and sample must be a positive integer. Also, The limits for X or Y must be non-negative</li>
+            <li id = "24">U-Quadratic distribution: while the values for a and b can be any real number, b must be greater than a</li>
+            <li id = "25">Arcsine distribution: the X or Y limits must be between 0 and 1</li>
+            <li id = "26">Semicircle distribution: the value for the radius (R) must be greater than 0</li>
+            <li id = "27">Max Distance Walked distribution: the value for N must be a positive integer. Also, the X or Y limits must be non-negative</li>
+            <li id = "28">Final Position on a Walk distribution: the value for N must be a positive integer. Also, the X or Y limits must be non-negative</li>
+            <li id = "29">Cauchy distribution</li>
+            <li id = "30">Hyperbolic Secant distribution: while the value for the location may be any real number, the value for scale must be greater than 0</li>
+            <li id = "31">Irwin-Hall distribution: the value for N must be a positive integer. Also, the X or Y limits must be non-negative</li>
+            <li id = "32">Laplace distribution: while the value for the location (&mu;) may be any real number, the value for scale (b) must be greater than 0</li>
+            <li id = "33">Benford-Mantissa distribution: the value for b must be greater than 2. Also, the X or Y limits must be non-negative</li>
+            <li id = "34">Exponential-Logarithmic distribution: the value for p must be greater than 0 but less than 1, while the value for &beta; must be greater than 0. Also, the X or Y limits must be non-negative</li>
+            <li id = "35">Beta Prime distribution: the values for &alpha; and &beta; must be positive numbers. Also, the X or Y limits must be non-negative</li>
+            <li id = "36">Zeta distribution: the value for s must be an integer greater than 1. Also, the X or Y limits must be non-negative</li>
+            <li id = "37">Log Logistic distribution: the values for &alpha; and &beta; must be positive numbers. Also, the X or Y limits must be non-negative</li>
+            <li id = "38">Maxwell–Boltzmann distribution: the value for a must be greater than 0. Also, the X or Y limits must be non-negative</li>
+            <li id = "39">Logarithmic distribution: the value for p must be greater than 0 but less than 1. Also, the X or Y limits must be non-negative</li>
+            <li id = "40">Binomial distribution: the value for Prob must be greater than 0 but less than 1, while the value for N must be a positive integer. Also, the X or Y limits must be non-negative</li>
+            <li id = "41">Negative Binomial distribution: the value for Prob must be greater than 0 but less than 1, while the value for K must be a positive integer. Also, the X or Y limits must be non-negative</li>
+            <li id = "42">Hypergeometric distribution: the value for N (population size) must be a positive integer, while the values for k and n must be positive integers no greater than N. Also, the X or Y limits must be non-negative</li>
+            <li id = "43">Polya: the value for r (number of successes) must be a positive integer, while the values for p must be between 0 and 1. Also, the X or Y limits must be non-negative</li>
+            <li id = "44">Finite Order distribution: the value for m (population size) must be a positive integer, the value for n must be a positive integer no greater than m, and the value for k must be a positive integer no greater than m. Also, the X or Y limits must be non-negative</li>
+            <li id = "45">Matching Hats distribution: the value for the number of hats must be a positive integer. Also, the X or Y limits must be non-negative</li>
+            <li id = "46">Triangular distribution: while all of the parameters can be any real number, Right must be greater than Left, while Middle must be in between Left and Right.</li>
+            <li id = "47">Coupon Collector distribution: both m and k must be positive integers, but k must be no greater than m. Also, the X or Y limits must be non-negative</li>
+            <li id = "48">Benford's Digit distribution: the value for b must be greater than 1. Also, the X or Y limits must be non-negative</li>
+            <li id = "49">Beta Binomial distribution: the value for n must be a positive integer, while a and b must be positive real numbers. Also, the X or Y limits must be non-negative</li>
+            <li id = "50">Beta Negative Binomial distribution: the value for k must be a positive integer, the value for a must be greater than 2 whileb must be positive real numbers. Also, the X or Y limits must be non-negative</li>
+        </ul>
+        <table>
+            <tr><td colspan = "2"><h2>Distribution type</h2></td></tr>
+            <tr>
+                <td>Distribution X</td>
+                <td><select id = "xdist">
+                    <option value = "15">Arcsine</option>
+                    <option value = "38">Benford's Digit</option>
+                    <option value = "23">Benford-Mantissa</option>
+                    <option value = "6">Beta</option>
+                    <option value = "39">Beta Binomial</option>
+                    <option value = "40">Beta Negative Binomial</option>
+                    <option value = "25">Beta Prime</option>
+                    <option value = "30">Binomial</option>
+                    <option value = "13">Birthday</option>
+                    <option value = "19">Cauchy</option>
+                    <option value = "3">Chi-Square</option>
+                    <option value = "37">Coupon Collector</option>
+                    <option value = "24">Exponential-Logarithmic</option>
+                    <option value = "5">F-distribution</option>
+                    <option value = "18">Final Position on a Walk</option>
+                    <option value = "34">Finite Order</option>
+                    <option value = "2">Gamma</option>
+                    <option value = "11">Gumbel</option>
+                    <option value = "20">Hyperbolic Secant</option>
+                    <option value = "32">Hypergeometric</option>
+                    <option value = "21">Irwin-Hall</option>
+                    <option value = "22">Laplace</option>
+                    <option value = "29">Logarithmic</option>
+                    <option value = "9">Logistic</option>
+                    <option value = "27">Log Logistic</option>
+                    <option value = "10">Log-normal</option>
+                    <option value = "35">Matching Hats</option>
+                    <option value = "17">Max Distance Walked</option>
+                    <option value = "28">Maxwell-Boltzmann</option>
+                    <option value = "31">Negative Binomial</option>
+                    <option value = "0" selected>Normal</option>
+                    <option value = "8">Pareto</option>
+                    <option value = "1">Poisson</option>
+                    <option value = "33">Polya</option>
+                    <option value = "16">Semicircle</option>
+                    <option value = "4">Student's t</option>
+                    <option value = "36">Triangular</option>
+                    <option value = "12">Uniform</option>
+                    <option value = "14">U-Quadratic</option>
+                    <option value = "7">Weibull</option>
+                    <option value = "26">Zeta</option>
+                </select></td>
+            </tr>
+            <tr>
+                <td>Distribution Y</td>
+                <td><select id = "ydist">
+                    <option value = "15">Arcsine</option>
+                    <option value = "38">Benford's Digit</option>
+                    <option value = "23">Benford-Mantissa</option>
+                    <option value = "6">Beta</option>
+                    <option value = "39">Beta Binomial</option>
+                    <option value = "40">Beta Negative Binomial</option>
+                    <option value = "25">Beta Prime</option>
+                    <option value = "30">Binomial</option>
+                    <option value = "13">Birthday</option>
+                    <option value = "19">Cauchy</option>
+                    <option value = "3">Chi-Square</option>
+                    <option value = "37">Coupon Collector</option>
+                    <option value = "24">Exponential-Logarithmic</option>
+                    <option value = "5">F-distribution</option>
+                    <option value = "18">Final Position on a Walk</option>
+                    <option value = "34">Finite Order</option>
+                    <option value = "2">Gamma</option>
+                    <option value = "11">Gumbel</option>
+                    <option value = "20">Hyperbolic Secant</option>
+                    <option value = "32">Hypergeometric</option>
+                    <option value = "21">Irwin-Hall</option>
+                    <option value = "22">Laplace</option>
+                    <option value = "29">Logarithmic</option>
+                    <option value = "9">Logistic</option>
+                    <option value = "27">Log Logistic</option>
+                    <option value = "10">Log-normal</option>
+                    <option value = "35">Matching Hats</option>
+                    <option value = "17">Max Distance Walked</option>
+                    <option value = "28">Maxwell-Boltzmann</option>
+                    <option value = "31">Negative Binomial</option>
+                    <option value = "0" selected>Normal</option>
+                    <option value = "8">Pareto</option>
+                    <option value = "1">Poisson</option>
+                    <!--<option value = "33">Polya</option>-->
+                    <option value = "16">Semicircle</option>
+                    <option value = "4">Student's t</option>
+                    <option value = "36">Triangular</option>
+                    <option value = "12">Uniform</option>
+                    <option value = "14">U-Quadratic</option>
+                    <option value = "7">Weibull</option>
+                    <option value = "26">Zeta</option>
+                </select></td>
+            </tr>
+        </table>
+        <table>
+            <tr>
+                <td colspan = "2"><h2>Variable Settings</h2></td>
+            </tr>
+            <tr>
+                <td>&rho; = <textarea id = "rho" onfocus="this.select()" rows="1" maxlength="4">0.5</textarea></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td id = "x1">&mu;<sub>X</sub> = <textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>
+                <td id = "y1">&mu;<sub>Y</sub> = <textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">0</textarea></td>
+            </tr>
+            <tr>
+                <td id = "x2">&sigma;<sub>X</sub> = <textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>
+                <td id = "y2">&sigma;<sub>Y</sub> = <textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>
+            </tr>
+            <tr>
+                <td id = "x3">N/A</td>
+                <td id = "y3">N/A</td>
+            </tr>
+            <tr>
+                <td id = "x4">N/A</td>
+                <td id = "y4">N/A</td>
+            </tr>
+        </table>
+        <table>
+            <tr><td><h2>Controls</h2></td></tr>
+            <tr><td><textarea id = "xmin" onfocus="this.select()" rows="1" maxlength="4">-4</textarea> &lt; X &lt; <textarea id = "xmax" onfocus="this.select()" rows="1" maxlength="4">4</textarea></td></tr>
+            <tr><td><textarea id = "ymin" onfocus="this.select()" rows="1" maxlength="4">-4</textarea> &lt; Y &lt; <textarea id = "ymax" onfocus="this.select()" rows="1" maxlength="4">4</textarea></td></tr>
+        </table>
+        <table>
+            <tr>
+                <td colspan="2"><h2>Marginal Distribution Settings</h2></td>
+            </tr>
+            <tr>
+                <td><input type = "radio" name = "1" value='0' checked> Marginal of X</td>
+                <td><input type = "radio" name = "1"  value='1'> Marginal of Y</td>
+            </tr>
+            <tr>
+                <td><input type = "radio" name = "1"  value="2"> Conditional of X|Y = Y<sub>min</sub></td>
+                <td><input type = "radio" name = "1"  value="3"> Conditional of X|Y = Y<sub>max</sub></td>
+            </tr>
+            <tr>
+                <td><input type = "radio" name = "1"  value="4"> Conditional of Y|X = X<sub>min</sub></td>
+                <td><input type = "radio" name = "1"  value="5"> Conditional of Y|X = X<sub>max</sub></td>
+            </tr>
+            <tr>
+                <td><input type = "radio" name = "1"  value="6"> CDF of X</td>
+                <td><input type = "radio" name = "1"  value="7"> CDF of Y</td>
+            </tr>
+            <tr>
+                <td colspan="2"><h2>Joint Bivariate Distribution</h2></td>
+            </tr>
+            <tr>
+                <td><input type = "radio" name = "2" value="0" checked> Bivariate PDF</td>
+                <td><input type = "radio" name = "2" value="1"> Bivariate CDF</td>
+            </tr>
+        </table>
+    </div></main>
+    <button id = "show">Graph Settings</button>
+    <button id = "showR">Methodology and Calculator Rules</button>
+    <!--<button id = "test">Test</button>-->
+    <table id = "res">
+        <tr><td><h2>Probability Results</h2></td></tr>
+        <tr><td><textarea id="pout" readonly></textarea></td></tr>
+    </table>
+    <div id = "graphs">
+        <div>
+            <h2 id = "flattitle"></h2>
+            <div id = "graph"></div>
+        </div>
+        <div>
+            <h2 id = "surftitle"></h2>
+            <div id = "surfacePlot"></div>
+        </div>
+    </div>
+</div>
+    <footer>
+        <a href="http://www.socr.umich.edu/">SOCR Resource</a> Visitor number
+        <img class="statcounter" src="https://c.statcounter.com/5714596/0/038e9ac4/0/" alt="Web Analytics" align="middle" border="0">
+        <script type="text/javascript">
+            var d = new Date();
+            document.write(" | " + d.getFullYear() + " | ");
+        </script>
+        <a href="../../../img/SOCR_Email.png"><img alt="SOCR Email" title="SOCR Email" src="../../img/SOCR_Email.png" style="border: 0px solid;"></a>
+        <script src="../../../js/bootstrap-transition.js" type="text/javascript"></script>
+        <script src="../../../js/bootstrap-alert.js" type="text/javascript"></script>
+        <script src="../../../js/bootstrap-modal.js" type="text/javascript"></script>
+        <script src="../../../js/bootstrap-dropdown.js" type="text/javascript"></script>
+        <script src="../../../js/bootstrap-scrollspy.js" type="text/javascript"></script>
+        <script src="../../../js/bootstrap-tab.js" type="text/javascript"></script>
+        <script src="../../../js/bootstrap-tooltip.js" type="text/javascript"></script>
+        <script src="../../../js/bootstrap-popover.js" type="text/javascript"></script>
+        <script src="../../../js/bootstrap-button.js" type="text/javascript"></script>
+        <script src="../../../js/bootstrap-collapse.js" type="text/javascript"></script>
+        <script src="../../../js/bootstrap-carousel.js" type="text/javascript"></script>
+        <script src="../../../js/bootstrap-typeahead.js" type="text/javascript"></script>
+        <script type="text/javascript">
+            var sc_project = 5714596;var sc_invisible = 1;var sc_partition = 71;var sc_click_stat = 1; var sc_security = "038e9ac4";
+        </script>
+        <script type="text/javascript"
+            src="http://www.statcounter.com/counter/counter.js"></script>
+        <script src="http://www.google-analytics.com/urchin.js" type="text/javascript"></script>
+        <script type="text/javascript"> _uacct = "UA-676559-1"; urchinTracker();</script>
+    </footer>
+</body>
+</html>
