@@ -958,11 +958,11 @@ $(document).ready(function(){
                     if(des4d == 0){temp = Math.round(255-255*triCut[i][j][k]/trimax);}
                     else{temp = Math.round(255-255*Tri[i][j][k]);}
                     temp1 = temp.toString();
-                    if((temp < 240 && des4d == 0) || temp < 50){
+                    if((temp < 250 && des4d == 0) || temp < 50){
                         xdisp.push(x[i]);
                         ydisp.push(y[j]);
                         zdisp.push(z[k]);
-                        colours.push("rgb(" + temp1 + "," + temp1 + "," + temp1 + ")");
+                        colours.push("rgb(" + 255 + "," + temp1 + "," + temp1 + ")");
                     }
                 }
             }
@@ -973,23 +973,22 @@ $(document).ready(function(){
             z: zdisp,
             mode: 'markers',
             marker: {
-                size: 5,
+                size: 1,
                 symbol: 'circle',
                 color: colours,
-                line: {color: '#000',width: 0.1},
-                opacity: 0.02
+                opacity: 0.2
             },
             type: 'scatter3d'
         }];
         pointsshown = xdisp.length;
         pointstot = (x.length-1)*(y.length-1)*(z.length-1);
-        if(des4d == 0){cutprob = 15*trimax/255;}
+        if(des4d == 0){cutprob = 5*trimax/255;}
         else{cutprob = 205/255;}
         var layout = {
             scene:{
-                xaxis:{title:{text:'X'}},
-                yaxis:{title:{text:'Y'}},
-                zaxis:{title:{text:'Z'}},
+                xaxis:{title:{text:'X'},range:[px1-sigmaStep*px2,px1+sigmaStep*px2]},
+                yaxis:{title:{text:'Y'},range:[py1-sigmaStep*py2,py1+sigmaStep*py2]},
+                zaxis:{title:{text:'Z'},range:[pz1-sigmaStep*pz2,pz1+sigmaStep*pz2]},
                 camera:{eye:{x:2,y:1,z:0.75}}
             },
             autosize: true,
