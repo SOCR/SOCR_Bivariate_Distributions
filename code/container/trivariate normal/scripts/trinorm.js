@@ -363,26 +363,30 @@ $(document).ready(function(){
         updateOutput('P(' + xmin + ' < X < ' + xmax + ' ∩ ' + ymin + ' < Y < ' + ymax + ' ∩ ' + zmin + ' < Z < ' + zmax + ') = ' + yeet.toFixed(3));
     }
     var makeTriBig = function(){//Makes Trifariate CDF tensor
-        var temp1 = [];
         var temp2 = [];
         var temp3 = [];
-        var temp4 = 0;
-        for (var k = 0; k < z.length; k++){
-            temp1.push(tri[0][0][k]);
-        }
         for (var i = 0; i < x.length; i++){
             temp2 = [];
-            for (var j = 0; j < y.length;j++){
+            for (var j = y.length-1; j >= 0; j--){
                 temp3 = [];
-                temp4 = 0;
                 for (var k = 0; k < z.length; k++){
-                    temp4 += tri[i][j][k];
-                    temp1[k] += temp4;
-                    temp3.push(temp1[k]);
+                    temp3.push(0);
                 }
                 temp2.push(temp3);
             }
             Tri.push(temp2);
+        }
+        for (var i = 0; i < x.length; i++){
+            for (var j = y.length-1; j >= 0; j--){
+                for (var k = 0; k < z.length; k++){
+                    if(i == 0 || j == 0 || k == 0){
+                        Tri[i][j][k] = tri[i][j][k];
+                    }
+                    else{
+                        Tri[i][j][k] = tri[i][j][k] + 0*(Tri[i-1][j][k] + Tri[i][j-1][k] + Tri[i][j][k-1]) + 0*(Tri[i-1][j-1][k] + Tri[i-1][j][k-1] + Tri[i][j-1][k-1]) + Tri[i-1][j-1][k-1];
+                    }
+                }
+            }
         }
         var scale = Tri[x.length-1][y.length-1][z.length-1];
         for (var i = 0; i < x.length; i++){
@@ -952,38 +956,64 @@ $(document).ready(function(){
         var colours = [];
         var temp = 0;
         var temp1 = "";
+        var anno = [];
+        var temp2 = 0;
         for (i = 0; i < x.length; i++){
             for (var j = 0; j < y.length; j++){
                 for (var k = 0; k < z.length; k++){
-                    if(des4d == 0){temp = Math.round(255-255*triCut[i][j][k]/trimax);}
-                    else{temp = Math.round(255-255*Tri[i][j][k]);}
+                    if(des4d == 0){temp = Math.round(255-255*triCut[i][j][k]/trimax);temp2 = triCut[i][j][k];}
+                    else{temp = Math.round(255-255*Tri[i][j][k]);temp2 = Tri[i][j][k];}
                     temp1 = temp.toString();
-                    if((temp < 250 && des4d == 0) || temp < 50){
+                    if((temp < 250 && des4d == 0) || (temp < 200 && des4d == 1)){
                         xdisp.push(x[i]);
                         ydisp.push(y[j]);
                         zdisp.push(z[k]);
                         colours.push("rgb(" + 255 + "," + temp1 + "," + temp1 + ")");
+                        anno.push('p=' + temp2);
                     }
                 }
             }
         }
-        data = [{
-            x: xdisp,
-            y: ydisp,
-            z: zdisp,
-            mode: 'markers',
-            marker: {
-                size: 1,
-                symbol: 'circle',
-                color: colours,
-                opacity: 0.2
-            },
-            type: 'scatter3d'
-        }];
+        if(des4d == 0){
+            data = [{
+                x: xdisp,
+                y: ydisp,
+                z: zdisp,
+                mode: 'markers',
+                text:anno,
+                marker: {
+                    size: 1,
+                    symbol: 'circle',
+                    color: colours,
+                    opacity: 0.2
+                },
+                type: 'scatter3d'
+            }];
+            cutprob = 55*trimax/255;
+            $('#cdf').hide();
+            $('#pdf').show();
+        }
+        else{
+            data = [{
+                x: xdisp,
+                y: ydisp,
+                z: zdisp,
+                mode: 'markers',
+                text:anno,
+                marker: {
+                    size: 5,
+                    symbol: 'circle',
+                    color: colours,
+                    opacity: 0.2
+                },
+                type: 'scatter3d'
+            }];
+            cutprob = 5/255;
+            $('#pdf').hide();
+            $('#cdf').show();
+        }
         pointsshown = xdisp.length;
         pointstot = (x.length-1)*(y.length-1)*(z.length-1);
-        if(des4d == 0){cutprob = 5*trimax/255;}
-        else{cutprob = 205/255;}
         var layout = {
             scene:{
                 xaxis:{title:{text:'X'},range:[px1-sigmaStep*px2,px1+sigmaStep*px2]},
