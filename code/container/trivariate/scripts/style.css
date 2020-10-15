@@ -77,6 +77,38 @@ main{
     padding-left: 1em;
 }
 
+#downloads{
+    display: none;
+    background-color: #eee;
+    z-index: 4;
+    position: fixed;
+    max-width: 75vw;
+    top: 5vh;
+    left: 15vw;
+    border: 2px solid black;
+    border-radius: 10px;
+    max-height: 35vw;
+    overflow: auto;
+    padding-left: 1em;
+    padding-bottom: 1em;
+}
+
+#versionHist{
+    display: none;
+    background-color: #eee;
+    z-index: 4;
+    position: fixed;
+    max-width: 75vw;
+    top: 5vh;
+    left: 15vw;
+    border: 2px solid black;
+    border-radius: 10px;
+    max-height: 35vw;
+    overflow: auto;
+    padding-left: 1em;
+    padding-bottom: 1em;
+}
+
 #mainContainer{
     display: flex;
     flex-flow: column;
@@ -119,6 +151,28 @@ main{
     margin-top: 0.5em;
 }
 
+#closeD{
+    position: absolute;
+	z-index: 3;
+    background-color: rgb(200, 200, 200);
+    width: 1em !important;
+    height: 1em !important;
+    font-size:2em;
+    right: 0.5em;
+    margin-top: 0.5em;
+}
+
+#closeV{
+    position: absolute;
+	z-index: 3;
+    background-color: rgb(200, 200, 200);
+    width: 1em !important;
+    height: 1em !important;
+    font-size:2em;
+    right: 0.5em;
+    margin-top: 0.5em;
+}
+
 main table, main div{
     min-width: 90%;
 }
@@ -134,6 +188,14 @@ footer{
 
 h2{
     margin: 0;
+}
+
+#setout{
+    width: 100%;
+}
+
+li.nostyle {
+    list-style-type: none;
 }
 
 /*Screen adjusting*/

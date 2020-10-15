@@ -59,14 +59,22 @@ $(document).ready(function(){
     var rhoxy = 0.5;// value of rho between x and y
     var rhoxz = 0.5;// value of rho between x and z
     var rhoyz = 0.5;// value of rho between y and z
-    var cond1 = 0;// Conditional probability variable 1 - x|y / x|z / y|x / y|z / z|x / z|y
-    var cond2 = 0;// Conditional probability variable 2 - min/max
+    var cond1 = 0;// Bivariate Conditional probability variable 1 - xy|z, xz|y, yz|x
+    var cond2 = 0;// Bivariate Conditional probability variable 2 - min/max
+    var cond3 = 0;// Univariate Conditional probability variable 1 - x|yz, y|xz, z|xy
+    var cond4 = 0;// Univariate Conditional probability variable 2 - xmin/xmax/ymin/ymax
+    var cond5 = 0;// Univariate Conditional probability variable 3 - ymin/ymax/zmin/zmax
+    var cond6 = 0;// Univariate Conditional probability variable 1 - x|, y|, z|
+    var cond7 = 0;// Univariate Conditional probability variable 2 - xmin/xmax/ymin/ymax/zmin/zmax
+    var iter = 0;
     var c = [];// conditional distribution stored here
     var C = [];// conditional CDF stored here
     var old = [];// stores old values of rho in case the user enters an incorrect one
-    var des = 0; //0 = marginal x, 1 = marginal y, 2 = x|y at ymin, 3 = x|y at ymax, 4 = y|x at xmin, 5 = y|x at xmax, 6 = cdf x, 7 = cdf y
     var numPoints = 100;// number of points per distribution, max = 500
     var sigmaStep = 5;// bounds how many sigmas away are the distributions calculated
+    var des = 0; //0 = marginal x, 1 = marginal y, 2 = marginal z, 3 = trivariate conditional, 4 = cdf x, 5 = cdf y, 6 = cdf z, 7 = bivariate conditional
+    var des3d = 0;// 0 = XY PDF, 1 = XZ PDF, 2 = YZ PDF, 3 = XY CDF, 4 = XZ CDF, 5 = YZ CDF, 6 = Conditional bivariate
+    var des4d = 0;// 0 = XYZ PDF, 1 = XYZ CDF
     var out = 0;// value to be displayed in the P box
     var outtemp = [];// stores a temporary output text string
     var des3d = 0;// 0 = bivariate PDF, 1 = bivariate CDF
@@ -74,10 +82,24 @@ $(document).ready(function(){
     var output = [];// String array to store history of outputs
     var settingsOpen = false;// Logs if the settings menu is open
     var rulesOpen = false;// Logs of the rules window is open
+    var downloadsOpen = false;// Logs if the downloads window is open
+    var historyOpen = false;// Logs ifthe version history is open
     var instructions = [10, 10, 10];// Logs what instructions are visible
-    var flattitle = ['Marginal of X', 'Marginal of Y', 'Marginal of Z', [['Conditional of X|Y = Y<sub>min</sub>', 'Conditional of X|Y = Y<sub>max</sub>'], ['Conditional of X|Z = Z<sub>min</sub>', 'Conditional of X|Z = Z<sub>max</sub>'], ['Conditional of Y|X = X<sub>min</sub>', 'Conditional of Y|X = X<sub>max</sub>'], ['Conditional of Y|Z = Z<sub>min</sub>', 'Conditional of Y|Z = Z<sub>max</sub>'], ['Conditional of Z|X = X<sub>min</sub>', 'Conditional of Z|X = X<sub>max</sub>'], ['Conditional of Z|Y = Y<sub>min</sub>', 'Conditional of Z|Y = Y<sub>max</sub>']], 'CDF of X', 'CDF of Y', 'CDF of Z'];// Stores the names of all 2d graphs
+    var flattitle = ['Marginal of X', 'Marginal of Y', 'Marginal of Z', [
+    [['Conditional of X|Y = Ymin ∩ Z = Zmin', 'Conditional of X|Y = Ymin ∩ Z = Zmax'], ['Conditional of X|Y = Ymax ∩ Z = Zmin', 'Conditional of X|Y = Ymax ∩ Z = Zmax']],
+    [['Conditional of Y|X = Xmin ∩ Z = Zmin', 'Conditional of Y|X = Xmin ∩ Z = Zmax'], ['Conditional of Y|X = Xmax ∩ Z = Zmin', 'Conditional of Y|X = Xmax ∩ Z = Zmax']],
+    [['Conditional of Z|X = Xmin ∩ Y = Ymin', 'Conditional of Z|X = Xmin ∩ Y = Ymax'], ['Conditional of Z|X = Xmax ∩ Y = Ymin', 'Conditional of Z|X = Xmax ∩ Y = Ymax']]
+    ],'CDF of X', 'CDF of Y', 'CDF of Z', [
+    ['Conditional of X|Y = Ymin', 'Conditional of X|Y = Ymax', 'Conditional of X|Z = Zmin', 'Conditional of X|Z = Zmax'], 
+    ['Conditional of Y|X = Xmin', 'Conditional of Y|X = Xmax', 'Conditional of Y|Z = Zmin', 'Conditional of Y|Z = Zmax'],
+    ['Conditional of Z|X = Xmin', 'Conditional of Z|X = Xmax', 'Conditional of Z|Y = Ymin', 'Conditional of Z|Y = Ymax']]];// Stores the names of all 2d graphs
     // Stores the titles of all distributions, Update if any new ones are added
     var distTitle = ['Normal', 'Poisson', 'Gamma', 'Chi-Square', "Student's T", 'F-distribution', 'Beta', 'Weibull', 'Pareto', 'Logistic', 'Log-normal', 'Gumbel', 'Uniform', 'Birthday', 'U-Quadratic', 'Arcsine', 'Semicircle', 'Max Distane Walked', 'Final Position on a Walk', 'Cauchy', 'Hyperbolic Secant', 'Irwin-Hall', 'Laplace', 'Benford-Mantissa', 'Exponential-Logarithmic', 'Beta Prime', 'Zeta', 'Log Logistic', 'Maxwell-Boltzmann', 'Logarithmic', 'Binomial', 'Negative Binomial', 'Hypergeometric', 'Polya', 'Finite Order', 'Matching Hats', 'Trianglular', 'Coupon Collector', "Benford's Digit", 'Beta Binomial', 'Beta Negative Binomial'];
+    var surftitle = ['Bivariate PDF: XY', 'Bivariate PDF: XZ', 'Bivariate PDF: YZ', 'Bivariate CDF: XY', 'Bivariate CDF: XZ', 'Bivariate CDF: YZ',[
+        ['Conditional Bivariate PDF: XY|Z = Zmin', 'Conditional Bivariate PDF: XY|Z = Zmax'],
+        ['Conditional Bivariate PDF: XZ|Y = Ymin', 'Conditional Bivariate PDF: XZ|Y = Ymax'],
+        ['Conditional Bivariate PDF: YZ|X = Xmin', 'Conditional Bivariate PDF: YZ|X = Xmax']]];
+    var trititle = ['Trivariate PDF', 'Trivariate CDF'];
                                                             //Functions
     var check = function(){// Checks if inputs are correct, if they are wrong it resets them to previously recorded values. Add the appropriate checks if more distributions are added
         //Rho
@@ -1398,6 +1420,11 @@ $(document).ready(function(){
         var temp3 = [];
         var temp4 = [];
         var topush = 0;
+        var copula3d = 0;
+        var w = 0;
+        var a = 0;
+        var b = 0;
+        var c = 0;
         for (var i = 0; i < x.length; i++){
             temp1 = [];
             temp3 = [];
@@ -1405,7 +1432,12 @@ $(document).ready(function(){
                 temp2 = [];
                 temp4 = [];
                 for (var k = 0; k < z.length; k++){
-                    topush = (bxy[i][j] + bxz[i][k] + byz[j][k])/3;
+                    a = Math.sqrt(2)*erfi(2*Fx[i]-1);
+                    b = Math.sqrt(2)*erfi(2*Fy[j]-1);
+                    c = Math.sqrt(2)*erfi(2*Fz[k]-1);
+                    w = 2*rhoxy*rhoxz*rhoyz*(a*a+b*b+c*c)-(a*a*(rhoxz*rhoxz + rhoxy*rhoxy) + b*b*(rhoyz*rhoyz + rhoxy*rhoxy) + c*c*(rhoxz*rhoxz + rhoyz*rhoyz)) + 2*(a*b*(rhoxy - rhoxz*rhoyz) + a*c*(rhoxz-rhoxy*rhoyz) + b*c*(rhoyz-rhoxy*rhoxz));
+                    copula3d = (1/(Math.sqrt(1-(rhoxy*rhoxy + rhoxz*rhoxz + rhoyz*rhoyz) + 2*rhoxy*rhoxz*rhoyz)))*Math.exp(-(w)/(2*(rhoxy*rhoxy + rhoxz*rhoxz + rhoyz*rhoyz - 2*rhoxy*rhoxz*rhoyz-1)));
+                    topush = fx[i]*fy[j]*fz[k]*copula3d;
                     temp2.push(topush);
                     if(topush > trimax){trimax = topush;}
                     if(x[i] < xmin || x[i] > xmax || y[j] < ymin || y[j] > ymax || z[k] < zmin || z[k] > zmax){temp4.push(0);}
@@ -1420,29 +1452,33 @@ $(document).ready(function(){
         makeTriBig();
         var yeet = sumMat3(triCut)/sumMat3(tri);
         if(isNaN(yeet)){yeet = 0;}
-        outtemp.push('P(' + xmin + ' < X < ' + xmax + ' ∩ ' + ymin + ' < Y < ' + ymax + ' ∩ ' + zmin + ' < Z < ' + zmax + ') = ' + yeet.toFixed(3));
+        updateOutput('P(' + xmin + ' < X < ' + xmax + ' ∩ ' + ymin + ' < Y < ' + ymax + ' ∩ ' + zmin + ' < Z < ' + zmax + ') = ' + yeet.toFixed(3));
     }
     var makeTriBig = function(){//Makes Trifariate CDF tensor
-        var temp1 = [];
         var temp2 = [];
         var temp3 = [];
-        var temp4 = 0;
-        for (var k = 0; k < z.length; k++){
-            temp1.push(tri[0][0][k]);
-        }
         for (var i = 0; i < x.length; i++){
             temp2 = [];
-            for (var j = 0; j < y.length;j++){
+            for (var j = y.length-1; j >= 0; j--){
                 temp3 = [];
-                temp4 = 0;
                 for (var k = 0; k < z.length; k++){
-                    temp4 += tri[i][j][k];
-                    temp1[k] += temp4;
-                    temp3.push(temp1[k]);
+                    temp3.push(0);
                 }
                 temp2.push(temp3);
             }
             Tri.push(temp2);
+        }
+        for (var i = 0; i < x.length; i++){
+            for (var j = y.length-1; j >= 0; j--){
+                for (var k = 0; k < z.length; k++){
+                    if(i == 0 || j == 0 || k == 0){
+                        Tri[i][j][k] = tri[i][j][k];
+                    }
+                    else{
+                        Tri[i][j][k] = tri[i][j][k] + Tri[i-1][j-1][k-1];
+                    }
+                }
+            }
         }
         var scale = Tri[x.length-1][y.length-1][z.length-1];
         for (var i = 0; i < x.length; i++){
@@ -1462,6 +1498,7 @@ $(document).ready(function(){
                 }
             }
         }
+        return ret;
     }
                                                             //Auxillary functions
     var findCDF = function(t, F, val){//Finds value of CDF given a t and F array at at given value
@@ -1483,43 +1520,82 @@ $(document).ready(function(){
             C[i] = C[i]/scale;
         }
     }
-    var getDist = function(val, dir, choice){//Gets the row/col at a particular point from a particular b - to fix
-        var min = 0;var max = 0;var delta = 0;
-        if(dir == 0){
-            min = x[0];
-            max = x[x.length - 1];
-            delta = x[1]-x[0];
-        }
-        else if(dir == 1){
-            min = y[0];
-            max = y[y.length - 1];
-            delta = y[1]-y[0];
-        }
-        else if(dir == 2){
-            min = z[0];
-            max = z[z.length - 1];
-            delta = z[1]-z[0];
-        }
-        if(val <= min && dir == 1){
-            if(choice == 0){return bxy[0];}
-            else if(choice == 1){return bxz[0];}
-            else if(choice == 2){return byz[0];}
-        }
-        if(val <= min){
-            if(choice == 0){return bxy[0];}
-            else if(choice == 1){return bxz[0];}
-            else if(choice == 2){return byz[0];}
-        }
-        if(val >= max && dir == 1){return b[x.length-1];}
-        if(val >= max){return getCol(y.length-1);}
-        var loc = Math.floor((val-min)/delta);//fix
-        if(dir == 1){return b[loc];}
-        return getCol(loc);
+    var getDistTri = function(){//Gets the x/y/z array from trivariate tensor
+        var xminloc = Math.floor((xmin-x[0])/(x[1]-x[0]));
+        if(xminloc < 0){xminloc = 0;}
+        else if(xminloc >= x.length){xminloc = x.length-1;}
+        var xmaxloc = Math.floor((xmax-x[0])/(x[1]-x[0]));
+        if(xmaxloc < 0){xmaxloc = 0;}
+        else if(xmaxloc >= x.length){xmaxloc = x.length-1;}
+        var yminloc = Math.floor((ymin-y[0])/(y[1]-y[0]));
+        if(yminloc < 0){yminloc = 0;}
+        else if(yminloc >= x.length){yminloc = x.length-1;}
+        var ymaxloc = Math.floor((ymax-y[0])/(y[1]-y[0]));
+        if(ymaxloc < 0){ymaxloc = 0;}
+        else if(ymaxloc >= x.length){ymaxloc = x.length-1;}
+        var zminloc = Math.floor((zmin-z[0])/(z[1]-z[0]));
+        if(zminloc < 0){zminloc = 0;}
+        else if(zminloc >= x.length){zminloc = x.length-1;}
+        var zmaxloc = Math.floor((zmax-z[0])/(z[1]-z[0]));
+        if(zmaxloc < 0){zmaxloc = 0;}
+        else if(zmaxloc >= x.length){zmaxloc = x.length-1;}
+        if(cond3 == 0 && cond4 == 0 && cond5 == 0){return getx(yminloc, zminloc)}
+        else if(cond3 == 0 && cond4 == 0 && cond5 == 1){return getx(yminloc, zmaxloc)}
+        else if(cond3 == 0 && cond4 == 1 && cond5 == 0){return getx(ymaxloc, zminloc)}
+        else if(cond3 == 0 && cond4 == 1 && cond5 == 1){return getx(ymaxloc, zmaxloc)}
+        else if(cond3 == 1 && cond4 == 0 && cond5 == 0){return gety(xminloc, zminloc)}
+        else if(cond3 == 1 && cond4 == 0 && cond5 == 1){return gety(xminloc, zmaxloc)}
+        else if(cond3 == 1 && cond4 == 1 && cond5 == 0){return gety(xmaxloc, zminloc)}
+        else if(cond3 == 1 && cond4 == 1 && cond5 == 1){return gety(xmaxloc, zmaxloc)}
+        else if(cond3 == 2 && cond4 == 0 && cond5 == 0){return tri[xminloc][yminloc]}
+        else if(cond3 == 2 && cond4 == 0 && cond5 == 1){return tri[xminloc][ymaxloc]}
+        else if(cond3 == 2 && cond4 == 1 && cond5 == 0){return tri[xmaxloc][yminloc]}
+        else if(cond3 == 2 && cond4 == 1 && cond5 == 1){return tri[xmaxloc][ymaxloc]}
     }
-    var getCol = function(col){//Returns a column from b - to fix
+    var getx = function(ypos, zpos){//Gets the x array from trivatiate tensor
         var temp = [];
         for (var i = 0; i < x.length; i++){
-            temp.push(b[i][col]);
+            temp.push(tri[i][ypos][zpos]);
+        }
+        return temp;
+    }
+    var gety = function(xpos, zpos){//Gets the y array from trivariate tensor
+        var temp = [];
+        for (var i = 0; i < y.length; i++){
+            temp.push(tri[xpos][i][zpos]);
+        }
+        return temp;
+    }
+    var getDist = function(){//Gets array from a bivariate matrix
+        var val = 0;
+        var temp = [];
+        var mat = [];
+        var dir = 0;
+        if(cond6 == 0 && cond7 == 0){mat = bxy;val = ymin;temp = y;dir = 1;}
+        else if(cond6 == 0 && cond7 == 0){mat = bxy;val = ymax;temp = y;dir = 0;}
+        else if(cond6 == 0 && cond7 == 1){mat = bxz;val = zmin;temp = z;dir = 1;}
+        else if(cond6 == 0 && cond7 == 2){mat = bxz;val = zmax;temp = z;dir = 0;}
+        else if(cond6 == 1 && cond7 == 0){mat = bxy;val = xmin;temp = x;dir = 1;}
+        else if(cond6 == 1 && cond7 == 0){mat = bxy;val = xmax;temp = x;dir = 0;}
+        else if(cond6 == 1 && cond7 == 1){mat = byz;val = zmin;temp = z;dir = 1;}
+        else if(cond6 == 1 && cond7 == 2){mat = byz;val = zmax;temp = z;dir = 0;}
+        else if(cond6 == 2 && cond7 == 0){mat = bxz;val = xmin;temp = x;dir = 1;}
+        else if(cond6 == 2 && cond7 == 0){mat = bxz;val = xmax;temp = x;dir = 0;}
+        else if(cond6 == 2 && cond7 == 1){mat = byz;val = ymin;temp = y;dir = 1;}
+        else if(cond6 == 2 && cond7 == 2){mat = byz;val = ymax;temp = y;dir = 0;}
+        var loc = Math.floor((val-temp[0])/(temp[1]-temp[0]));
+        if(loc < 0){loc = 0;}
+        else if(loc >= temp.length){loc = temp.length - 1;}
+        return getArr(mat, loc, dir);
+    }
+    var getArr = function(mat, loc, dir){//Gets array from a given matrix in a given direction at a given location
+        var temp = [];
+        var end = 0;
+        if(dir == 1){end = (mat[0]).length;}
+        else{end = mat.length;}
+        for (var i = 0; i < end; i++){
+            if(dir == 0){temp.push(mat[i][loc]);}
+            else{temp.push(mat[loc][i]);}
         }
         return temp;
     }
@@ -1557,14 +1633,20 @@ $(document).ready(function(){
                 out = findCDF(z, Fz, zmax) - findCDF(z, Fz, zmin);
                 updateOutput('P(' + zmin + ' < Z < ' + zmax + ') = ' + out.toFixed(3));
                 break;
-            case 3:// All Conditionals - not yet implemented
-                c = getDist(ymin, 0);
+            case 3:// All Conditionals from trivariate
+                c = getDistTri();
                 var temp = makefuncut(x, c, xmin, xmax);
                 C = makeCDF(c,x[1]-x[0]);
                 scaleC();
-                drawData(x, c, temp, 'X', 'P(x=X|Y=Ymin)');
                 out = findCDF(x, C, xmax) - findCDF(x, C, xmin);
-                updateOutput('P(' + xmin + ' < X < ' + xmax + ' | Y = ' + ymin + ') = ' + out.toFixed(3));
+                var temp1 = [xmin + ' < X < ' + xmax, ymin + ' < Y < ' + ymax, zmin + ' < Z < ' + zmax];
+                var temp2 = [[['Y = ' + ymin + ' ∩ Z = ' + zmin, 'Y = ' + ymin + ' ∩ Z = ' + zmax], ['Y = ' + ymax + ' ∩ Z = ' + zmin, 'Y = ' + ymax + ' ∩ Z = ' + zmax]],
+                             [['X = ' + xmin + ' ∩ Z = ' + zmin, 'X = ' + xmin + ' ∩ Z = ' + zmax], ['X = ' + xmax + ' ∩ Z = ' + zmin, 'X = ' + xmax + ' ∩ Z = ' + zmax]],
+                             [['X = ' + xmin + ' ∩ Y = ' + ymin, 'X = ' + xmin + ' ∩ Y = ' + ymax], ['X = ' + xmax + ' ∩ Y = ' + ymin, 'X = ' + xmax + ' ∩ Y = ' + ymax]]];
+                updateOutput('P(' + temp1[cond3] + ' | ' + temp2[cond3][cond4][cond5] + ') = ' + out.toFixed(3));
+                var temp3 = ['X', 'Y', 'Z'];
+                var temp4 = ['x=X', 'y=Y', 'z=Z'];
+                drawData(x, c, temp, temp3[cond3], 'P(' + temp4[cond3] + ' | ' + temp2[cond3][cond4][cond5] + ')');
                 break;
             case 4:// CDF of X
                 var temp = makefuncut(x, Fx, xmin, xmax);
@@ -1584,11 +1666,24 @@ $(document).ready(function(){
                 out = findCDF(z, Fz, zmax) - findCDF(z, Fz, zmin);
                 updateOutput('P(' + zmin + ' < Z < ' + zmax + ') = ' + out.toFixed(3));
                 break;
+            case 7://All bivariate conditionals
+                c = getDist();
+                var temp = makefuncut(x, c, xmin, xmax);
+                C = makeCDF(c,x[1]-x[0]);
+                scaleC();
+                out = findCDF(x, C, xmax) - findCDF(x, C, xmin);
+                var temp1 = [xmin + ' < X < ' + xmax, ymin + ' < Y < ' + ymax, zmin + ' < Z < ' + zmax];
+                var temp2 = [['Y = ' + ymin, 'Y = ' + ymax, 'Z = ' + zmin, 'Z = ' + zmax], ['X = ' + xmin, 'X = ' + xmax, 'Z = ' + zmin, 'Z = ' + zmax], ['X = ' + xmin, 'X = ' + xmax, 'Y = ' + ymin, 'Y = ' + ymax]];
+                updateOutput('P(' + temp1[cond6] + ' | ' + temp2[cond6][cond7] + ') = ' + out.toFixed(3));
+                var temp3 = ['X', 'Y', 'Z'];
+                var temp4 = ['x=X', 'y=Y', 'z=Z'];
+                drawData(x, c, temp, temp3[cond6], 'P(' + temp4[cond6] + ' | ' + temp2[cond6][cond7] + ')');
+                break;
         }
     }
     var drawData = function(time, fun, funcut, xt, yt){// Draws the data on canvas
         var data = [];
-        if(time.length > 75){
+        if(time.length > 50){
             data = [{
                 x: time,
                 y: fun,
@@ -1678,18 +1773,43 @@ $(document).ready(function(){
         zmax = Number($('#zmax').val());
         des = Number($("input[name='1']:checked").val());
         des3d = Number($("input[name='2']:checked").val());
+        des4d = Number($("input[name='3']:checked").val());
         var temp = "";
         outtemp = [];
 		$('#cond1 option:selected').each(function(){
 			temp += $(this).val();
-        })
+        });
         cond1 = Number(temp);
         temp = "";
 		$('#cond2 option:selected').each(function(){
 			temp += $(this).val();
-        })
+        });
         cond2 = Number(temp);
-        check();
+        temp = "";
+		$('#cond3 option:selected').each(function(){
+			temp += $(this).val();
+        });
+        cond3 = Number(temp);
+        temp = "";
+		$('#cond4 option:selected').each(function(){
+			temp += $(this).val();
+        });
+        cond4 = Number(temp);
+        temp = "";
+		$('#cond5 option:selected').each(function(){
+			temp += $(this).val();
+        });
+        cond5 = Number(temp);
+        temp = "";
+		$('#cond6 option:selected').each(function(){
+			temp += $(this).val();
+        });
+        cond6 = Number(temp);
+        temp = "";
+		$('#cond7 option:selected').each(function(){
+			temp += $(this).val();
+        });
+        cond7 = Number(temp);
         switch(xdist){//Add additional cases for any distribution added
             case 0:
                 px3 = 1;
@@ -2417,7 +2537,15 @@ $(document).ready(function(){
         maketri();
         updateGraph();//Updates 2D Graph
         updatePlot();//Updates 3D Graph
+        updateTriPlot();//Updates Trivariate plot
         updateTitles();
+        var moo = 'Iteration ' + iter;
+        updateOutput(moo);
+        iter++;
+        $('#trimax').replaceWith('<b id = "trimax">' + trimax.toFixed(3) + '</b>');
+        $('#pointsshown').replaceWith('<b id = "pointsshown">' + pointsshown + '</b>');
+        $('#pointstot').replaceWith('<b id = "pointstot">' + pointstot + '</b>');
+        $('#cutprob').replaceWith('<b id = "cutprob">' + cutprob.toFixed(3) + '</b>');
         $('main').hide(1000);
         $('#backdim').hide(1000);
         settingsOpen = false;
@@ -2434,16 +2562,15 @@ $(document).ready(function(){
     }
     var updateTitles = function(){//Updates graph titles
         if(des == 3){
-            $('#flattitle').replaceWith('<h2 id = "flattitle">' + flattitle[des][cond1][cond2] + '</h2>');
+            $('#flattitle').replaceWith('<h2 id = "flattitle">' + flattitle[des][cond3][cond4][cond5] + '</h2>');
+        }
+        else if(des == 7){
+            $('#flattitle').replaceWith('<h2 id = "flattitle">' + flattitle[des][cond6][cond7] + '</h2>');
         }
         else{$('#flattitle').replaceWith('<h2 id = "flattitle">' + flattitle[des] + '</h2>');}
-        if(des3d == 0){$('#surftitle').replaceWith('<h2 id = "surftitle">Bivariate PDF: X - ' + distTitle[xdist] + ', Y - ' + distTitle[ydist] + '</h2>');}
-        else if(des3d == 1){$('#surftitle').replaceWith('<h2 id = "surftitle">Bivariate PDF: X - ' + distTitle[xdist] + ', Z - ' + distTitle[zdist] + '</h2>');}
-        else if(des3d == 2){$('#surftitle').replaceWith('<h2 id = "surftitle">Bivariate PDF: Y - ' + distTitle[ydist] + ', Z - ' + distTitle[zdist] + '</h2>');}
-        else if(des3d == 3){$('#surftitle').replaceWith('<h2 id = "surftitle">Bivariate CDF: X - ' + distTitle[xdist] + ', Y - ' + distTitle[ydist] + '</h2>');}
-        else if(des3d == 4){$('#surftitle').replaceWith('<h2 id = "surftitle">Bivariate CDF: X - ' + distTitle[xdist] + ', Z - ' + distTitle[zdist] + '</h2>');}
-        else if(des3d == 5){$('#surftitle').replaceWith('<h2 id = "surftitle">Bivariate CDF: Y - ' + distTitle[ydist] + ', Z - ' + distTitle[zdist] + '</h2>');}
-        
+        if(des3d == 6){$('#surftitle').replaceWith('<h2 id = "surftitle">' + surftitle[des3d][cond1][cond2] + '</h2>');}
+        else{$('#surftitle').replaceWith('<h2 id = "surftitle">' + surftitle[des3d] + '</h2>');}
+        $('#trititle').replaceWith('<h2 id = "trititle">' + trititle[des4d] + '</h2>');
     }
                                                             //Buttons
     $('#close').click(function(){//Does all the work updating everything
@@ -2457,16 +2584,38 @@ $(document).ready(function(){
     $('#backdim').click(function(){//Clicking outside the settings box
         if (settingsOpen){doAll();}
         else if(rulesOpen){$('#rules').hide(1000);$('#backdim').hide(1000);rulesOpen = false;}
+        else if(downloadsOpen){$('#downloads').hide(1000);$('#backdim').hide(1000);downloadsOpen = false;}
+        else if(historyOpen){$('#versionHist').hide(1000);$('#backdim').hide(1000);historyOpen = false;}
     })
-    $('#showR').click(function(){//Sgows the rules
+    $('#showR').click(function(){//Shows the rules
         $('#backdim').show(1000);
         $('#rules').show(1000);
         rulesOpen = true;
     })
-    $('#closeR').click(function(){//Does all the work updating everything
+    $('#closeR').click(function(){//Closes rules
         $('#rules').hide(1000);
         $('#backdim').hide(1000);
         rulesOpen = false;
+    })
+    $('#showD').click(function(){//Shows the downloads
+        $('#backdim').show(1000);
+        $('#downloads').show(1000);
+        downloadsOpen = true;
+    })
+    $('#closeD').click(function(){//Closes downloads
+        $('#downloads').hide(1000);
+        $('#backdim').hide(1000);
+        downloadsOpen = false;
+    })
+    $('#showV').click(function(){//Shows the rules
+        $('#versionHist').show(1000);
+        $('#backdim').show(1000);
+        historyOpen = true;
+    })
+    $('#closeV').click(function(){//Closes downloads
+        $('#versionHist').hide(1000);
+        $('#backdim').hide(1000);
+        historyOpen = false;
     })
     $(document).keyup(function(e){// Pressing Esc key
         if(e.which == 27 && settingsOpen) {
@@ -2476,6 +2625,16 @@ $(document).ready(function(){
             $('#rules').hide(1000);
             $('#backdim').hide(1000);
             rulesOpen = false;
+        }
+        else if(e.which == 27 && downloadsOpen){
+            $('#downloads').hide(1000);
+            $('#backdim').hide(1000);
+            downloadsOpen = false;
+        }
+        else if(e.which == 27 && historyOpen){
+            $('#versionHist').hide(1000);
+            $('#backdim').hide(1000);
+            historyOpen = false;
         }
     });
     $(document).on('change', '#xdist', function(){//Detects change in select menu for X and alters the page accordingly
@@ -3249,89 +3408,266 @@ $(document).ready(function(){
                 break;
         }
     })
+    $(document).on('change', '#cond3', function(){//Updates conditions based on the user selected option
+        var temp = "";
+		$('#cond3 option:selected').each(function(){
+			temp += $(this).val();
+        })
+        cond3 = Number(temp);
+        if(cond3 == 0){
+            $('#cond4').replaceWith('<select id = "cond4"><option value="0" selected>Y = Ymin</option><option value="1">Y = Ymax</option></select>');
+            $('#cond5').replaceWith('<select id = "cond5"><option value="0" selected>Z = Zmin</option><option value="1">Z = Zmax</option></select>');
+        }
+        else if(cond3 == 1){
+            $('#cond4').replaceWith('<select id = "cond4"><option value="0" selected>X = Xmin</option><option value="1">X = Xmax</option></select>');
+            $('#cond5').replaceWith('<select id = "cond5"><option value="0" selected>Z = Zmin</option><option value="1">Z = Zmax</option></select>');
+        }
+        else{
+            $('#cond4').replaceWith('<select id = "cond4"><option value="0" selected>X = Xmin</option><option value="1">X = Xmax</option></select>');
+            $('#cond5').replaceWith('<select id = "cond5"><option value="0" selected>Y = Ymin</option><option value="1">Y = Ymax</option></select>');
+        }
+    })
+    $(document).on('change', '#cond6', function(){//Updates conditions based on the user selected option
+        var temp = "";
+		$('#cond6 option:selected').each(function(){
+			temp += $(this).val();
+        })
+        cond6 = Number(temp);
+        if(cond6 == 0){
+            $('#cond7').replaceWith('<select id = "cond7"><option value="0" selected>Y = Ymin</option><option value="1">Y = Ymax</option><option value="2">Z = Zmin</option><option value="3">Z = Zmax</option></select>');
+        }
+        else if(cond6 == 1){
+            $('#cond7').replaceWith('<select id = "cond7"><option value="0" selected>X = Xmin</option><option value="1">X = Xmax</option><option value="2">Z = Zmin</option><option value="3">Z = Zmax</option></select>');
+        }
+        else{
+            $('#cond7').replaceWith('<select id = "cond7"><option value="0" selected>X = Xmin</option><option value="1">X = Xmax</option><option value="2">Y = Ymin</option><option value="3">Y = Ymax</option></select>');
+        }
+    })
     
                                                             //3D model
-    var updatePlot = function(){// Uses Plotly to generate a 3d plot
+    var updatePlot = function(){// Uses Plotly to generate a bivariate plot
         var data = [];
-        if(des3d == 0){data = [{x: x,y: y,z: bxyCut,type: 'surface'}];updateOutput(outtemp[0]);}
-        else if(des3d == 1){data = [{x: x,y: z,z: bxzCut,type: 'surface'}];updateOutput(outtemp[1]);}
-        else if(des3d == 2){data = [{x: y,y: z,z: byzCut,type: 'surface'}];updateOutput(outtemp[2]);}
-        else if(des3d == 3){data = [{x: x,y: y,z: Bxy,type: 'surface'}];updateOutput(outtemp[0]);}
-        else if(des3d == 4){data = [{x: x,y: z,z: Bxz,type: 'surface'}];updateOutput(outtemp[1]);}
-        else if(des3d == 5){data = [{x: y,y: z,z: Byz,type: 'surface'}];updateOutput(outtemp[2]);}
+        var layout = {};
+        if(des3d == 0){
+            data = [{x: x,y: y,z: bxyCut,type: 'surface'}];
+            updateOutput(outtemp[0]);
+            layout ={
+                autosize: true,
+                margin: {l:0,r:0,b:0,t:0,pad:0},
+                scene:{
+                    xaxis:{title:{text:'X'}},
+                    yaxis:{title:{text:'Y'}},
+                    zaxis:{title:{text:'P(x=X ∩ y=Y)'}}
+                }
+            };
+        }
+        else if(des3d == 1){
+            data = [{x: x,y: z,z: bxzCut,type: 'surface'}];
+            updateOutput(outtemp[1]);
+            layout ={
+                autosize: true,
+                margin: {l:0,r:0,b:0,t:0,pad:0},
+                scene:{
+                    xaxis:{title:{text:'X'}},
+                    yaxis:{title:{text:'Z'}},
+                    zaxis:{title:{text:'P(x=X ∩ z=Z)'}}
+                }
+            };
+        }
+        else if(des3d == 2){
+            data = [{x: y,y: z,z: byzCut,type: 'surface'}];
+            updateOutput(outtemp[2]);
+            layout ={
+                autosize: true,
+                margin: {l:0,r:0,b:0,t:0,pad:0},
+                scene:{
+                    xaxis:{title:{text:'Y'}},
+                    yaxis:{title:{text:'Z'}},
+                    zaxis:{title:{text:'P(y=Y ∩ z=Z)'}}
+                }
+            };
+        }
+        else if(des3d == 3){
+            data = [{x: x,y: y,z: Bxy,type: 'surface'}];
+            updateOutput(outtemp[0]);
+            layout ={
+                autosize: true,
+                margin: {l:0,r:0,b:0,t:0,pad:0},
+                scene:{
+                    xaxis:{title:{text:'X'}},
+                    yaxis:{title:{text:'Y'}},
+                    zaxis:{title:{text:'P(x≤X ∩ y≤Y)'}}
+                }
+            };
+        }
+        else if(des3d == 4){
+            data = [{x: x,y: z,z: Bxz,type: 'surface'}];
+            updateOutput(outtemp[1]);
+            layout ={
+                autosize: true,
+                margin: {l:0,r:0,b:0,t:0,pad:0},
+                scene:{
+                    xaxis:{title:{text:'X'}},
+                    yaxis:{title:{text:'Z'}},
+                    zaxis:{title:{text:'P(x≤X ∩ z≤Z)'}}
+                }
+            };
+        }
+        else if(des3d == 5){
+            data = [{x: y,y: z,z: Byz,type: 'surface'}];
+            updateOutput(outtemp[2]);
+            layout ={
+                autosize: true,
+                margin: {l:0,r:0,b:0,t:0,pad:0},
+                scene:{
+                    xaxis:{title:{text:'Y'}},
+                    yaxis:{title:{text:'Z'}},
+                    zaxis:{title:{text:'P(y≤Y ∩ z≤Z)'}}
+                }
+            };
+        }
         else if(des3d == 6){
-            var xdisp = [];
-            var ydisp = [];
-            var zdisp = [];
-            var colours = [];
-            var temp = 0;
-            var temp1 = "";
-            for (i = 0; i < x.length; i++){
-                for (var j = 0; j < y.length; j++){
-                    for (var k = 0; k < z.length; k++){
-                        temp = Math.round(255*triCut[i][j][k]/trimax);
-                        temp1 = temp.toString();
-                        if(temp > 50){
-                            xdisp.push(x[i]);
-                            ydisp.push(y[j]);
-                            zdisp.push(z[k]);
-                            colours.push("rgb(0," + temp1 + ",0)");
-                        }
+            var xout = [];
+            var yout = [];
+            if(cond1 == 0){xout = x; yout = y;}
+            else if(cond1 == 1){xout = x; yout = z;}
+            else{xout = y, yout = z;}
+            var b = [];
+            b = getbiv();
+            data = [{x: xout,y: yout,z: b,type: 'surface'}];
+            var temp1 = [['X', 'Y'], ['X', 'Z'], ['Y', 'Z']];
+            var temp2 = [['P(x=X ∩ y=Y | Z=' + zmin, 'P(x=X ∩ y=Y | Z=' + zmax], ['P(x=X ∩ z=Z | Y=' + ymin, 'P(x=X ∩ z=Z | Y=' + ymax], ['P(y=Y ∩ z=Z | X=' + xmin, 'P(y=Y ∩ z=Z | X=' + xmax]];
+            layout ={
+                autosize: true,
+                margin: {l:0,r:0,b:0,t:0,pad:0},
+                scene:{
+                    xaxis:{title:{text:temp1[cond1][0]}},
+                    yaxis:{title:{text:temp1[cond1][1]}},
+                    zaxis:{title:{text:temp2[cond1][cond2]}}
+                }
+            };
+        }
+        Plotly.newPlot('surfacePlot', data, layout);
+        Plotly.restyle('surfacePlot', {showscale: false});
+    }
+    var getbiv = function(){//Gets the bivariate matrix from the trivariate tensor
+        var xout = [];
+        var yout = [];
+        var pos = 0;
+        if(cond1 == 0){
+            xout = x;
+            yout = y;
+            if(cond2 == 0){pos = Math.floor((zmin-z[0])/(z[1]-z[0]));if(pos < 0){pos = 0}}
+            else{pos = Math.floor((zmax-z[0])/(z[1]-z[0]));if(pos >= z.length){pos = z.length-1}}
+        }
+        else if(cond1 == 1){
+            xout = x;
+            yout = z;
+            if(cond2 == 0){pos = Math.floor((ymin-y[0])/(y[1]-y[0]));if(pos < 0){pos = 0}}
+            else{pos = Math.floor((ymax-y[0])/(y[1]-y[0]));if(pos >= y.length){pos = y.length-1}}
+        }
+        else{
+            xout = y,
+            yout = z;
+            if(cond2 == 0){pos = Math.floor((xmin-x[0])/(x[1]-x[0]));if(pos < 0){pos = 0}}
+            else{pos = Math.floor((ymax-x[0])/(x[1]-x[0]));if(pos >= x.length){pos = x.length-1}}
+        }
+        var temp = [];
+        var temp2 = [];
+        var temp1 = [];
+        var temp3 = [];
+        for (var i = 0; i < xout.length; i++){
+            temp = [];
+            temp2 = [];
+            for (var j = 0; j < yout.length; j++){
+                if(cond1 == 0){temp.push(triCut[i][j][pos]);temp2.push(tri[i][j][pos]);}
+                else if(cond1 == 1){temp.push(triCut[i][pos][j]);temp2.push(tri[i][pos][j]);}
+                else{temp.push(triCut[pos][i][j]);temp2.push(tri[pos][i][j]);}
+            }
+            temp1.push(temp);
+            temp3.push(temp2);
+        }
+        var yeet = sumMat(temp1)/sumMat(temp3);
+        if(cond1 == 0 && cond2 == 0){updateOutput('P(' + xmin + ' < X < ' + xmax + ' ∩ ' + ymin + ' < Y < ' + ymax + ' | Z = ' + zmin + ') = ' + yeet.toFixed(3) + '');}
+        else if(cond1 == 0 && cond2 == 1){updateOutput('P(' + xmin + ' < X < ' + xmax + ' ∩ ' + ymin + ' < Y < ' + ymax + ' | Z = ' + zmax + ') = ' + yeet.toFixed(3) + '');}
+        else if(cond1 == 1 && cond2 == 0){updateOutput('P(' + xmin + ' < X < ' + xmax + ' ∩ ' + zmin + ' < Z < ' + zmax + ' | Y = ' + ymin + ') = ' + yeet.toFixed(3) + '');}
+        else if(cond1 == 1 && cond2 == 1){updateOutput('P(' + xmin + ' < X < ' + xmax + ' ∩ ' + zmin + ' < Z < ' + zmax + ' | Y = ' + ymax + ') = ' + yeet.toFixed(3) + '');}
+        else if(cond1 == 2 && cond2 == 0){updateOutput('P(' + ymin + ' < Y < ' + ymax + ' ∩ ' + zmin + ' < Z < ' + zmax + ' | X = ' + xmin + ') = ' + yeet.toFixed(3) + '');}
+        else if(cond1 == 2 && cond2 == 1){updateOutput('P(' + ymin + ' < Y < ' + ymax + ' ∩ ' + zmin + ' < Z < ' + zmax + ' | X = ' + xmax + ') = ' + yeet.toFixed(3) + '');}
+        return temp1;
+    }
+    var updateTriPlot = function(){//Updates the trivariate plot using Plotly
+        var xdisp = [];
+        var ydisp = [];
+        var zdisp = [];
+        var colours = [];
+        var temp = 0;
+        var temp1 = "";
+        var anno = [];
+        var temp2 = 0;
+        for (i = 0; i < x.length; i++){
+            for (var j = 0; j < y.length; j++){
+                for (var k = 0; k < z.length; k++){
+                    if(des4d == 0){temp = Math.round(255-255*triCut[i][j][k]/trimax);temp2 = triCut[i][j][k];}
+                    else{temp = Math.round(255-255*Tri[i][j][k]);temp2 = Tri[i][j][k];}
+                    temp1 = temp.toString();
+                    if((temp < 250 && des4d == 0) || (temp < 200 && des4d == 1)){
+                        xdisp.push(x[i]);
+                        ydisp.push(y[j]);
+                        zdisp.push(z[k]);
+                        colours.push("rgb(" + 255 + "," + temp1 + "," + temp1 + ")");
+                        anno.push('p=' + temp2);
                     }
                 }
             }
-            //alert(xdisp.length);
+        }
+        if(des4d == 0){
             data = [{
                 x: xdisp,
                 y: ydisp,
                 z: zdisp,
+                mode: 'markers',
+                text:anno,
                 marker: {
-                    size: 5,
+                    size: 1,
                     symbol: 'circle',
                     color: colours,
-                    line: {color: '#fff',width: 0},
-                    opacity: 0.1
+                    opacity: 0.2
                 },
-                type: 'scatter3d'}];updateOutput(outtemp[3]);
+                type: 'scatter3d'
+            }];
+            cutprob = 55*trimax/255;
+            $('#cdf').hide();
+            $('#pdf').show();
         }
-        else if(des3d == 7){
-            var xdisp = [];
-            var ydisp = [];
-            var zdisp = [];
-            var colours = [];
-            var temp = 0;
-            var temp1 = "";
-            for (i = 0; i < x.length; i++){
-                for (var j = 0; j < y.length; j++){
-                    for (var k = 0; k < z.length; k++){
-                        temp = Math.round(255*Tri[i][j][k]);
-                        temp1 = temp.toString();
-                        if(temp > 100){
-                            xdisp.push(x[i]);
-                            ydisp.push(y[j]);
-                            zdisp.push(z[k]);
-                            colours.push("rgb(0," + temp1 + ",0)");
-                        }
-                    }
-                }
-            }
-            //alert(xdisp.length);
+        else{
             data = [{
                 x: xdisp,
                 y: ydisp,
                 z: zdisp,
+                mode: 'markers',
+                text:anno,
                 marker: {
                     size: 5,
                     symbol: 'circle',
                     color: colours,
-                    line: {color: '#fff',width: 0},
-                    opacity: 0.1
+                    opacity: 0.2
                 },
-                type: 'scatter3d'}];updateOutput(outtemp[3]);
+                type: 'scatter3d'
+            }];
+            cutprob = 5/255;
+            $('#pdf').hide();
+            $('#cdf').show();
         }
-        
+        pointsshown = xdisp.length;
+        pointstot = (x.length-1)*(y.length-1)*(z.length-1);
         var layout = {
-            scene: {camera: {eye: {x: 2, y: 1, z: 0.75}}},
+            scene:{
+                xaxis:{title:{text:'X'},range:[px1-sigmaStep*px2,px1+sigmaStep*px2]},
+                yaxis:{title:{text:'Y'},range:[py1-sigmaStep*py2,py1+sigmaStep*py2]},
+                zaxis:{title:{text:'Z'},range:[pz1-sigmaStep*pz2,pz1+sigmaStep*pz2]},
+                camera:{eye:{x:2,y:1,z:0.75}}
+            },
             autosize: true,
             margin: {
                 l: 0,
@@ -3341,8 +3677,7 @@ $(document).ready(function(){
                 pad: 0
             }
         };
-        Plotly.newPlot('surfacePlot', data, layout);
-        Plotly.restyle('surfacePlot', {showscale: false});
+        Plotly.newPlot('triPlot', data, layout);
     }
                                                             // On loading
     var initial = function(){// loads initial functions to be displayed
@@ -3351,31 +3686,114 @@ $(document).ready(function(){
         starting++;
         dispI();
     }
-    initial();//running on load
     $('main').draggable();
-                                                            // Testing button
-    $('#test').click(function(){
-        var temp69 = 0;
-        for (var i = 0; i < c.length;i++){
-            temp69 += c[i];
+                                                            // Download Data and Settings
+    $('#downdata').click(function(){//Downloading data
+        var todown = "Settings:\n";
+        todown += "XDist\t" + distTitle[xdist] + "\n" + "YDist\t" + distTitle[ydist] + "\n" + "ZDist\t" + distTitle[zdist] + "\n";
+        todown += "RhoXY\t" + rhoxy + "\n" + "RhoXZ\t" + rhoxz + "\n" + "RhoYZ\t" + rhoyz + "\n";
+        todown += "X parameters:\t" + px1 + "\t" + px2 + "\t" + px3 + "\t" + px4 + "\n" + "Y parameters:\t" + py1 + "\t" + py2 + "\t" + py3 + "\t" + py4 + "\n" + "Z parameters:\t" + pz1 + "\t" + pz2 + "\t" + pz3 + "\t" + pz4 + "\n";
+        todown += "Xmin\t" + xmin + "\tXmax\t" + xmax + "\nYmin\t" + ymin + "\tYmax\t" + ymax + "\nZmin\t" + zmin + "\tZmax\t" + zmax + "\n";
+        todown += "\nData table:\n";
+        todown += "X\tY\tZ\tp(x=X)\tp(y=Y)\tp(z=Y)\tp(x=X & y=Y)\tp(x=X & z=Z)\tp(y=Y & z=Z)\tp(x=X & y=Y & z=Z)\n"
+        for(var i = 0; i < x.length; i++){
+            for(var j = 0; j < y.length; j++){
+                for(var k = 0; k < z.length; k++){
+                    todown += x[i] + "\t" + y[j] + "\t" + z[k] + "\t" + fx[i] + "\t" + fy[j] + "\t" + fz[k] + "\t" + bxy[i][j] + "\t" + bxz[i][k] + "\t" + byz[j][k] + "\t" + tri[i][j][k] + "\n";
+                }
+            }
         }
-        var temp420 = sumMat(b);
-        alert(temp69/temp420);
-        var min = x[0];
-        var max = x[x.length-1];
-        var val = xmin;
-        var temp = (val-min)/((max-min)/x.length);
-        var temp1 = fx[Math.floor(temp)];
-        var temp2 = fx[Math.ceil(temp)];
-        var step1 = (Math.ceil(temp)-Math.floor(temp))/Math.floor(temp);
-        var step2 = (temp2-temp1)/temp1;
-        alert(temp1+step1*step2);
-        val = xmax;
-        var temp = (val-min)/((max-min)/x.length);
-        var temp1 = fx[Math.floor(temp)];
-        var temp2 = fx[Math.ceil(temp)];
-        var step1 = (Math.ceil(temp)-Math.floor(temp))/Math.floor(temp);
-        var step2 = (temp2-temp1)/temp1;
-        alert(temp1+step1*step2);
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(todown));
+        element.setAttribute('download', "data.txt");
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
     })
+    $('#getset').click(function(){//Generates url string
+        var toout = params[0];
+        toout += "?" + xdist + "?" + rhoxy + "?" + px1 + "?" + px2 + "?" + px3 + "?" + px4 + "?" + xmin + "?" + xmax + "?" + ydist + "?" + rhoxz + "?" + py1 + "?" + py2 + "?" + py3 + "?" + py4 + "?" + ymin + "?" + ymax + "?" + zdist + "?" + rhoyz + "?" + pz1 + "?" + pz2 + "?" + pz3 + "?" + pz4 + "?" + zmin + "?" + zmax;
+        $('#setout').replaceWith('<textarea id = "setout" readonly>' + toout + '</textarea>');
+    })
+    $('#copyset').click(function(){//Copies settings to clipboard
+        $('#setout').select();
+        document.execCommand('copy');
+    })
+    $('#downset').click(function(){//Generates a settings file
+        var todown = "Settings:\n";
+        todown += "XDist\t" + distTitle[xdist] + "\n" + "YDist\t" + distTitle[ydist] + "\n" + "ZDist\t" + distTitle[zdist] + "\n";
+        todown += "RhoXY\t" + rhoxy + "\n" + "RhoXZ\t" + rhoxz + "\n" + "RhoYZ\t" + rhoyz + "\n";
+        todown += "X parameters:\t" + px1 + "\t" + px2 + "\t" + px3 + "\t" + px4 + "\n" + "Y parameters:\t" + py1 + "\t" + py2 + "\t" + py3 + "\t" + py4 + "\n" + "Z parameters:\t" + pz1 + "\t" + pz2 + "\t" + pz3 + "\t" + pz4 + "\n";
+        todown += "Xmin\t" + xmin + "\tXmax\t" + xmax + "\nYmin\t" + ymin + "\tYmax\t" + ymax + "\nZmin\t" + zmin + "\tZmax\t" + zmax + "\n";
+        var element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(todown));
+        element.setAttribute('download', "settings.txt");
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    })
+    // URL splicing
+    var url = window.location.href;
+    var params = url.split('?');
+    if(params[1] != undefined && isNaN(params[24]) == false){//If there is a custom URL then a custom calculator is launched
+        xdist = Number(params[1]);
+        rhoxy = Number(params[2]);
+        px1 = Number(params[3]);
+        px2 = Number(params[4]);
+        px3 = Number(params[5]);
+        px4 = Number(params[6]);
+        xmin = Number(params[7]);
+        xmax = Number(params[8]);
+        ydist = Number(params[9]);
+        rhoxz = Number(params[10]);
+        py1 = Number(params[11]);
+        py2 = Number(params[12]);
+        py3 = Number(params[13]);
+        py4 = Number(params[14]);
+        ymin = Number(params[15]);
+        ymax = Number(params[16]);
+        zdist = Number(params[17]);
+        rhoyz = Number(params[18]);
+        pz1 = Number(params[19]);
+        pz2 = Number(params[20]);
+        pz3 = Number(params[21]);
+        pz4 = Number(params[22]);
+        zmin = Number(params[23]);
+        zmax = Number(params[24]);
+        $('#xdist').val(xdist);
+        instructions[0] = xdist+10;
+        $('#ydist').val(ydist);
+        instructions[1] = ydist+10;
+        $('#zdist').val(zdist);
+        instructions[2] = zdist+10;
+        $('#rhoxy').replaceWith('<textarea id = "rhoxy" onfocus="this.select()" rows="1" maxlength="4">' + rhoxy + '</textarea>');
+        $('#rhoxz').replaceWith('<textarea id = "rhoxz" onfocus="this.select()" rows="1" maxlength="4">' + rhoxz + '</textarea>');
+        $('#rhoyz').replaceWith('<textarea id = "rhoyz" onfocus="this.select()" rows="1" maxlength="4">' + rhoyz + '</textarea>');
+        $('#px1').replaceWith('<textarea id = "px1" onfocus="this.select()" rows="1" maxlength="4">' + px1 + '</textarea>');
+        $('#px2').replaceWith('<textarea id = "px2" onfocus="this.select()" rows="1" maxlength="4">' + px2 + '</textarea>');
+        $('#px3').replaceWith('<textarea id = "px3" onfocus="this.select()" rows="1" maxlength="4">' + px3 + '</textarea>');
+        $('#px4').replaceWith('<textarea id = "px4" onfocus="this.select()" rows="1" maxlength="4">' + px4 + '</textarea>');
+        $('#py1').replaceWith('<textarea id = "py1" onfocus="this.select()" rows="1" maxlength="4">' + py1 + '</textarea>');
+        $('#py2').replaceWith('<textarea id = "py2" onfocus="this.select()" rows="1" maxlength="4">' + py2 + '</textarea>');
+        $('#py3').replaceWith('<textarea id = "py3" onfocus="this.select()" rows="1" maxlength="4">' + py3 + '</textarea>');
+        $('#py4').replaceWith('<textarea id = "py4" onfocus="this.select()" rows="1" maxlength="4">' + py4 + '</textarea>');
+        $('#pz1').replaceWith('<textarea id = "pz1" onfocus="this.select()" rows="1" maxlength="4">' + pz1 + '</textarea>');
+        $('#pz2').replaceWith('<textarea id = "pz2" onfocus="this.select()" rows="1" maxlength="4">' + pz2 + '</textarea>');
+        $('#pz3').replaceWith('<textarea id = "pz3" onfocus="this.select()" rows="1" maxlength="4">' + pz3 + '</textarea>');
+        $('#pz4').replaceWith('<textarea id = "pz4" onfocus="this.select()" rows="1" maxlength="4">' + pz4 + '</textarea>');
+        $('#xmin').replaceWith('<textarea id = "xmin" onfocus="this.select()" rows="1" maxlength="4">' + xmin + '</textarea>');
+        $('#xmax').replaceWith('<textarea id = "xmax" onfocus="this.select()" rows="1" maxlength="4">' + xmax + '</textarea>');
+        $('#ymin').replaceWith('<textarea id = "ymin" onfocus="this.select()" rows="1" maxlength="4">' + ymin + '</textarea>');
+        $('#ymax').replaceWith('<textarea id = "ymax" onfocus="this.select()" rows="1" maxlength="4">' + ymax + '</textarea>');
+        $('#zmin').replaceWith('<textarea id = "zmin" onfocus="this.select()" rows="1" maxlength="4">' + zmin + '</textarea>');
+        $('#zmax').replaceWith('<textarea id = "zmax" onfocus="this.select()" rows="1" maxlength="4">' + zmax + '</textarea>');
+        initial();
+    }
+    else{//If the custom URL is strange or not present, launches standard tri-normal
+        initial();
+    }
+                                                            // Testing button
+    $('#test').click(function(){})
 })

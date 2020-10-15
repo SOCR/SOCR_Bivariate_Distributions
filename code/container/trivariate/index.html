@@ -17,6 +17,12 @@
     <script type="text/javascript" src="./scripts/plotly.min.js"></script>
     <script type="text/javascript" src="./scripts/distributions.js"></script>
     <script type="text/javascript" src="./scripts/tri.js"></script>
+    <script>
+    MathJax = {
+      tex: {inlineMath: [['$', '$'], ['\\(', '\\)']]}
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
     <link href="./scripts/style.css" rel="stylesheet">
     <title>Trivariate Distribution Calculator</title>
 </head>
@@ -178,8 +184,12 @@
             <li>Click the <b>Graph Settings</b> button to open an overlay window for controlling the distribution parameters.</li>
             <li>You can control the distribution graphs clicking and dragging on the graph, zooming in and out, as well as taking a picture</li>
             <li>Probability Results are reported in the <b>Probability</b> section</li>
+            <li id = "pdf">For the Joint Trivariate Distribution PDF graph the probability P is reflected in the shade of the point. The redder the point the closer the probability is to its maximum value of <b id = "trimax">0</b></li>
+            <li id = "cdf">For the Joint Trivariate Distribution CDF graph the probability P is reflected in the shade of the point. The redder the point the closer the probability is to 1.</li>
+            <li>Note: due to the limitations of Plotly, only <b id = "pointsshown">0</b> of <b id = "pointstot">0</b> points could be shown. All cropped points have a probability of less than <b id = "cutprob">0</b></li>
+            <li>In the event of Plotly crashing the page needs to be hard-reloaded. Press <b>CTRL+F5</b> do do this on Windows, or <b>Command+Shift+R</b> while on a Mac</li>
             <li>This graphical bivariate Normal probability calculator shows visually the correspondence between the graphical area representation and the numeric (PDF/CDF) results. However, the reported probabilities are approximate (accuracy 10<sup>-3</sup> for Results section and the 2D graph, 10<sup>-2</sup> for 3D bivariate plot) due to the finite viewing window of the infinitely supported Normal distribution, and the limited numerical precision of the inputs (domain) and outputs (range). Users that require high-precision calculations are encouraged to use the <a href="https://socr.umich.edu/Applets/index.html#High-Precision_Distribution_Calculators">SOCR high-precision numerical probability calculators</a></li>
-            <li>Also see the <a href = "https://socr.umich.edu/HTML5/BivariateNormal/index.html">first verison of the BVN Distribution Calculator</a></li>
+            <li>Also see the <a href = "https://socr.umich.edu/HTML5/BivariateNormal/index.html">first verison</a> and the <a href = "https://socr.umich.edu/HTML5/BivariateNormal/BVN2/">second verison</a> of the bivariate Normal (BVN) Distribution Calculator.</li>
         </ul>
     </header>
     <div id = "backdim"></div>
@@ -187,21 +197,27 @@
         <button id = "closeR">&times;</button>
         <h2>Methodology</h2>
         <p>The Joint Trivariate Distribution is formed by using the Gaussian copula that combines the X and Y distributions. The steps taken by the calculator are outlined below:</p>
-        <ol>
-            <li>All continuous distribution are discretized, turning into discrete arrays with 500 points</li>
-            <li>Intermediate variables "a" and "b" are calculated using the individual cumulative distributions and the inverse error function (erf<sup>-1</sup>) using the following formula: <img src="./img/kappa.PNG" /></li>
-            <li>Using the values for "a" and "b", the Joint Bivariate PDF "z" is calculated using the following formula: <img src = "./img/b.PNG"/></li>
-            <li>Finally, the Joint Bivariate CDF is calculated from the bivariate PDF by integration.</li>
+        <ul>
+            <li>All continuous distribution are discretized, turning into discrete arrays with 100 points</li>
+            <li>Intermediate variables "a", "b" and "c" are calculated using the individual cumulative distributions and the inverse error function (erf<sup>-1</sup>) using the following formula:</li>
+            <li class="nostyle">\[ a(x) = \sqrt 2 * {erf}^{-1} \{F_x (x)\} \;;\; b(y) = \sqrt 2 * {erf}^{-1} \{F_y (y)\} \;;\; c(z) = \sqrt 2 * {erf}^{-1} \{F_z (z)\} \]</li>
+            <li>Using the values for "a", "b" and "c", the Joint Bivariate PDF "b" for each variable pair is calculated using the following formula:</li>
+            <li class="nostyle">\[ b(x,y) = f_x(x)*f_y(y)* \frac{1}{\sqrt{1-\rho^2}} * \exp {\{- \frac {\rho^2 (a^2+b^2) - 2 \rho a b} {2*(1-\rho^2)}\}} \]</li>
+            <li>The Joint Bivariate CDF for each variable pair is calculated from the corresponding Bivariate PDF by integration.</li>
+            <li>Also using the values for "a", "b" and "c", the Joint Trivariate PDF is calculated using the following formula:</li>
+            <li class="nostyle">\[ TVN(x,y,z) = f_x(x)*f_y(y)*f_z(z)*\frac{1}{\sqrt{1-\rho_{xy}^2-\rho_{xz}^2-\rho_{yz}^2+2\rho_{xy}\rho_{xz}\rho_{yz}}} * \exp {\{- \frac{2\rho_{xy}\rho_{xz}\rho_{yz}(a^2+b^2+c^2)-a^2(\rho_{xy}^2+\rho_{xz}^2)-b^2(\rho_{xy}^2+\rho_{yz}^2)-c^2(\rho_{xz}^2+\rho_{yz}^2) + 2(ab(\rho_{xy}-\rho_{xz}\rho_{yz})+ac(\rho_{xz}-\rho_{xy}\rho_{yz})+bc(\rho_{yz}-\rho_{xy}\rho_{xz}))}{2(\rho_{xy}^2+\rho_{xz}^2+\rho_{yz}^2-2\rho_{xy}\rho_{xz}\rho_{yz}-1)} \}} \]</li>
             <li>The Gaussian copula equations were taken from <a href = "https://en.wikipedia.org/wiki/Copula_(probability_theory)#List_of_copula_density_functions_and_applications">here</a></li>
-        </ol>
+            <li>The Joint Trvariate PDF is calculated using the following formula <a href = "https://mathworld.wolfram.com/TrivariateNormalDistribution.html">found here</a></li>
+            <li>The Joint Trivariate CDF for each variable pair is calculated from the trivariate PDF by integration</li>
+        </ul>
         <br>
         <h2>Calculator Rules</h2>
         <ul>
             <li>This calculator has been tested for accuracy and the following results were obtained:</li>
             <li style="list-style: none;"><ul>
                 <li>Marginal Distributions: accurate to within 0.001. Main error contributing factor: discretization of continuous functions</li>
-                <li>Conditional Distributions: accurate to within 0.005. Main error contributing factor: copula calculations</li>
-                <li>Joint Distributions (P(X ∩ Y ∩ Z)): accurate to within 0.005. Main error contributing factor: copula calculations</li>
+                <li>Conditional Distributions: accurate to within 0.001. Main error contributing factor: copula calculations</li>
+                <li>Joint Distributions (P(X ∩ Y ∩ Z)): accurate to within 0.001. Main error contributing factor: copula calculations</li>
             </ul></li>
             <li>The calculator has certain limitations on the variables and min/max values, so if those limitats are exceeded then calculator will restore the incorrect values to default</li>
             <li>Each distribution's limits are described under the <b>Rules</b> section in the <b>Graph Settings</b> tab</li>
@@ -441,7 +457,7 @@
         </table>
         <table>
             <tr>
-                <td colspan="2"><h2>Marginal Distribution Settings</h2></td>
+                <td colspan="3"><h2>Marginal Distribution Settings</h2></td>
             </tr>
             <tr>
                 <td><input type = "radio" name = "1" value='0' checked> Marginal of X</td>
@@ -449,19 +465,37 @@
                 <td><input type = "radio" name = "1"  value='2'> Marginal of Z</td>
             </tr>
             <tr>
-                <td colspan="3"><input type = "radio" name = "1"  value="3"> Conditional of 
-                <select id = "cond1">
-                    <option value = "0" selected>X|Y = Y</option>
-                    <option value = "1">X|Z = Z</option>
-                    <option value = "2">Y|X = X</option>
-                    <option value = "3">Y|Z = Z</option>
-                    <option value = "4">Z|X = X</option>
-                    <option value = "5">Z|Y = Y</option>
-                </select>
-                <select id = "cond2">
-                    <option value = "0">min</option>
-                    <option value = "1">max</option>
-                </select></td>
+                <td colspan="3"><input type = "radio" name = "1"  value="7">Bivariate Conditional of
+                    <select id = "cond6">
+                        <option value="0" selected>X given</option>
+                        <option value="1">Y given</option>
+                        <option value="2">Z given</option>
+                    </select>
+                    <select id = "cond7">
+                        <option value="0" selected>Y = Ymin</option>
+                        <option value="1">Y = Ymax</option>
+                        <option value="2">Z = Zmin</option>
+                        <option value="3">Z = Zmax</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3"><input type = "radio" name = "1"  value="3">Trivariate Conditional of
+                    <select id = "cond3">
+                        <option value="0" selected>X given</option>
+                        <option value="1">Y given</option>
+                        <option value="2">Z given</option>
+                    </select>
+                    <select id = "cond4">
+                        <option value="0" selected>Y = Ymin</option>
+                        <option value="1">Y = Ymax</option>
+                    </select>
+                    ∩
+                    <select id = "cond5">
+                        <option value="0" selected>Z = Zmin</option>
+                        <option value="1">Z = Zmax</option>
+                    </select>
+                </td>
             </tr>
             <tr>
                 <td><input type = "radio" name = "1"  value="4"> CDF of X</td>
@@ -469,7 +503,7 @@
                 <td><input type = "radio" name = "1"  value="6"> CDF of Z</td>
             </tr>
             <tr>
-                <td colspan="2"><h2>Joint Bivariate Distribution</h2></td>
+                <td colspan="3"><h2>Joint Bivariate Distribution</h2></td>
             </tr>
             <tr>
                 <td><input type = "radio" name = "2" value="0" checked> Bivariate XY PDF</td>
@@ -482,14 +516,84 @@
                 <td><input type = "radio" name = "2" value="5"> Bivariate YZ CDF</td>
             </tr>
             <tr>
-                <td><input type = "radio" name = "2" value="6"> Trivariate PDF</td>
-                <td><input type = "radio" name = "2" value="7"> Trivariate CDF</td>
+                <td colspan="3"><input type = "radio" name = "2"  value="6"> Trivariate Conditional of 
+                <select id = "cond1">
+                    <option value = "0" selected>XY|Z = Z</option>
+                    <option value = "1">XZ|Y = Y</option>
+                    <option value = "2">YZ|X = X</option>
+                </select>
+                <select id = "cond2">
+                    <option value = "0">min</option>
+                    <option value = "1">max</option>
+                </select></td>
+            </tr>
+            <tr>
+                <td colspan="3"><h2>Joint Trivariate Distribution</h2></td>
+            </tr>
+            <tr>
+                <td><input type = "radio" name = "3" value="0" checked> Trivariate PDF</td>
+                <td><input type = "radio" name = "3" value="1"> Trivariate CDF</td>
                 <td></td>
             </tr>
         </table>
     </div></main>
+    <div id = "downloads">
+        <button id = "closeD">&times;</button>
+        <h2>Download Options</h2>
+        <h3>Download Data</h3>
+        <ul>
+            <li>This generates a text file with 3 Marginal Distribution PDFs (X, Y and Z), 3 Bivaiate PDFs (XY, YZ and XZ) and the Trivariate PDF.</li>
+            <li>No conditional distributions are downloaded. The text file will have the settings used at the top of the file.</li>
+            <li>Note: This text file is very large and may take a while to download.</li>
+        </ul>
+        <h3>Generate Settings</h3>
+        <ul>
+            <li>This generates a URL in the textarea below that can be pasted to the address bar to load the page with custom settings</li>
+            <li>The text string consists of the following: (xdistType ? rhoxy ? parameter1X ? parameter2X ? parameter3X ? parameter4X ? xmin ? xmax) repeated for each distribution</li>
+            <li>Please note: a URL string that does not produce valid settings will be ignored and the page will load with standard normal distributions</li>
+        </ul>
+        <h3>Copy Settings</h3>
+        <ul>
+            <li>This copies the entire URL to clipboard</li>
+            <li>This can also be done by manually copying from the textarea</li>
+        </ul>
+        <h3>Download Settings</h3>
+        <ul>
+            <li>This downloads just the settings as a text file</li>
+        </ul>
+        <textarea id = "setout" onfocus="this.select()" readonly></textarea>
+            <br>
+        <button id = "downdata">Download Data</button>
+        <button id = "getset">Generate Settings</button>
+        <button id = "copyset">Copy Settings</button>
+        <button id = "downset">Download Settings</button>
+    </div>
+    <div id = "versionHist">
+        <button id = "closeV">&times;</button>
+        <h2>Version History</h2>
+        <h3>1.2</h3>
+        <ul>
+            <li>Added Copy Settings to automatically copy the URL to clipboard</li>
+            <li>Added Download Setting to just get a text file with all the settings</li>
+            <li>Added Version History</li>
+            <li>Converted all formulas to TeX format</li>
+        </ul>
+        <h3>1.1</h3>
+        <ul>
+            <li>Added Download Options to get a text file with all the data and settings</li>
+            <li>Added Generate Settings to generate a specific URL for launching the calculator with custom settings</li>
+        </ul>
+        <h3>1.0</h3>
+        <ul>
+            <li><b>Public Release</b></li>
+            <li>Finished testing and calibrating the copula formula against the Trivariate Normal Calculator</li>
+            <li>Carried out further testing to ensure that the probabilities reported are accurate</li>
+        </ul>
+    </div>
     <button id = "show">Graph Settings</button>
     <button id = "showR">Methodology and Calculator Rules</button>
+    <button id = "showD">Download Options</button>
+    <button id = "showV">Version History</button>
     <!--<button id = "test">Test</button>-->
     <table id = "res">
         <tr><td><h2>Probability Results</h2></td></tr>
@@ -504,6 +608,10 @@
             <h2 id = "surftitle"></h2>
             <div id = "surfacePlot"></div>
         </div>
+        <div>
+            <h2 id = "trititle"></h2>
+            <div id = "triPlot"></div>
+        </div>
     </div>
 </div>
     <footer>
@@ -513,7 +621,7 @@
             var d = new Date();
             document.write(" | " + d.getFullYear() + " | ");
         </script>
-        <a href="../../../img/SOCR_Email.png"><img alt="SOCR Email" title="SOCR Email" src="../../img/SOCR_Email.png" style="border: 0px solid;"></a>
+        <a href="../../../img/SOCR_Email.png"><img alt="SOCR Email" title="SOCR Email" src="../../../img/SOCR_Email.png" style="border: 0px solid;"></a>
         <script src="../../../js/bootstrap-transition.js" type="text/javascript"></script>
         <script src="../../../js/bootstrap-alert.js" type="text/javascript"></script>
         <script src="../../../js/bootstrap-modal.js" type="text/javascript"></script>
