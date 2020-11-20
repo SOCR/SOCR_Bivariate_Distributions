@@ -1,4 +1,5 @@
 $(document).ready(function(){
+    $('main').draggable();
     /*
     How to add a new distribution:
     1. xdist comment - add number for distribution and the name for it
@@ -10,6 +11,17 @@ $(document).ready(function(){
     6. Update the 2 switch statements in the $(document).on('change') functions, using the case number in xdist comment section - these will change the input sections to match the distribution parameters. Important: set all unused inputs to N/A
     7. Add the distribution to the two <select> sections in index.html. Be sure to have the value match the number in the xdist comment section
     8. Add a <li id = "X"> with X matching the number in the xdist comment section to the <ul> section in the mainContainer section. Follow a similar style as in the previous list items
+    */
+
+                                                            //Notes and Comments:
+    /*
+    - Some terminology used here:
+        Array = 1 dimensional vector
+        Matrix = an array of arrays, is 2D
+        Tensor = an array of arrays of arrays, is 3D
+    - Plotly cannot draw the same graphin two different locations, so two distinct graphs are drawn - 1 is the enlarged version, one is the regular version
+    - Plotly currently does not have a well-defined resize functionality. Currently the graph can only be resized horizontally when the window size changes. Thus, all the enlarged graphs have been set to a fixed size
+    - 
     */
                                                             // Variable declaration
     var fx = [];// Stores PDF for x
@@ -83,7 +95,10 @@ $(document).ready(function(){
     var settingsOpen = false;// Logs if the settings menu is open
     var rulesOpen = false;// Logs of the rules window is open
     var downloadsOpen = false;// Logs if the downloads window is open
-    var historyOpen = false;// Logs ifthe version history is open
+    var historyOpen = false;// Logs if the version history is open
+    var flatOpen = false;// Logs if Flat graph is Enlarged
+    var surfOpen = false;// Logs if Surface graph is Enlarged
+    var triOpen = false;// Logs if Tri graph is Enlarged
     var instructions = [10, 10, 10];// Logs what instructions are visible
     var flattitle = ['Marginal of X', 'Marginal of Y', 'Marginal of Z', [
     [['Conditional of X|Y = Ymin ∩ Z = Zmin', 'Conditional of X|Y = Ymin ∩ Z = Zmax'], ['Conditional of X|Y = Ymax ∩ Z = Zmin', 'Conditional of X|Y = Ymax ∩ Z = Zmax']],
@@ -99,7 +114,7 @@ $(document).ready(function(){
         ['Conditional Bivariate PDF: XY|Z = Zmin', 'Conditional Bivariate PDF: XY|Z = Zmax'],
         ['Conditional Bivariate PDF: XZ|Y = Ymin', 'Conditional Bivariate PDF: XZ|Y = Ymax'],
         ['Conditional Bivariate PDF: YZ|X = Xmin', 'Conditional Bivariate PDF: YZ|X = Xmax']]];
-    var trititle = ['Trivariate PDF', 'Trivariate CDF'];
+    var trititle = ['Trivariate Point Cloud PDF', 'Trivariate CDF', 'Trivariate Isosurface PDF'];
                                                             //Functions
     var check = function(){// Checks if inputs are correct, if they are wrong it resets them to previously recorded values. Add the appropriate checks if more distributions are added
         //Rho
@@ -1239,26 +1254,32 @@ $(document).ready(function(){
         else if(des == 2){z = t; fz = f; Fz = F;}
     }
     var template = function(des){//Template for adding more distributions, copy as a new function then add references to distributions.js, or write in own functions for pdf/cdf. Note that the makeCDF function can be used to make the CDF from a pdf
-        var t = [];
-        var f = [];
-        var F = [];
+        //Declare temporary arrays to fill with data
+        var t = [];//x/y/z
+        var f = [];//PDF
+        var F = [];//CDF
+        //Declare temporary distribution variables
         var mu = 0;
         var sigma = 0;
         var blob = 0;
         var fish = 0;
+        //Make temporary dist vars equal to the x/y/z distribution parameters
         if(des == 0){mu = px1;sigma = px2;blob = px3;fish = px4;x = [];fx = [];Fx = [];}
         else if(des == 1){mu = py1;sigma = py2;blob = py3;fish = py4;y = [];fy = [];Fy = [];}
         else if(des == 2){mu = pz1;sigma = pz2;blob = pz3;fish = pz4;z = [];fz = [];Fz = [];}
+        //Creating distribution
         var tempdist = new Distribution();
         var start = tempdist.minValue;
         var end = tempdist.maxValue;
         var step = Math.abs((end-start)/numPoints);
+        //Filling temporary arrays with the distribution
         for(var i = 0; i <= numPoints; i++){
             t.push(start+step*i);
             f.push(tempdist.density(t[i]));
-            F.push(tempdist.CDF(t[i]));
+            F.push(tempdist.CDF(t[i]));//Use this if CDF is defined
         }
-        F = makeCDF(f, step);//If no CDF defined
+        F = makeCDF(f, step);//Use this if no CDF defined
+        //Assign x/y/z arrays using the temporary distribution arrays
         if(des == 0){x = t; fx = f; Fx = F}
         else if(des == 1){y = t; fy = f; Fy = F;}
         else if(des == 2){z = t; fz = f; Fz = F;}
@@ -1278,8 +1299,8 @@ $(document).ready(function(){
         var scaled_R = signX * primaryComp ;
         return scaled_R ;
     }
-    var makeB = function(choice){
-        //FGM copula prep - finding kappa
+    var makeB = function(choice){//Makes the bivariate distribution
+        //FGM copula prep - finding kappa - obsolete code as we now use the Gaussian Copula
         /*var deltax = x[1]-x[0];
         var deltay = y[1]-y[0];
         var temp1 = 0;
@@ -1292,7 +1313,8 @@ $(document).ready(function(){
         }
         kappa = (temp1*temp2)/(rho*px2*py2);
         kappa = 1/kappa;*/
-        //making bxy,B
+
+        //Creating temporay arrays and variables
         var b = [];
         var B = [];
         var copula = 0;
@@ -1301,50 +1323,56 @@ $(document).ready(function(){
         var bee = 0;
         var max1 = 1;
         var max2 = 1;
-        if (choice == 0){max1 = x.length;max2 = y.length;rho = rhoxy;}
-        else if (choice == 1){max1 = x.length;max2 = z.length;rho = rhoxz;}
-        else if (choice == 2){max1 = y.length;max2 = z.length;rho = rhoyz;}
+        //Filling temporary variables with x/y/z parameters
+        if (choice == 0){max1 = x.length;max2 = y.length;rho = rhoxy;}//XY bivariate
+        else if (choice == 1){max1 = x.length;max2 = z.length;rho = rhoxz;}//XZ bivariate
+        else if (choice == 2){max1 = y.length;max2 = z.length;rho = rhoyz;}//YZ bivariate
         for (var i = 0; i < max1; i++){
-            var temp3 = [];
-            var temp5 = 0;
+            var temp3 = [];//temporary array to store probabilities to push to the main Bivariate matrix
+            var temp5 = 0;//temporay value to store the probability at a point
             for (var j = 0; j < max2; j++){
                     //FGM copula
                 //copula = 1+kappa*(2*Fx[i]-1)*(2*Fy[j]-1);
                     //Exponential copula
                 //copula = (1/(1-rho))*(2/(1-rho))*Math.sqrt(rho*Math.log(1-Fx[i])*Math.log(1-Fy[j]))*Math.exp((rho/(1-rho))*(Math.log(1-Fx[i])+Math.log(1-Fy[j])));
-                    //Gaussian
+                    //Gaussian copula
                 ay = Math.sqrt(2)*erfi(2*Fx[i]-1);
                 bee = Math.sqrt(2)*erfi(2*Fy[j]-1);
                 copula = (1/(Math.sqrt(1-rho*rho)))*Math.exp(-1*((ay*ay+bee*bee)*rho*rho-2*rho*ay*bee)/(2*(1-rho*rho)));
-                if (choice == 0){fx[i]*fy[j]*copula}
-                else if (choice == 1){fx[i]*fz[j]*copula}
-                else if (choice == 2){fy[i]*fz[j]*copula}
-                temp5 = fx[i]*fy[j]*copula;
-                if(temp5 < 0){temp5 = 0;}
-                temp3.push(temp5);
+                //Creating the point basedon what pair is being processed
+                if (choice == 0){temp5 = fx[i]*fy[j]*copula}
+                else if (choice == 1){temp5 = fx[i]*fz[j]*copula}
+                else if (choice == 2){temp5 = fy[i]*fz[j]*copula}
+                if(temp5 < 0){temp5 = 0;}//if the copula produces a negative probability (it should not, but just in case) then we set that probability to 0
+                temp3.push(temp5);//appending probability to temporary array
             }
-            b.push(temp3);
+            b.push(temp3);//appending tomporary array to bivariate matrix
         }
-        B = makeBigB(b, choice);
-        bCut = makebCut(b, choice);
+        B = makeBigB(b, choice);//creating the bivariate CDF
+        bCut = makebCut(b, choice);//creating a cut version of the bivariate matrix that is within the specified limits
+        //Assigning the bivariate matrixes to corresponding global variables
         if (choice == 0){bxy = b;bxyCut = bCut;Bxy = B;}
         else if (choice == 1){bxz = b;bxzCut = bCut;Bxz = B;}
         else if (choice == 2){byz = b;byzCut = bCut;Byz = B;}
     }
-    var makeBigB = function(b, choice){//Makes CDF of bxy
+    var makeBigB = function(b, choice){//Makes CDF of bivariate mmatrix
+        //Temporary variable and array declaration
         var temp = [];
         var temp1 = 0;
         var temp2 = [];
         var max1 = 1;
         var max2 = 1;
         var ret = [];
+        //assigns variables based on the pairing selected
         if (choice == 0){max1 = x.length;max2 = y.length;}
         else if (choice == 1){max1 = x.length;max2 = z.length;}
         else if (choice == 2){max1 = y.length;max2 = z.length;}
+        //Creating initial array to start the integration - JS can sometimes alter the original data if we just assign the first row to be the start of the integration
         for (var j = 0; j < max2; j++){
             temp2.push(b[0][j]);
         }
         var temp3 = 0;
+        //Integrationto get the CDF
         for (var i = 0; i < max1; i++){
             temp = [];
             temp1 = 0;
@@ -1356,6 +1384,7 @@ $(document).ready(function(){
             }
             ret.push(temp);
         }
+        //Since this is a discrete integration process the CDF values can go much higher than 1, so we scale it down to 1
         var scale = ret[max1-1][max2-1];
         for (var i = 0; i < max1; i++){
             for (var j = 0; j < max2; j++){
@@ -1364,7 +1393,8 @@ $(document).ready(function(){
         }
         return ret;
     }
-    var makebCut = function(b, choice){//makes a cut version of b, bounded by x and y min and max
+    var makebCut = function(b, choice){//makes a cut version of b, bounded by a min and max of two variables, as declared by theuser
+        //Creating temporary variables
         var max1 = 1;
         var max2 = 1;
         var ret = [];
@@ -1376,26 +1406,29 @@ $(document).ready(function(){
         var baa = [];
         var t1 = "";
         var t2 = "";
+        //assigns variables based on the pairing selected
         if (choice == 0){max1 = x.length;max2 = y.length;amin = xmin;amax = xmax;bmin = ymin;bmax = ymax;moo = x;baa = y;t1 = "X";t2 = "Y";}
         else if (choice == 1){max1 = x.length;max2 = z.length;amin = xmin;amax = xmax;bmin = zmin;bmax = zmax;moo = x;baa = z;t1 = "X";t2 = "Z";}
         else if (choice == 2){max1 = y.length;max2 = z.length;amin = ymin;amax = ymax;bmin = zmin;bmax = zmax;moo = y;baa = z;t1 = "Y";t2 = "Z";}
+        //Creation of the cut matrix
         for (var i = 0; i < max1; i++){
             var temp = [];
             for (var j = 0; j < max2; j++){
-                if(moo[i] >= amin && moo[i] <= amax && baa[j] >= bmin && baa[j] <= bmax){temp.push(b[i][j]);}
-                else{temp.push(0);}
+                if(moo[i] >= amin && moo[i] <= amax && baa[j] >= bmin && baa[j] <= bmax){temp.push(b[i][j]);}//if within the specified limits, add that probability to the cut matrix
+                else{temp.push(0);}//if outside the specified limits, add 0 to the cut matrix
             }
             ret.push(temp);
         }
-        var temp1 = (sumMat(ret)/sumMat(b));
+        //Calculating the bivariate consitional probability that is within the limits
+        var temp1 = (sumMat(ret, max1, max2)/sumMat(b, max1, max2));
         if(isNaN(temp1)){temp1 = 0;}
         outtemp.push('P(' + amin + ' < ' + t1 + ' < ' + amax + ' ∩ ' + bmin + ' < ' + t2 + ' < ' + bmax + ') = ' + temp1.toFixed(3));
         return ret;
     }
-    var sumMat = function(mat){//Sums a matrix
+    var sumMat = function(mat, m1, m2){//Sums a matrix across all data points
         var temp = 0;
-        for (var i = 0; i < x.length; i++){
-            for (var j = 0; j < y.length; j++){
+        for (var i = 0; i < m1; i++){
+            for (var j = 0; j < m2; j++){
                 temp += mat[i][j];
             }
         }
@@ -1411,6 +1444,7 @@ $(document).ready(function(){
         return F;
     }
     var maketri = function(){//Makes Trivariate tensors
+        //Declaring arrays and variables
         tri = [];
         triCut = [];
         Tri = [];
@@ -1425,41 +1459,48 @@ $(document).ready(function(){
         var a = 0;
         var b = 0;
         var c = 0;
+        //Trivariate tensor making
         for (var i = 0; i < x.length; i++){
-            temp1 = [];
-            temp3 = [];
+            temp1 = [];//temporary uncut probability matrix
+            temp3 = [];//temporary cut probability matrix
             for (var j = 0; j < y.length; j++){
-                temp2 = [];
-                temp4 = [];
+                temp2 = [];//temporary cut probability array
+                temp4 = [];//temporary uncut probability array
                 for (var k = 0; k < z.length; k++){
+                    //Gaussian 3D copula
                     a = Math.sqrt(2)*erfi(2*Fx[i]-1);
                     b = Math.sqrt(2)*erfi(2*Fy[j]-1);
                     c = Math.sqrt(2)*erfi(2*Fz[k]-1);
                     w = 2*rhoxy*rhoxz*rhoyz*(a*a+b*b+c*c)-(a*a*(rhoxz*rhoxz + rhoxy*rhoxy) + b*b*(rhoyz*rhoyz + rhoxy*rhoxy) + c*c*(rhoxz*rhoxz + rhoyz*rhoyz)) + 2*(a*b*(rhoxy - rhoxz*rhoyz) + a*c*(rhoxz-rhoxy*rhoyz) + b*c*(rhoyz-rhoxy*rhoxz));
                     copula3d = (1/(Math.sqrt(1-(rhoxy*rhoxy + rhoxz*rhoxz + rhoyz*rhoyz) + 2*rhoxy*rhoxz*rhoyz)))*Math.exp(-(w)/(2*(rhoxy*rhoxy + rhoxz*rhoxz + rhoyz*rhoyz - 2*rhoxy*rhoxz*rhoyz-1)));
                     topush = fx[i]*fy[j]*fz[k]*copula3d;
-                    temp2.push(topush);
-                    if(topush > trimax){trimax = topush;}
-                    if(x[i] < xmin || x[i] > xmax || y[j] < ymin || y[j] > ymax || z[k] < zmin || z[k] > zmax){temp4.push(0);}
-                    else{temp4.push(topush);}
+                    temp2.push(topush);//adding probability to the uncut array
+                    if(topush > trimax){trimax = topush;}//updating maximum probability value in tensor
+                    if(x[i] < xmin || x[i] > xmax || y[j] < ymin || y[j] > ymax || z[k] < zmin || z[k] > zmax){temp4.push(0);}//if the xyz point is in bounds then add probability to cut array
+                    else{temp4.push(topush);}//if the xyz point is not in bounds then add 0 to cut array
                 }
+                //appending arrays to matrixes
                 temp1.push(temp2);
                 temp3.push(temp4);
             }
+            //adding matrixes to trivariate tensors
             tri.push(temp1);
             triCut.push(temp3);
         }
-        makeTriBig();
+        makeTriBig();//generate trivaiate CDF
+        //generating trivariate consitional probability
         var yeet = sumMat3(triCut)/sumMat3(tri);
         if(isNaN(yeet)){yeet = 0;}
         updateOutput('P(' + xmin + ' < X < ' + xmax + ' ∩ ' + ymin + ' < Y < ' + ymax + ' ∩ ' + zmin + ' < Z < ' + zmax + ') = ' + yeet.toFixed(3));
     }
     var makeTriBig = function(){//Makes Trifariate CDF tensor
+        //Creates temporary arrays
         var temp2 = [];
         var temp3 = [];
+        //Creating the starting matrix
         for (var i = 0; i < x.length; i++){
             temp2 = [];
-            for (var j = y.length-1; j >= 0; j--){
+            for (var j = y.length-1; j >= 0; j--){//For some reason if you go from 0 to y.length-1 the whole thing breaks
                 temp3 = [];
                 for (var k = 0; k < z.length; k++){
                     temp3.push(0);
@@ -1468,8 +1509,9 @@ $(document).ready(function(){
             }
             Tri.push(temp2);
         }
+        //Integration process to get the trivatiate CDF - this is a very fragile process that somehow just works
         for (var i = 0; i < x.length; i++){
-            for (var j = y.length-1; j >= 0; j--){
+            for (var j = y.length-1; j >= 0; j--){//For some reason if you go from 0 to y.length-1 the whole thing breaks
                 for (var k = 0; k < z.length; k++){
                     if(i == 0 || j == 0 || k == 0){
                         Tri[i][j][k] = tri[i][j][k];
@@ -1480,6 +1522,7 @@ $(document).ready(function(){
                 }
             }
         }
+        //Scaling down to 1 as this is a discrete itegration
         var scale = Tri[x.length-1][y.length-1][z.length-1];
         for (var i = 0; i < x.length; i++){
             for (var j = 0; j < y.length; j++){
@@ -1489,7 +1532,7 @@ $(document).ready(function(){
             }
         }
     }
-    var sumMat3 = function(trimat){//Returns the sum of the 3D tensor
+    var sumMat3 = function(trimat){//Returns the sum of the 3D tensor across all 3 dimensions
         var ret = 0;
         for (i = 0; i < x.length; i++){
             for (var j = 0; j < y.length; j++){
@@ -1504,23 +1547,24 @@ $(document).ready(function(){
     var findCDF = function(t, F, val){//Finds value of CDF given a t and F array at at given value
         var min = t[0];
         var max = t[t.length-1];
-        if(val <= min){return 0;}
-        else if(val >= max){return 1;}
+        if(val <= min){return 0;}//if val is less than the t array min then returns 0
+        else if(val >= max){return 1;}//if val is greater than the t array max then returns 1
+        //finding the closest value that is stored in the t array to the given value - since only 100 points are generated it is sometimes impossible to find an exact match to the value in the t array
         var temp = (val-min)/((max-min)/(t.length-1));
         var temp1 = F[Math.floor(temp)];
         var temp2 = F[Math.ceil(temp)];
-        if(temp1 < 0.0001 || temp2 < 0.0001){return 0;}
+        if(temp1 < 0.0001 || temp2 < 0.0001){return 0;}//just in case the CDF probablity is very small - this can sometimes break the function
         var step1 = (Math.ceil(temp)-Math.floor(temp))/Math.floor(temp);
         var step2 = (temp2-temp1)/temp1;
         return temp1+step1*step2;
     }
-    var scaleC = function(){
+    var scaleC = function(){//Scales the conditional CDF array to 1
         var scale = C[C.length-1];
         for (var i = 0; i < C.length; i++){
             C[i] = C[i]/scale;
         }
     }
-    var getDistTri = function(){//Gets the x/y/z array from trivariate tensor
+    var getDistTri = function(){//Gets the conditional x/y/z array from trivariate tensor
         var xminloc = Math.floor((xmin-x[0])/(x[1]-x[0]));
         if(xminloc < 0){xminloc = 0;}
         else if(xminloc >= x.length){xminloc = x.length-1;}
@@ -1567,10 +1611,12 @@ $(document).ready(function(){
         return temp;
     }
     var getDist = function(){//Gets array from a bivariate matrix
+        //Declaration of decision variables
         var val = 0;
         var temp = [];
         var mat = [];
         var dir = 0;
+        //Based on the user input the corresponding variables are set to get the correct array from the correct bivariate matrix
         if(cond6 == 0 && cond7 == 0){mat = bxy;val = ymin;temp = y;dir = 1;}
         else if(cond6 == 0 && cond7 == 0){mat = bxy;val = ymax;temp = y;dir = 0;}
         else if(cond6 == 0 && cond7 == 1){mat = bxz;val = zmin;temp = z;dir = 1;}
@@ -1586,7 +1632,7 @@ $(document).ready(function(){
         var loc = Math.floor((val-temp[0])/(temp[1]-temp[0]));
         if(loc < 0){loc = 0;}
         else if(loc >= temp.length){loc = temp.length - 1;}
-        return getArr(mat, loc, dir);
+        return getArr(mat, loc, dir);//Getting the corresponsing array from the given matrix
     }
     var getArr = function(mat, loc, dir){//Gets array from a given matrix in a given direction at a given location
         var temp = [];
@@ -1613,7 +1659,7 @@ $(document).ready(function(){
         }
         return temp;
     }
-    var updateGraph = function(){// Core function, coordinates other functions based on the radio selected
+    var updateGraph = function(){// Core 1D function, coordinates other functions based on the radio inputs selected
         switch (des){
             case 0:// Marginal of X
                 var temp = makefuncut(x, fx, xmin, xmax);
@@ -1681,9 +1727,9 @@ $(document).ready(function(){
                 break;
         }
     }
-    var drawData = function(time, fun, funcut, xt, yt){// Draws the data on canvas
+    var drawData = function(time, fun, funcut, xt, yt){// Draws the data on 1D Plotly graph
         var data = [];
-        if(time.length > 50){
+        if(time.length > 50){//Continuous distribution
             data = [{
                 x: time,
                 y: fun,
@@ -1704,7 +1750,7 @@ $(document).ready(function(){
                 hoverinfo:'none'
             }];
         }
-        else{
+        else{// Discrete distribution
             var temp = [];
             for (var i = 0; i < time.length; i++){
                 if(funcut[i] == 0){temp.push('rgb(255,255,255)')}
@@ -1726,7 +1772,7 @@ $(document).ready(function(){
                 name: ''
             }];
         }
-        var layout = {
+        var layout1 = {
             autosize: true,
             margin: {
                 l: 0,
@@ -1745,10 +1791,35 @@ $(document).ready(function(){
             showlegend: false,
             barmode: 'relative'
         };
-        Plotly.newPlot('graph', data, layout);
+        var layout = {
+            autosize: false,
+            width: 1000,
+            height: 750,
+            useResizeHandler: true,
+            margin: {
+                l: 1,
+                r: 1,
+                b: 1,
+                t: 1,
+                pad: 0
+            },
+            xaxis: {
+              title: xt,
+              showticklabels: true,
+            },
+            yaxis: {
+              title: yt,
+            },
+            showlegend: false,
+            barmode: 'relative'
+        };
+        Plotly.newPlot('graph', data, layout);//Enlarged graph
         Plotly.relayout('graph', {'xaxis.autorange': true,'yaxis.autorange': true});
+        Plotly.newPlot('graph1', data, layout1);//Regular graph
+        Plotly.relayout('graph1', {'xaxis.autorange': true,'yaxis.autorange': true});
     }
-    var doAll = function(){//Does everything
+    var doAll = function(){//Does everything once the Graph settings window is closed
+        //Getting user input variables
         old = [rhoxy, rhoxz, rhoyz];
         px1 = Number($('#px1').val());
         px2 = Number($('#px2').val());
@@ -1810,7 +1881,7 @@ $(document).ready(function(){
 			temp += $(this).val();
         });
         cond7 = Number(temp);
-        switch(xdist){//Add additional cases for any distribution added
+        switch(xdist){//Based on the distribution selected makes the 1D probability arrays. Add additional cases for any distribution added
             case 0:
                 px3 = 1;
                 px4 = 1;
@@ -2051,7 +2122,7 @@ $(document).ready(function(){
                 betanegbinom(0);
                 break;
         }
-        switch(ydist){//Add additional cases for any distribution added
+        switch(ydist){//Based on the distribution selected makes the 1D probability arrays. Add additional cases for any distribution added
             case 0:
                 py3 = 1;
                 py4 = 1;
@@ -2290,7 +2361,7 @@ $(document).ready(function(){
                 betanegbinom(1);
                 break;
         }
-        switch(zdist){//Add additional cases for any distribution added
+        switch(zdist){//Based on the distribution selected makes the 1D probability arrays. Add additional cases for any distribution added
             case 0:
                 pz3 = 1;
                 pz4 = 1;
@@ -2531,26 +2602,29 @@ $(document).ready(function(){
                 betanegbinom(2);
                 break;
         }
-        makeB(0);
-        makeB(1);
-        makeB(2);
-        maketri();
+        check();//Checks if all the user inputs are valid
+        makeB(0);//Makes the XY bivariate matrixes
+        makeB(1);//Makes the XZ bivariate matrixes
+        makeB(2);//Makes the YZ bivariate matrixes
+        maketri();//Makes the trivariate tensor
         updateGraph();//Updates 2D Graph
         updatePlot();//Updates 3D Graph
         updateTriPlot();//Updates Trivariate plot
-        updateTitles();
+        updateTitles();//Updates the graph titles
         var moo = 'Iteration ' + iter;
-        updateOutput(moo);
+        updateOutput(moo);//Updates output
         iter++;
+        //Updates various other things on the page
         $('#trimax').replaceWith('<b id = "trimax">' + trimax.toFixed(3) + '</b>');
         $('#pointsshown').replaceWith('<b id = "pointsshown">' + pointsshown + '</b>');
         $('#pointstot').replaceWith('<b id = "pointstot">' + pointstot + '</b>');
         $('#cutprob').replaceWith('<b id = "cutprob">' + cutprob.toFixed(3) + '</b>');
+        //Closes the graph settings window
         $('main').hide(1000);
         $('#backdim').hide(1000);
         settingsOpen = false;
     }
-    var dispI = function(){//Updates instructions in the Graph settings window
+    var dispI = function(){//Updates instructions in the Graph settings window based on user selection
         for (var i = 10; i < distTitle.length+10; i++){
             if(i == instructions[0] || i == instructions[1] || i == instructions[2]){
                 $('#' + i).show();
@@ -2563,29 +2637,44 @@ $(document).ready(function(){
     var updateTitles = function(){//Updates graph titles
         if(des == 3){
             $('#flattitle').replaceWith('<h2 id = "flattitle">' + flattitle[des][cond3][cond4][cond5] + '</h2>');
+            $('#flattitle1').replaceWith('<h2 id = "flattitle1">' + flattitle[des][cond3][cond4][cond5] + '</h2>');
         }
         else if(des == 7){
             $('#flattitle').replaceWith('<h2 id = "flattitle">' + flattitle[des][cond6][cond7] + '</h2>');
+            $('#flattitle1').replaceWith('<h2 id = "flattitle1">' + flattitle[des][cond6][cond7] + '</h2>');
         }
-        else{$('#flattitle').replaceWith('<h2 id = "flattitle">' + flattitle[des] + '</h2>');}
-        if(des3d == 6){$('#surftitle').replaceWith('<h2 id = "surftitle">' + surftitle[des3d][cond1][cond2] + '</h2>');}
-        else{$('#surftitle').replaceWith('<h2 id = "surftitle">' + surftitle[des3d] + '</h2>');}
+        else{
+            $('#flattitle').replaceWith('<h2 id = "flattitle">' + flattitle[des] + '</h2>');
+            $('#flattitle1').replaceWith('<h2 id = "flattitle1">' + flattitle[des] + '</h2>');
+        }
+        if(des3d == 6){
+            $('#surftitle').replaceWith('<h2 id = "surftitle">' + surftitle[des3d][cond1][cond2] + '</h2>');
+            $('#surftitle1').replaceWith('<h2 id = "surftitle1">' + surftitle[des3d][cond1][cond2] + '</h2>');
+        }
+        else{
+            $('#surftitle').replaceWith('<h2 id = "surftitle">' + surftitle[des3d] + '</h2>');
+            $('#surftitle1').replaceWith('<h2 id = "surftitle1">' + surftitle[des3d] + '</h2>');
+        }
         $('#trititle').replaceWith('<h2 id = "trititle">' + trititle[des4d] + '</h2>');
+        $('#trititle1').replaceWith('<h2 id = "trititle1">' + trititle[des4d] + '</h2>');
     }
                                                             //Buttons
-    $('#close').click(function(){//Does all the work updating everything
+    $('#close').click(function(){//Does all the work updating everything when the graph settings are closed
         doAll();
     })
-    $('#show').click(function(){//Shows the settings menu
+    $('#show').click(function(){//Shows the graph settings menu
         $('#backdim').show(1000);
         $('main').show(1000);
         settingsOpen = true;
     })
-    $('#backdim').click(function(){//Clicking outside the settings box
+    $('#backdim').click(function(){//Clicking outside the settings box closes the corresponding window
         if (settingsOpen){doAll();}
         else if(rulesOpen){$('#rules').hide(1000);$('#backdim').hide(1000);rulesOpen = false;}
         else if(downloadsOpen){$('#downloads').hide(1000);$('#backdim').hide(1000);downloadsOpen = false;}
         else if(historyOpen){$('#versionHist').hide(1000);$('#backdim').hide(1000);historyOpen = false;}
+        else if(flatOpen){$('#flatEn').hide(1000);$('#backdim').hide(1000);flatOpen = false;}
+        else if(surfOpen){$('#surfEn').hide(1000);$('#backdim').hide(1000);surfOpen = false;}
+        else if(triOpen){$('#triEn').hide(1000);$('#backdim').hide(1000);triOpen = false;}
     })
     $('#showR').click(function(){//Shows the rules
         $('#backdim').show(1000);
@@ -2607,17 +2696,47 @@ $(document).ready(function(){
         $('#backdim').hide(1000);
         downloadsOpen = false;
     })
-    $('#showV').click(function(){//Shows the rules
+    $('#showV').click(function(){//Shows the history
         $('#versionHist').show(1000);
         $('#backdim').show(1000);
         historyOpen = true;
     })
-    $('#closeV').click(function(){//Closes downloads
+    $('#closeV').click(function(){//Closes history
         $('#versionHist').hide(1000);
         $('#backdim').hide(1000);
         historyOpen = false;
     })
-    $(document).keyup(function(e){// Pressing Esc key
+    $('#flaten').click(function(){//Shows the enlarged flat/1D graph
+        $('#flatEn').show(1000);
+        $('#backdim').show(1000);
+        flatOpen = true;
+    })
+    $('#closeFE').click(function(){//Closes enlarged flat/1D graph
+        $('#flatEn').hide(1000);
+        $('#backdim').hide(1000);
+        flatOpen = false;
+    })
+    $('#surfen').click(function(){//Shows the enlarged surf/bivariate graph
+        $('#surfEn').show(1000);
+        $('#backdim').show(1000);
+        surfOpen = true;
+    })
+    $('#closeSE').click(function(){//Closes enlarged surf/bivariate graph
+        $('#surfEn').hide(1000);
+        $('#backdim').hide(1000);
+        surfOpen = false;
+    })
+    $('#trien').click(function(){//Shows the enlarged trivariate graph
+        $('#triEn').show(1000);
+        $('#backdim').show(1000);
+        triOpen = true;
+    })
+    $('#closeTE').click(function(){//Closes enlarged trivariate graph
+        $('#triEn').hide(1000);
+        $('#backdim').hide(1000);
+        triOpen = false;
+    })
+    $(document).keyup(function(e){// Pressing Esc key closes the corresponding window
         if(e.which == 27 && settingsOpen) {
             doAll();
         }
@@ -2636,8 +2755,23 @@ $(document).ready(function(){
             $('#backdim').hide(1000);
             historyOpen = false;
         }
+        else if(e.which == 27 && flatOpen){
+            $('#flatEn').hide(1000);
+            $('#backdim').hide(1000);
+            flatOpen = false;
+        }
+        else if(e.which == 27 && surfOpen){
+            $('#surfEn').hide(1000);
+            $('#backdim').hide(1000);
+            surfOpen = false;
+        }
+        else if(e.which == 27 && triOpen){
+            $('#triEn').hide(1000);
+            $('#backdim').hide(1000);
+            triOpen = false;
+        }
     });
-    $(document).on('change', '#xdist', function(){//Detects change in select menu for X and alters the page accordingly
+    $(document).on('change', '#xdist', function(){//Detects change in distribution select menu for X and alters the page accordingly
         var temp = "";
 		$('#xdist option:selected').each(function(){
 			temp += $(this).val();
@@ -2894,7 +3028,7 @@ $(document).ready(function(){
                 break;
         }
     })
-    $(document).on('change', '#ydist', function(){//Detects change in select menu for Y and alters the page accordingly
+    $(document).on('change', '#ydist', function(){//Detects change in distribution select menu for Y and alters the page accordingly
         var temp = "";
 		$('#ydist option:selected').each(function(){//Add other cases for any distributions added
 			temp += $(this).val();
@@ -3151,7 +3285,7 @@ $(document).ready(function(){
                 break;
         }
     })
-    $(document).on('change', '#zdist', function(){//Detects change in select menu for Y and alters the page accordingly
+    $(document).on('change', '#zdist', function(){//Detects change in distribution select menu for Y and alters the page accordingly
         var temp = "";
 		$('#zdist option:selected').each(function(){//Add other cases for any distributions added
 			temp += $(this).val();
@@ -3448,11 +3582,23 @@ $(document).ready(function(){
     var updatePlot = function(){// Uses Plotly to generate a bivariate plot
         var data = [];
         var layout = {};
-        if(des3d == 0){
+        var layout1 = {};
+        if(des3d == 0){//Bivariate XY PDF
             data = [{x: x,y: y,z: bxyCut,type: 'surface'}];
             updateOutput(outtemp[0]);
             layout ={
-                autosize: true,
+                autosize: false,
+                margin: {l:0,r:0,b:0,t:0,pad:0},
+                scene:{
+                    xaxis:{title:{text:'X'}},
+                    yaxis:{title:{text:'Y'}},
+                    zaxis:{title:{text:'P(x=X ∩ y=Y)'}}
+                }
+            };
+            layout1 ={
+                autosize: false,
+                height: 750,
+                width: 1000,
                 margin: {l:0,r:0,b:0,t:0,pad:0},
                 scene:{
                     xaxis:{title:{text:'X'}},
@@ -3461,11 +3607,22 @@ $(document).ready(function(){
                 }
             };
         }
-        else if(des3d == 1){
+        else if(des3d == 1){//Bivariate XZ PDF
             data = [{x: x,y: z,z: bxzCut,type: 'surface'}];
             updateOutput(outtemp[1]);
             layout ={
-                autosize: true,
+                autosize: false,
+                margin: {l:0,r:0,b:0,t:0,pad:0},
+                scene:{
+                    xaxis:{title:{text:'X'}},
+                    yaxis:{title:{text:'Z'}},
+                    zaxis:{title:{text:'P(x=X ∩ z=Z)'}}
+                }
+            };
+            layout1 ={
+                autosize: false,
+                height: 750,
+                width: 1000,
                 margin: {l:0,r:0,b:0,t:0,pad:0},
                 scene:{
                     xaxis:{title:{text:'X'}},
@@ -3474,11 +3631,22 @@ $(document).ready(function(){
                 }
             };
         }
-        else if(des3d == 2){
+        else if(des3d == 2){//Bivariate YZ PDF
             data = [{x: y,y: z,z: byzCut,type: 'surface'}];
             updateOutput(outtemp[2]);
             layout ={
-                autosize: true,
+                autosize: false,
+                margin: {l:0,r:0,b:0,t:0,pad:0},
+                scene:{
+                    xaxis:{title:{text:'Y'}},
+                    yaxis:{title:{text:'Z'}},
+                    zaxis:{title:{text:'P(y=Y ∩ z=Z)'}}
+                }
+            };
+            layout1 ={
+                autosize: false,
+                height: 750,
+                width: 1000,
                 margin: {l:0,r:0,b:0,t:0,pad:0},
                 scene:{
                     xaxis:{title:{text:'Y'}},
@@ -3487,11 +3655,22 @@ $(document).ready(function(){
                 }
             };
         }
-        else if(des3d == 3){
+        else if(des3d == 3){//Bivariate XY CDF
             data = [{x: x,y: y,z: Bxy,type: 'surface'}];
             updateOutput(outtemp[0]);
             layout ={
-                autosize: true,
+                autosize: false,
+                margin: {l:0,r:0,b:0,t:0,pad:0},
+                scene:{
+                    xaxis:{title:{text:'X'}},
+                    yaxis:{title:{text:'Y'}},
+                    zaxis:{title:{text:'P(x≤X ∩ y≤Y)'}}
+                }
+            };
+            layout1 ={
+                autosize: false,
+                height: 750,
+                width: 1000,
                 margin: {l:0,r:0,b:0,t:0,pad:0},
                 scene:{
                     xaxis:{title:{text:'X'}},
@@ -3500,11 +3679,22 @@ $(document).ready(function(){
                 }
             };
         }
-        else if(des3d == 4){
+        else if(des3d == 4){//Bivariate XZ CDF
             data = [{x: x,y: z,z: Bxz,type: 'surface'}];
             updateOutput(outtemp[1]);
             layout ={
-                autosize: true,
+                autosize: false,
+                margin: {l:0,r:0,b:0,t:0,pad:0},
+                scene:{
+                    xaxis:{title:{text:'X'}},
+                    yaxis:{title:{text:'Z'}},
+                    zaxis:{title:{text:'P(x≤X ∩ z≤Z)'}}
+                }
+            };
+            layout1 ={
+                autosize: false,
+                height: 750,
+                width: 1000,
                 margin: {l:0,r:0,b:0,t:0,pad:0},
                 scene:{
                     xaxis:{title:{text:'X'}},
@@ -3513,11 +3703,22 @@ $(document).ready(function(){
                 }
             };
         }
-        else if(des3d == 5){
+        else if(des3d == 5){//Bivariate YZ CDF
             data = [{x: y,y: z,z: Byz,type: 'surface'}];
             updateOutput(outtemp[2]);
             layout ={
-                autosize: true,
+                autosize: false,
+                margin: {l:0,r:0,b:0,t:0,pad:0},
+                scene:{
+                    xaxis:{title:{text:'Y'}},
+                    yaxis:{title:{text:'Z'}},
+                    zaxis:{title:{text:'P(y≤Y ∩ z≤Z)'}}
+                }
+            };
+            layout1 ={
+                autosize: false,
+                height: 750,
+                width: 1000,
                 margin: {l:0,r:0,b:0,t:0,pad:0},
                 scene:{
                     xaxis:{title:{text:'Y'}},
@@ -3526,7 +3727,7 @@ $(document).ready(function(){
                 }
             };
         }
-        else if(des3d == 6){
+        else if(des3d == 6){//Bivariate conditional
             var xout = [];
             var yout = [];
             if(cond1 == 0){xout = x; yout = y;}
@@ -3538,7 +3739,18 @@ $(document).ready(function(){
             var temp1 = [['X', 'Y'], ['X', 'Z'], ['Y', 'Z']];
             var temp2 = [['P(x=X ∩ y=Y | Z=' + zmin, 'P(x=X ∩ y=Y | Z=' + zmax], ['P(x=X ∩ z=Z | Y=' + ymin, 'P(x=X ∩ z=Z | Y=' + ymax], ['P(y=Y ∩ z=Z | X=' + xmin, 'P(y=Y ∩ z=Z | X=' + xmax]];
             layout ={
-                autosize: true,
+                autosize: false,
+                margin: {l:0,r:0,b:0,t:0,pad:0},
+                scene:{
+                    xaxis:{title:{text:temp1[cond1][0]}},
+                    yaxis:{title:{text:temp1[cond1][1]}},
+                    zaxis:{title:{text:temp2[cond1][cond2]}}
+                }
+            };
+            layout1 ={
+                autosize: false,
+                height: 750,
+                width: 1000,
                 margin: {l:0,r:0,b:0,t:0,pad:0},
                 scene:{
                     xaxis:{title:{text:temp1[cond1][0]}},
@@ -3547,10 +3759,12 @@ $(document).ready(function(){
                 }
             };
         }
-        Plotly.newPlot('surfacePlot', data, layout);
+        Plotly.newPlot('surfacePlot', data, layout1);//enlarged plot
         Plotly.restyle('surfacePlot', {showscale: false});
+        Plotly.newPlot('surfacePlot1', data, layout);//regular plot
+        Plotly.restyle('surfacePlot1', {showscale: false});
     }
-    var getbiv = function(){//Gets the bivariate matrix from the trivariate tensor
+    var getbiv = function(){//Gets the bivariate conditinal matrix from the trivariate tensor
         var xout = [];
         var yout = [];
         var pos = 0;
@@ -3587,6 +3801,7 @@ $(document).ready(function(){
             temp1.push(temp);
             temp3.push(temp2);
         }
+        //Updates the output window with the corresponsing probability
         var yeet = sumMat(temp1)/sumMat(temp3);
         if(cond1 == 0 && cond2 == 0){updateOutput('P(' + xmin + ' < X < ' + xmax + ' ∩ ' + ymin + ' < Y < ' + ymax + ' | Z = ' + zmin + ') = ' + yeet.toFixed(3) + '');}
         else if(cond1 == 0 && cond2 == 1){updateOutput('P(' + xmin + ' < X < ' + xmax + ' ∩ ' + ymin + ' < Y < ' + ymax + ' | Z = ' + zmax + ') = ' + yeet.toFixed(3) + '');}
@@ -3597,6 +3812,7 @@ $(document).ready(function(){
         return temp1;
     }
     var updateTriPlot = function(){//Updates the trivariate plot using Plotly
+        //Declaring temporary variables
         var xdisp = [];
         var ydisp = [];
         var zdisp = [];
@@ -3605,23 +3821,29 @@ $(document).ready(function(){
         var temp1 = "";
         var anno = [];
         var temp2 = 0;
+        var clrs = [];
+        var annot = [];
+        //Converting the trivariate tensor into a long array, as Plotly cannot deal with tensors
         for (i = 0; i < x.length; i++){
             for (var j = 0; j < y.length; j++){
                 for (var k = 0; k < z.length; k++){
                     if(des4d == 0){temp = Math.round(255-255*triCut[i][j][k]/trimax);temp2 = triCut[i][j][k];}
-                    else{temp = Math.round(255-255*Tri[i][j][k]);temp2 = Tri[i][j][k];}
+                    else if(des4d == 1){temp = Math.round(255-255*Tri[i][j][k]);temp2 = Tri[i][j][k];}
+                    else if(des4d == 2){temp = Math.round(255-255*triCut[i][j][k]/trimax);temp2 = triCut[i][j][k];}
                     temp1 = temp.toString();
-                    if((temp < 250 && des4d == 0) || (temp < 200 && des4d == 1)){
+                    if((temp < 250 && (des4d == 0 || des4d == 2)) || (temp < 200 && des4d == 1)){
                         xdisp.push(x[i]);
                         ydisp.push(y[j]);
                         zdisp.push(z[k]);
+                        clrs.push(temp);
+                        annot.push(temp2);
                         colours.push("rgb(" + 255 + "," + temp1 + "," + temp1 + ")");
                         anno.push('p=' + temp2);
                     }
                 }
             }
         }
-        if(des4d == 0){
+        if(des4d == 0){//Trivariate point cloud PDF
             data = [{
                 x: xdisp,
                 y: ydisp,
@@ -3636,11 +3858,11 @@ $(document).ready(function(){
                 },
                 type: 'scatter3d'
             }];
-            cutprob = 55*trimax/255;
+            cutprob = 5*trimax/255;
             $('#cdf').hide();
             $('#pdf').show();
         }
-        else{
+        else if(des4d == 1){//Trivariate CDF
             data = [{
                 x: xdisp,
                 y: ydisp,
@@ -3659,6 +3881,41 @@ $(document).ready(function(){
             $('#pdf').hide();
             $('#cdf').show();
         }
+        else if(des4d == 2){//Trivariate isosurface PDF
+            var data = [];
+            for (var i = 0; i < 250; i += 25){
+                var tempx = [];
+                var tempy = [];
+                var tempz = [];
+                var avga = 0;
+                var counter = 0;
+                for(var j = 0; j < xdisp.length; j++){
+                    if(clrs[j] >= i && clrs[j] <= i+25){
+                        tempx.push(xdisp[j]);
+                        tempy.push(ydisp[j]);
+                        tempz.push(zdisp[j]);
+                        avga += annot[j];
+                        counter++;
+                    }
+                }
+                var col = 'rgb(255,' + i + ',' + i + ')';
+                var temptrace = {
+                    opacity:0.1,
+                    color:col,
+                    text: avga/counter,
+                    type: 'mesh3d',
+                    hoverinfo: "x+y+z+text",
+                    x: tempx,
+                    y: tempy,
+                    z: tempz,
+                    alphahull: 0//very important that this is 0, otherwise nothing works
+                }
+                data.push(temptrace);
+            }
+            cutprob = 5*trimax/255;
+            $('#cdf').hide();
+            $('#pdf').show();
+        }
         pointsshown = xdisp.length;
         pointstot = (x.length-1)*(y.length-1)*(z.length-1);
         var layout = {
@@ -3668,7 +3925,9 @@ $(document).ready(function(){
                 zaxis:{title:{text:'Z'},range:[pz1-sigmaStep*pz2,pz1+sigmaStep*pz2]},
                 camera:{eye:{x:2,y:1,z:0.75}}
             },
-            autosize: true,
+            autosize: false,
+            width: 1000,
+            height: 750,
             margin: {
                 l: 0,
                 r: 0,
@@ -3677,18 +3936,35 @@ $(document).ready(function(){
                 pad: 0
             }
         };
-        Plotly.newPlot('triPlot', data, layout);
+        var layout1 = {
+            scene:{
+                xaxis:{title:{text:'X'},range:[px1-sigmaStep*px2,px1+sigmaStep*px2]},
+                yaxis:{title:{text:'Y'},range:[py1-sigmaStep*py2,py1+sigmaStep*py2]},
+                zaxis:{title:{text:'Z'},range:[pz1-sigmaStep*pz2,pz1+sigmaStep*pz2]},
+                camera:{eye:{x:2,y:1,z:0.75}}
+            },
+            autosize: false,
+            margin: {
+                l: 0,
+                r: 0,
+                b: 0,
+                t: 0,
+                pad: 0
+            }
+        };
+        Plotly.newPlot('triPlot', data, layout);//enlarged plot
+        Plotly.newPlot('triPlot1', data, layout1);//regular plot
     }
                                                             // On loading
-    var initial = function(){// loads initial functions to be displayed
+    var initial = function(){// loads initial functions to be displayed, is only called when no custom url is used
         if(starting != 0){return;}
         doAll();
         starting++;
         dispI();
     }
-    $('main').draggable();
                                                             // Download Data and Settings
-    $('#downdata').click(function(){//Downloading data
+    $('#downdata').click(function(){//Downloading data as a txt file
+        //Graph Settings
         var todown = "Settings:\n";
         todown += "XDist\t" + distTitle[xdist] + "\n" + "YDist\t" + distTitle[ydist] + "\n" + "ZDist\t" + distTitle[zdist] + "\n";
         todown += "RhoXY\t" + rhoxy + "\n" + "RhoXZ\t" + rhoxz + "\n" + "RhoYZ\t" + rhoyz + "\n";
@@ -3696,6 +3972,7 @@ $(document).ready(function(){
         todown += "Xmin\t" + xmin + "\tXmax\t" + xmax + "\nYmin\t" + ymin + "\tYmax\t" + ymax + "\nZmin\t" + zmin + "\tZmax\t" + zmax + "\n";
         todown += "\nData table:\n";
         todown += "X\tY\tZ\tp(x=X)\tp(y=Y)\tp(z=Y)\tp(x=X & y=Y)\tp(x=X & z=Z)\tp(y=Y & z=Z)\tp(x=X & y=Y & z=Z)\n"
+        //Data table
         for(var i = 0; i < x.length; i++){
             for(var j = 0; j < y.length; j++){
                 for(var k = 0; k < z.length; k++){
@@ -3703,6 +3980,7 @@ $(document).ready(function(){
                 }
             }
         }
+        //Download code
         var element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(todown));
         element.setAttribute('download', "data.txt");
@@ -3711,24 +3989,26 @@ $(document).ready(function(){
         element.click();
         document.body.removeChild(element);
     })
-    $('#getset').click(function(){//Generates url string
+    $('#getset').click(function(){//Generates url string based on graph settings
         var toout = params[0];
         toout += "?" + xdist + "?" + rhoxy + "?" + px1 + "?" + px2 + "?" + px3 + "?" + px4 + "?" + xmin + "?" + xmax + "?" + ydist + "?" + rhoxz + "?" + py1 + "?" + py2 + "?" + py3 + "?" + py4 + "?" + ymin + "?" + ymax + "?" + zdist + "?" + rhoyz + "?" + pz1 + "?" + pz2 + "?" + pz3 + "?" + pz4 + "?" + zmin + "?" + zmax;
         $('#setout').replaceWith('<textarea id = "setout" readonly>' + toout + '</textarea>');
     })
-    $('#copyset').click(function(){//Copies settings to clipboard
+    $('#copyset').click(function(){//Copies settings url string to clipboard
         $('#setout').select();
         document.execCommand('copy');
     })
-    $('#downset').click(function(){//Generates a settings file
-        var todown = "Settings:\n";
-        todown += "XDist\t" + distTitle[xdist] + "\n" + "YDist\t" + distTitle[ydist] + "\n" + "ZDist\t" + distTitle[zdist] + "\n";
-        todown += "RhoXY\t" + rhoxy + "\n" + "RhoXZ\t" + rhoxz + "\n" + "RhoYZ\t" + rhoyz + "\n";
-        todown += "X parameters:\t" + px1 + "\t" + px2 + "\t" + px3 + "\t" + px4 + "\n" + "Y parameters:\t" + py1 + "\t" + py2 + "\t" + py3 + "\t" + py4 + "\n" + "Z parameters:\t" + pz1 + "\t" + pz2 + "\t" + pz3 + "\t" + pz4 + "\n";
-        todown += "Xmin\t" + xmin + "\tXmax\t" + xmax + "\nYmin\t" + ymin + "\tYmax\t" + ymax + "\nZmin\t" + zmin + "\tZmax\t" + zmax + "\n";
+    $('#downset').click(function(){//Generates a settings JSON file
+        var todown = '{\n\t"TVN Settings": {\n';
+        todown += '\t\t"Rho":{\n\t\t\t"RhoXY": ' + rhoxy + ',\n\t\t\t"RhoXZ": ' + rhoxz + ',\n\t\t\t"RhoYZ": '+ rhoyz + '\n\t\t},\n';
+        todown += '\t\t"X":{\n\t\t\t"X Distribution Name": "' + distTitle[xdist] + '",\n\t\t\t"X Distribution Number": ' + xdist + ',\n\t\t\t"P1": ' + px1 + ',\n\t\t\t"P2": ' + px2 + ',\n\t\t\t"P3": ' + px3 + ',\n\t\t\t"P4": ' + px4 + ',\n\t\t\t"Min": ' + xmin + ',\n\t\t\t"Max": ' + xmax + '\n\t\t},\n';
+        todown += '\t\t"Y":{\n\t\t\t"Y Distribution Name": "' + distTitle[ydist] + '",\n\t\t\t"Y Distribution Number": ' + ydist + ',\n\t\t\t"P1": ' + py1 + ',\n\t\t\t"P2": ' + py2 + ',\n\t\t\t"P3": ' + py3 + ',\n\t\t\t"P4": ' + py4 + ',\n\t\t\t"Min": ' + ymin + ',\n\t\t\t"Max": ' + ymax + '\n\t\t},\n';
+        todown += '\t\t"Z":{\n\t\t\t"Z Distribution Name": "' + distTitle[zdist] + '",\n\t\t\t"Z Distribution Number": ' + zdist + ',\n\t\t\t"P1": ' + pz1 + ',\n\t\t\t"P2": ' + pz2 + ',\n\t\t\t"P3": ' + pz3 + ',\n\t\t\t"P4": ' + pz4 + ',\n\t\t\t"Min": ' + zmin + ',\n\t\t\t"Max": ' + zmax + '\n\t\t}\n';
+        todown += '\t}\n}';
+        //Downoad code
         var element = document.createElement('a');
         element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(todown));
-        element.setAttribute('download', "settings.txt");
+        element.setAttribute('download', "settings.json");
         element.style.display = 'none';
         document.body.appendChild(element);
         element.click();
@@ -3794,6 +4074,6 @@ $(document).ready(function(){
     else{//If the custom URL is strange or not present, launches standard tri-normal
         initial();
     }
-                                                            // Testing button
+                                                            // Testing button - not currently used
     $('#test').click(function(){})
 })

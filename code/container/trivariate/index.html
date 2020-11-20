@@ -14,6 +14,8 @@
     <link rel="alternate" type="application/rss+xml" rel="tooltip" title="SOCR News" href="http://socr.umich.edu/html/feed.rss">
     <script type="text/javascript" src="./scripts/jquery-1.7.2.min.js"></script>
     <script type = "text/javascript" src="./scripts/jquery-ui.js"></script>
+    <script src="./scripts/ResizeSensor.js"></script>
+    <script src="./scripts/ElementQueries.js"></script>
     <script type="text/javascript" src="./scripts/plotly.min.js"></script>
     <script type="text/javascript" src="./scripts/distributions.js"></script>
     <script type="text/javascript" src="./scripts/tri.js"></script>
@@ -231,7 +233,8 @@
             <li>Use the <b>Distribution type</b> section to select what distributions you would like to be displayed</li>
             <li>Use the <b>Variable Settings</b> section to input the distribution parameters and correlation coefficient</li>
             <li>Use the <b>Control</b> section to input appropriate bivariate limits for X, Y and Z variables</li>
-            <li>Use the <b>Graph Settings</b> sections to indicate what type of Marginal Distribution and Joint Bivariate Distribution to view. You can select to view either the Marginal functions of each variable, the Conditional distributions at the limits of variables, or the CDF functions for the Marginal Distribution graph, while the PDF and the CDF are available for the Joint Bivariate Distribution plot.</li>
+            <li>Use the <b>Graph Settings</b> sections to indicate what type of Marginal Distribution and Joint Bivariate Distribution to view. You can select to view either the Marginal functions of each variable, the Conditional distributions at the limits of variables, or the CDF functions for the Marginal Distribution graph, while the PDF, conditional PDF and the CDF are available for the Joint Bivariate Distribution plot.</li>
+            <li><b>Please note that the "Trivariate Isosurface PDF" may take a long time to generate!</b></li>
             <li>Once done, click the <b>X</b> button to close the Graph Settings Section. The graph may take a few seconds to update.</li>
         </ul>
         <h2>Rules</h2>
@@ -531,9 +534,9 @@
                 <td colspan="3"><h2>Joint Trivariate Distribution</h2></td>
             </tr>
             <tr>
-                <td><input type = "radio" name = "3" value="0" checked> Trivariate PDF</td>
+                <td><input type = "radio" name = "3" value="0" checked> Trivariate Point Cloud PDF</td>
+                <td><input type = "radio" name = "3" value="2"> Trivariate Isosurface PDF</td>
                 <td><input type = "radio" name = "3" value="1"> Trivariate CDF</td>
-                <td></td>
             </tr>
         </table>
     </div></main>
@@ -559,7 +562,7 @@
         </ul>
         <h3>Download Settings</h3>
         <ul>
-            <li>This downloads just the settings as a text file</li>
+            <li>This downloads just the settings as a JSON file</li>
         </ul>
         <textarea id = "setout" onfocus="this.select()" readonly></textarea>
             <br>
@@ -571,6 +574,18 @@
     <div id = "versionHist">
         <button id = "closeV">&times;</button>
         <h2>Version History</h2>
+        <h3>1.3.1</h3>
+        <ul>
+            <li>Added comments to all of the JS code</li>
+            <li>Renamed "Trivariate PDF" into "Trivariate Point Cloud PDF"</li>
+            <li>Renamed "Trivariate PDF Cloud" into "Trivariate Isosurface PDF"</li>
+        </ul>
+        <h3>1.3</h3>
+        <ul>
+            <li>Download Settings now downloads a JSON file</li>
+            <li>Added "Trivariate PDF Cloud" which displays an ellipsoid cloud of probabilities instead of individual points</li>
+            <li>Added Enlarge functionality to the graphs</li>
+        </ul>
         <h3>1.2</h3>
         <ul>
             <li>Added Copy Settings to automatically copy the URL to clipboard</li>
@@ -590,6 +605,21 @@
             <li>Carried out further testing to ensure that the probabilities reported are accurate</li>
         </ul>
     </div>
+    <div id = "flatEn">
+        <button id = "closeFE">&times;</button>
+        <h2 id = "flattitle"></h2>
+        <div id = "graph"></div>
+    </div>
+    <div id = "surfEn">
+        <button id = "closeSE">&times;</button>
+        <h2 id = "surftitle"></h2>
+        <div id = "surfacePlot"></div>
+    </div>
+    <div id = "triEn">
+        <button id = "closeTE">&times;</button>
+        <h2 id = "trititle"></h2>
+        <div id = "triPlot"></div>
+    </div>
     <button id = "show">Graph Settings</button>
     <button id = "showR">Methodology and Calculator Rules</button>
     <button id = "showD">Download Options</button>
@@ -601,16 +631,19 @@
     </table>
     <div id = "graphs">
         <div>
-            <h2 id = "flattitle"></h2>
-            <div id = "graph"></div>
+            <h2 id = "flattitle1"></h2>
+            <button id = "flaten">Enlarge</button>
+            <div id = "graph1"></div>
         </div>
         <div>
-            <h2 id = "surftitle"></h2>
-            <div id = "surfacePlot"></div>
+            <h2 id = "surftitle1"></h2>
+            <button id = "surfen">Enlarge</button>
+            <div id = "surfacePlot1"></div>
         </div>
         <div>
-            <h2 id = "trititle"></h2>
-            <div id = "triPlot"></div>
+            <h2 id = "trititle1"></h2>
+            <button id = "trien">Enlarge</button>
+            <div id = "triPlot1"></div>
         </div>
     </div>
 </div>

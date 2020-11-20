@@ -109,6 +109,62 @@ main{
     padding-bottom: 1em;
 }
 
+#flatEn{
+    display: none;
+    background-color: #eee;
+    z-index: 4;
+    position: fixed;
+    min-width: 30vw;
+    top: 5vh;
+    left: 15vw;
+    border: 2px solid black;
+    border-radius: 10px;
+    min-height: 30vh;
+    overflow: auto;
+    padding-left: 1em;
+    padding-bottom: 1em;
+    resize: both;
+}
+
+#graph{
+    max-width: 95%;
+    max-height: 95%;
+}
+
+#surfEn{
+    display: none;
+    background-color: #eee;
+    z-index: 4;
+    position: fixed;
+    max-width: 75vw;
+    min-width: 50vw;
+    top: 5vh;
+    left: 15vw;
+    border: 2px solid black;
+    border-radius: 10px;
+    max-height: 50vw;
+    overflow: auto;
+    padding-left: 1em;
+    padding-bottom: 1em;
+}
+
+#triEn{
+    display: none;
+    background-color: #eee;
+    z-index: 4;
+    position: fixed;
+    max-width: 75vw;
+    min-width: 50vw;
+    top: 5vh;
+    left: 15vw;
+    border: 2px solid black;
+    border-radius: 10px;
+    max-height: 50vw;
+    overflow: auto;
+    padding-left: 1em;
+    padding-bottom: 1em;
+}
+
 #mainContainer{
     display: flex;
     flex-flow: column;
@@ -163,6 +219,39 @@ main{
 }
 
 #closeV{
+    position: absolute;
+	z-index: 3;
+    background-color: rgb(200, 200, 200);
+    width: 1em !important;
+    height: 1em !important;
+    font-size:2em;
+    right: 0.5em;
+    margin-top: 0.5em;
+}
+
+#closeFE{
+    position: absolute;
+	z-index: 3;
+    background-color: rgb(200, 200, 200);
+    width: 1em !important;
+    height: 1em !important;
+    font-size:2em;
+    right: 0.5em;
+    margin-top: 0.5em;
+}
+
+#closeSE{
+    position: absolute;
+	z-index: 3;
+    background-color: rgb(200, 200, 200);
+    width: 1em !important;
+    height: 1em !important;
+    font-size:2em;
+    right: 0.5em;
+    margin-top: 0.5em;
+}
+
+#closeTE{
     position: absolute;
 	z-index: 3;
     background-color: rgb(200, 200, 200);
