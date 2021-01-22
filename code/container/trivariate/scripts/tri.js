@@ -1488,7 +1488,7 @@ $(document).ready(function(){
                     if(topush > trimax){trimax = topush;}//updating maximum probability value in tensor
                     if(x[i] < xmin || x[i] > xmax || y[j] < ymin || y[j] > ymax || z[k] < zmin || z[k] > zmax){temp4.push(0);}//if the xyz point is in bounds then add probability to cut array
                     else{temp4.push(topush);}//if the xyz point is not in bounds then add 0 to cut array
-                    if(i%5 == 0 && j%5 == 0 && k%5 == 0){temp6.push(topush);if(topush > trimax){triShellMax = topush;}}
+                    if(i%5 == 0 && j%5 == 0 && k%5 == 0){temp6.push(topush);if(topush > triShellMax){triShellMax = topush;}}
                 }
                 //appending arrays to matrixes
                 temp1.push(temp2);
