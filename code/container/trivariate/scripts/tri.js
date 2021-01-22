@@ -1,5 +1,7 @@
 $(document).ready(function(){
     $('main').draggable();
+    var windowWidth = $(window).width();
+    var windowHeight = $(window).height();
     /*
     How to add a new distribution:
     1. xdist comment - add number for distribution and the name for it
@@ -49,6 +51,8 @@ $(document).ready(function(){
     var triCut = [];// Stores the tensor for trivariate PDF between bounds
     var Tri = [];// Stores the tensor for trivariate CDF
     var trimax = 0;// Stores the max value of the trivariate distribution
+    var triShell = [];// Stores the points used for the shell display
+    var triShellMax = 0;// Stores the max value of the trivariate shell distribution
     //var kappa = 0;// stores value for k for FGM
     var px1 = 0;// first parameter of distribution X
     var px2 = 1;// second parameter of distribution X
@@ -1448,11 +1452,15 @@ $(document).ready(function(){
         tri = [];
         triCut = [];
         Tri = [];
+        triShell = [];
         trimax = 0;
+        triShellMax = 0;
         var temp1 = [];
         var temp2 = [];
         var temp3 = [];
         var temp4 = [];
+        var temp5 = [];
+        var temp6 = [];
         var topush = 0;
         var copula3d = 0;
         var w = 0;
@@ -1463,9 +1471,11 @@ $(document).ready(function(){
         for (var i = 0; i < x.length; i++){
             temp1 = [];//temporary uncut probability matrix
             temp3 = [];//temporary cut probability matrix
+            temp5 = [];//temporary shell probability matrix
             for (var j = 0; j < y.length; j++){
                 temp2 = [];//temporary cut probability array
                 temp4 = [];//temporary uncut probability array
+                temp6 = [];//temporary shell probability array
                 for (var k = 0; k < z.length; k++){
                     //Gaussian 3D copula
                     a = Math.sqrt(2)*erfi(2*Fx[i]-1);
@@ -1478,14 +1488,17 @@ $(document).ready(function(){
                     if(topush > trimax){trimax = topush;}//updating maximum probability value in tensor
                     if(x[i] < xmin || x[i] > xmax || y[j] < ymin || y[j] > ymax || z[k] < zmin || z[k] > zmax){temp4.push(0);}//if the xyz point is in bounds then add probability to cut array
                     else{temp4.push(topush);}//if the xyz point is not in bounds then add 0 to cut array
+                    if(i%5 == 0 && j%5 == 0 && k%5 == 0){temp6.push(topush);if(topush > trimax){triShellMax = topush;}}
                 }
                 //appending arrays to matrixes
                 temp1.push(temp2);
                 temp3.push(temp4);
+                if(i%5 == 0 && j%5 == 0){temp5.push(temp6);}
             }
             //adding matrixes to trivariate tensors
             tri.push(temp1);
             triCut.push(temp3);
+            if(i%5 == 0){triShell.push(temp5);}
         }
         makeTriBig();//generate trivaiate CDF
         //generating trivariate consitional probability
@@ -1793,8 +1806,8 @@ $(document).ready(function(){
         };
         var layout = {
             autosize: false,
-            width: 1000,
-            height: 750,
+            width: windowWidth/2,
+            height: windowHeight*0.8,
             useResizeHandler: true,
             margin: {
                 l: 1,
@@ -3597,8 +3610,8 @@ $(document).ready(function(){
             };
             layout1 ={
                 autosize: false,
-                height: 750,
-                width: 1000,
+                width: windowWidth/2,
+                height: windowHeight*0.8,
                 margin: {l:0,r:0,b:0,t:0,pad:0},
                 scene:{
                     xaxis:{title:{text:'X'}},
@@ -3621,8 +3634,8 @@ $(document).ready(function(){
             };
             layout1 ={
                 autosize: false,
-                height: 750,
-                width: 1000,
+                width: windowWidth/2,
+                height: windowHeight*0.8,
                 margin: {l:0,r:0,b:0,t:0,pad:0},
                 scene:{
                     xaxis:{title:{text:'X'}},
@@ -3645,8 +3658,8 @@ $(document).ready(function(){
             };
             layout1 ={
                 autosize: false,
-                height: 750,
-                width: 1000,
+                width: windowWidth/2,
+                height: windowHeight*0.8,
                 margin: {l:0,r:0,b:0,t:0,pad:0},
                 scene:{
                     xaxis:{title:{text:'Y'}},
@@ -3669,8 +3682,8 @@ $(document).ready(function(){
             };
             layout1 ={
                 autosize: false,
-                height: 750,
-                width: 1000,
+                width: windowWidth/2,
+                height: windowHeight*0.8,
                 margin: {l:0,r:0,b:0,t:0,pad:0},
                 scene:{
                     xaxis:{title:{text:'X'}},
@@ -3693,8 +3706,8 @@ $(document).ready(function(){
             };
             layout1 ={
                 autosize: false,
-                height: 750,
-                width: 1000,
+                width: windowWidth/2,
+                height: windowHeight*0.8,
                 margin: {l:0,r:0,b:0,t:0,pad:0},
                 scene:{
                     xaxis:{title:{text:'X'}},
@@ -3717,8 +3730,8 @@ $(document).ready(function(){
             };
             layout1 ={
                 autosize: false,
-                height: 750,
-                width: 1000,
+                width: windowWidth/2,
+                height: windowHeight*0.8,
                 margin: {l:0,r:0,b:0,t:0,pad:0},
                 scene:{
                     xaxis:{title:{text:'Y'}},
@@ -3749,8 +3762,8 @@ $(document).ready(function(){
             };
             layout1 ={
                 autosize: false,
-                height: 750,
-                width: 1000,
+                width: windowWidth/2,
+                height: windowHeight*0.8,
                 margin: {l:0,r:0,b:0,t:0,pad:0},
                 scene:{
                     xaxis:{title:{text:temp1[cond1][0]}},
@@ -3829,7 +3842,7 @@ $(document).ready(function(){
                 for (var k = 0; k < z.length; k++){
                     if(des4d == 0){temp = Math.round(255-255*triCut[i][j][k]/trimax);temp2 = triCut[i][j][k];}
                     else if(des4d == 1){temp = Math.round(255-255*Tri[i][j][k]);temp2 = Tri[i][j][k];}
-                    else if(des4d == 2){temp = Math.round(255-255*triCut[i][j][k]/trimax);temp2 = triCut[i][j][k];}
+                    else if(des4d == 2){if(i%5 == 0 && j%5 == 0 && k%5 == 0){temp = Math.round(255-255*triShell[i/5][j/5][k/5]/triShellMax);temp2 = triShell[i/5][j/5][k/5];}}
                     temp1 = temp.toString();
                     if((temp < 250 && (des4d == 0 || des4d == 2)) || (temp < 200 && des4d == 1)){
                         xdisp.push(x[i]);
@@ -3883,14 +3896,14 @@ $(document).ready(function(){
         }
         else if(des4d == 2){//Trivariate isosurface PDF
             var data = [];
-            for (var i = 0; i < 250; i += 25){
+            for (var i = 0; i < 250; i += 10){
                 var tempx = [];
                 var tempy = [];
                 var tempz = [];
                 var avga = 0;
                 var counter = 0;
                 for(var j = 0; j < xdisp.length; j++){
-                    if(clrs[j] >= i && clrs[j] <= i+25){
+                    if(clrs[j] >= i && clrs[j] <= i+10){
                         tempx.push(xdisp[j]);
                         tempy.push(ydisp[j]);
                         tempz.push(zdisp[j]);
@@ -3912,7 +3925,7 @@ $(document).ready(function(){
                 }
                 data.push(temptrace);
             }
-            cutprob = 5*trimax/255;
+            cutprob = 5*triShellMax/255;
             $('#cdf').hide();
             $('#pdf').show();
         }
@@ -3926,8 +3939,8 @@ $(document).ready(function(){
                 camera:{eye:{x:2,y:1,z:0.75}}
             },
             autosize: false,
-            width: 1000,
-            height: 750,
+            width: windowWidth/2,
+            height: windowHeight*0.8,
             margin: {
                 l: 0,
                 r: 0,
