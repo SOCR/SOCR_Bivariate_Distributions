@@ -200,12 +200,16 @@ $(document).ready(function(){
             $('#px4').replaceWith('<textarea id = "px4" onfocus="this.select()" rows="1" maxlength="4">' + px4 + '</textarea>');
         }
         //X min
-        if(xmin >= xmax || isNaN(xmin) || (xmin < 0 && (xdist == 1 || xdist == 2 || xdist == 3 || xdist == 5 || xdist == 7 || xdist == 8 || xdist == 10 || xdist == 13 || xdist == 15 || xdist == 17 || xdist == 18 || xdist == 21 || xdist == 23 || xdist == 25 || xdist == 26 || xdist == 27 || xdist == 28 || xdist == 29 || xdist == 30 || xdist == 31 || xdist == 32 || xdist == 33 || xdist == 34 || xdist == 35 || xdist == 37 || xdist == 38 || xdist == 39 || xdist == 40))){
+        if(xmin >= xmax || isNaN(xmin) || (xmin < 0 && (xdist == 1 || xdist == 2 || xdist == 3 || xdist == 5 || xdist == 7 || xdist == 8 || xdist == 10 || xdist == 13 || xdist == 15 || xdist == 17 || xdist == 18 || xdist == 21 || xdist == 23 || xdist == 25 || xdist == 26 || xdist == 27 || xdist == 28 || xdist == 29 || xdist == 30 || xdist == 31 || xdist == 32 || xdist == 33 || xdist == 34 || xdist == 35 || xdist == 37 || xdist == 38 || xdist == 39))){
             xmin = 0;
             $('#xmin').replaceWith('<textarea id = "xmin" onfocus="this.select()" rows="1" maxlength="4">' + xmin + '</textarea>');
         }
         else if(xmin < px1-2 && xdist == 12){
             xmin = px1-2;
+            $('#xmin').replaceWith('<textarea id = "xmin" onfocus="this.select()" rows="1" maxlength="4">' + xmin + '</textarea>');
+        }
+        else if(xmin < px1 && xdist == 40){
+            xmin = px1;
             $('#xmin').replaceWith('<textarea id = "xmin" onfocus="this.select()" rows="1" maxlength="4">' + xmin + '</textarea>');
         }
         //X max
@@ -289,12 +293,16 @@ $(document).ready(function(){
             $('#py3').replaceWith('<textarea id = "py4" onfocus="this.select()" rows="1" maxlength="4">' + py4 + '</textarea>');
         }
         //Y min
-        if(ymin >= ymax || isNaN(ymin) || (ymin < 0 && (ydist == 1 || ydist == 2 || ydist == 3 || ydist == 5 || ydist == 7 || ydist == 8 || ydist == 10 || ydist == 13 || ydist == 15 || ydist == 17 || ydist == 18 || ydist == 21 || ydist == 23 || ydist == 25 || ydist == 26 || ydist == 27 || ydist == 28 || ydist == 29 || ydist == 30 || ydist == 31 || ydist == 32 || ydist == 33 || ydist == 34 || ydist == 35 || ydist == 37 || ydist == 38 || ydist == 39 || ydist == 40))){
+        if(ymin >= ymax || isNaN(ymin) || (ymin < 0 && (ydist == 1 || ydist == 2 || ydist == 3 || ydist == 5 || ydist == 7 || ydist == 8 || ydist == 10 || ydist == 13 || ydist == 15 || ydist == 17 || ydist == 18 || ydist == 21 || ydist == 23 || ydist == 25 || ydist == 26 || ydist == 27 || ydist == 28 || ydist == 29 || ydist == 30 || ydist == 31 || ydist == 32 || ydist == 33 || ydist == 34 || ydist == 35 || ydist == 37 || ydist == 38 || ydist == 39))){
             ymin = 0;
             $('#ymin').replaceWith('<textarea id = "ymin" onfocus="this.select()" rows="1" maxlength="4">' + ymin + '</textarea>');
         }
         else if(ymin < py1-2 && ydist == 12){
             ymin = py1-2;
+            $('#ymin').replaceWith('<textarea id = "ymin" onfocus="this.select()" rows="1" maxlength="4">' + ymin + '</textarea>');
+        }
+        else if(ymin < py1 && ydist == 40){
+            ymin = py1;
             $('#ymin').replaceWith('<textarea id = "ymin" onfocus="this.select()" rows="1" maxlength="4">' + ymin + '</textarea>');
         }
         //Y max
@@ -378,12 +386,16 @@ $(document).ready(function(){
             $('#pz3').replaceWith('<textarea id = "pz4" onfocus="this.select()" rows="1" maxlength="4">' + pz4 + '</textarea>');
         }
         //Z min
-        if(zmin >= zmax || isNaN(zmin) || (zmin < 0 && (zdist == 1 || zdist == 2 || zdist == 3 || zdist == 5 || zdist == 7 || zdist == 8 || zdist == 10 || zdist == 13 || zdist == 15 || zdist == 17 || zdist == 18 || zdist == 21 || zdist == 23 || zdist == 25 || zdist == 26 || zdist == 27 || zdist == 28 || zdist == 29 || zdist == 30 || zdist == 31 || zdist == 32 || zdist == 33 || zdist == 34 || zdist == 35 || zdist == 37 || zdist == 38 || zdist == 39 || zdist == 40))){
+        if(zmin >= zmax || isNaN(zmin) || (zmin < 0 && (zdist == 1 || zdist == 2 || zdist == 3 || zdist == 5 || zdist == 7 || zdist == 8 || zdist == 10 || zdist == 13 || zdist == 15 || zdist == 17 || zdist == 18 || zdist == 21 || zdist == 23 || zdist == 25 || zdist == 26 || zdist == 27 || zdist == 28 || zdist == 29 || zdist == 30 || zdist == 31 || zdist == 32 || zdist == 33 || zdist == 34 || zdist == 35 || zdist == 37 || zdist == 38 || zdist == 39))){
             zmin = 0;
             $('#zmin').replaceWith('<textarea id = "zmin" onfocus="this.select()" rows="1" maxlength="4">' + zmin + '</textarea>');
         }
         else if(zmin < pz1-2 && zdist == 12){
             zmin = pz1-2;
+            $('#zmin').replaceWith('<textarea id = "zmin" onfocus="this.select()" rows="1" maxlength="4">' + zmin + '</textarea>');
+        }
+        else if(zmin < pz1 && zdist == 40){
+            zmin = pz1;
             $('#zmin').replaceWith('<textarea id = "zmin" onfocus="this.select()" rows="1" maxlength="4">' + zmin + '</textarea>');
         }
         //Z max
@@ -776,10 +788,10 @@ $(document).ready(function(){
         else if(des == 2){n = pz1;z = [];fz = [];Fz = [];}
         var tempdist = new WalkPositionDistribution(n);
         for(var i = 0; i <= n+5; i++){
-            t.push(i);
+            t.push(i+2);
             f.push(tempdist.density(t[i]));
-            F.push(tempdist.CDF(t[i]));
         }
+        F = makeCDF(f, 1);
         if(des == 0){x = t; fx = f; Fx = F}
         else if(des == 1){y = t; fy = f; Fy = F;}
         else if(des == 2){z = t; fz = f; Fz = F;}
@@ -1208,11 +1220,11 @@ $(document).ready(function(){
         else if(des == 1){beta = py1;y = [];fy = [];Fy = [];}
         else if(des == 2){beta = pz1;z = [];fz = [];Fz = [];}
         var tempdist = new BenfordDigitDistribution(beta);
-        for(var i = 0; i < beta; i++){
-            t.push(i-1);
+        for(var i = 0; i < beta-1; i++){
+            t.push(i+1);
             f.push(tempdist.density(t[i]));
         }
-        F = makeCDF(f, step);
+        F = makeCDF(f, 1);
         if(des == 0){x = t; fx = f; Fx = F}
         else if(des == 1){y = t; fy = f; Fy = F;}
         else if(des == 2){z = t; fz = f; Fz = F;}
@@ -1347,7 +1359,7 @@ $(document).ready(function(){
                 if (choice == 0){temp5 = fx[i]*fy[j]*copula}
                 else if (choice == 1){temp5 = fx[i]*fz[j]*copula}
                 else if (choice == 2){temp5 = fy[i]*fz[j]*copula}
-                if(temp5 < 0){temp5 = 0;}//if the copula produces a negative probability (it should not, but just in case) then we set that probability to 0
+                if(temp5 < 0 || isNaN(temp5) == true){temp5 = 0;}//if the copula produces a negative probability (it should not, but just in case) then we set that probability to 0
                 temp3.push(temp5);//appending probability to temporary array
             }
             b.push(temp3);//appending tomporary array to bivariate matrix
@@ -1423,7 +1435,7 @@ $(document).ready(function(){
             }
             ret.push(temp);
         }
-        //Calculating the bivariate consitional probability that is within the limits
+        //Calculating the bivariate conditional probability that is within the limits
         var temp1 = (sumMat(ret, max1, max2)/sumMat(b, max1, max2));
         if(isNaN(temp1)){temp1 = 0;}
         outtemp.push('P(' + amin + ' < ' + t1 + ' < ' + amax + ' ∩ ' + bmin + ' < ' + t2 + ' < ' + bmax + ') = ' + temp1.toFixed(3));
@@ -1484,11 +1496,12 @@ $(document).ready(function(){
                     w = 2*rhoxy*rhoxz*rhoyz*(a*a+b*b+c*c)-(a*a*(rhoxz*rhoxz + rhoxy*rhoxy) + b*b*(rhoyz*rhoyz + rhoxy*rhoxy) + c*c*(rhoxz*rhoxz + rhoyz*rhoyz)) + 2*(a*b*(rhoxy - rhoxz*rhoyz) + a*c*(rhoxz-rhoxy*rhoyz) + b*c*(rhoyz-rhoxy*rhoxz));
                     copula3d = (1/(Math.sqrt(1-(rhoxy*rhoxy + rhoxz*rhoxz + rhoyz*rhoyz) + 2*rhoxy*rhoxz*rhoyz)))*Math.exp(-(w)/(2*(rhoxy*rhoxy + rhoxz*rhoxz + rhoyz*rhoyz - 2*rhoxy*rhoxz*rhoyz-1)));
                     topush = fx[i]*fy[j]*fz[k]*copula3d;
+                    if(isNaN(topush) == true || topush < 0){topush = 0;}
                     temp2.push(topush);//adding probability to the uncut array
                     if(topush > trimax){trimax = topush;}//updating maximum probability value in tensor
                     if(x[i] < xmin || x[i] > xmax || y[j] < ymin || y[j] > ymax || z[k] < zmin || z[k] > zmax){temp4.push(0);}//if the xyz point is in bounds then add probability to cut array
                     else{temp4.push(topush);}//if the xyz point is not in bounds then add 0 to cut array
-                    if(i%5 == 0 && j%5 == 0 && k%5 == 0){temp6.push(topush);if(topush > triShellMax){triShellMax = topush;}}
+                    if((i%5 == 0 && j%5 == 0 && k%5 == 0) && (x[i] < xmin || x[i] > xmax || y[j] < ymin || y[j] > ymax || z[k] < zmin || z[k] > zmax)){temp6.push(topush);if(topush > triShellMax){triShellMax = topush;}}
                 }
                 //appending arrays to matrixes
                 temp1.push(temp2);
@@ -1631,17 +1644,17 @@ $(document).ready(function(){
         var dir = 0;
         //Based on the user input the corresponding variables are set to get the correct array from the correct bivariate matrix
         if(cond6 == 0 && cond7 == 0){mat = bxy;val = ymin;temp = y;dir = 1;}
-        else if(cond6 == 0 && cond7 == 0){mat = bxy;val = ymax;temp = y;dir = 0;}
-        else if(cond6 == 0 && cond7 == 1){mat = bxz;val = zmin;temp = z;dir = 1;}
-        else if(cond6 == 0 && cond7 == 2){mat = bxz;val = zmax;temp = z;dir = 0;}
+        else if(cond6 == 0 && cond7 == 1){mat = bxy;val = ymax;temp = y;dir = 0;}
+        else if(cond6 == 0 && cond7 == 2){mat = bxz;val = zmin;temp = z;dir = 1;}
+        else if(cond6 == 0 && cond7 == 3){mat = bxz;val = zmax;temp = z;dir = 0;}
         else if(cond6 == 1 && cond7 == 0){mat = bxy;val = xmin;temp = x;dir = 1;}
-        else if(cond6 == 1 && cond7 == 0){mat = bxy;val = xmax;temp = x;dir = 0;}
-        else if(cond6 == 1 && cond7 == 1){mat = byz;val = zmin;temp = z;dir = 1;}
-        else if(cond6 == 1 && cond7 == 2){mat = byz;val = zmax;temp = z;dir = 0;}
+        else if(cond6 == 1 && cond7 == 1){mat = bxy;val = xmax;temp = x;dir = 0;}
+        else if(cond6 == 1 && cond7 == 2){mat = byz;val = zmin;temp = z;dir = 1;}
+        else if(cond6 == 1 && cond7 == 3){mat = byz;val = zmax;temp = z;dir = 0;}
         else if(cond6 == 2 && cond7 == 0){mat = bxz;val = xmin;temp = x;dir = 1;}
-        else if(cond6 == 2 && cond7 == 0){mat = bxz;val = xmax;temp = x;dir = 0;}
-        else if(cond6 == 2 && cond7 == 1){mat = byz;val = ymin;temp = y;dir = 1;}
-        else if(cond6 == 2 && cond7 == 2){mat = byz;val = ymax;temp = y;dir = 0;}
+        else if(cond6 == 2 && cond7 == 1){mat = bxz;val = xmax;temp = x;dir = 0;}
+        else if(cond6 == 2 && cond7 == 2){mat = byz;val = ymin;temp = y;dir = 1;}
+        else if(cond6 == 2 && cond7 == 3){mat = byz;val = ymax;temp = y;dir = 0;}
         var loc = Math.floor((val-temp[0])/(temp[1]-temp[0]));
         if(loc < 0){loc = 0;}
         else if(loc >= temp.length){loc = temp.length - 1;}
@@ -3386,7 +3399,7 @@ $(document).ready(function(){
                 $('#z4').replaceWith('<td id = "z4">N/A</td>');
                 break;
             case 13:
-                $('#z1').replaceWith('<td id = "z1">Dazs<sub>Z</sub> = <textarea id = "pz1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
+                $('#z1').replaceWith('<td id = "z1">Days<sub>Z</sub> = <textarea id = "pz1" onfocus="this.select()" rows="1" maxlength="4">1</textarea></td>');
                 $('#z2').replaceWith('<td id = "z2">Sample<sub>Z</sub> = <textarea id = "pz2" onfocus="this.select()" rows="1" maxlength="4">5</textarea></td>');
                 $('#z3').replaceWith('<td id = "z3">N/A</td>');
                 $('#z4').replaceWith('<td id = "z4">N/A</td>');
@@ -3815,7 +3828,7 @@ $(document).ready(function(){
             temp3.push(temp2);
         }
         //Updates the output window with the corresponsing probability
-        var yeet = sumMat(temp1)/sumMat(temp3);
+        var yeet = sumMat(temp1, xout.length, yout.length)/sumMat(temp3, xout.length, yout.length);
         if(cond1 == 0 && cond2 == 0){updateOutput('P(' + xmin + ' < X < ' + xmax + ' ∩ ' + ymin + ' < Y < ' + ymax + ' | Z = ' + zmin + ') = ' + yeet.toFixed(3) + '');}
         else if(cond1 == 0 && cond2 == 1){updateOutput('P(' + xmin + ' < X < ' + xmax + ' ∩ ' + ymin + ' < Y < ' + ymax + ' | Z = ' + zmax + ') = ' + yeet.toFixed(3) + '');}
         else if(cond1 == 1 && cond2 == 0){updateOutput('P(' + xmin + ' < X < ' + xmax + ' ∩ ' + zmin + ' < Z < ' + zmax + ' | Y = ' + ymin + ') = ' + yeet.toFixed(3) + '');}

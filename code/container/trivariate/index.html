@@ -189,6 +189,7 @@
             <li id = "pdf">For the Joint Trivariate Distribution PDF graph the probability P is reflected in the shade of the point. The redder the point the closer the probability is to its maximum value of <b id = "trimax">0</b></li>
             <li id = "cdf">For the Joint Trivariate Distribution CDF graph the probability P is reflected in the shade of the point. The redder the point the closer the probability is to 1.</li>
             <li>Note: due to the limitations of Plotly, only <b id = "pointsshown">0</b> of <b id = "pointstot">0</b> points could be shown. All cropped points have a probability of less than <b id = "cutprob">0</b></li>
+            <li>Note: sometimes the points may be too faint to see, even if they are rendered</li>
             <li>In the event of Plotly crashing the page needs to be hard-reloaded. Press <b>CTRL+F5</b> do do this on Windows, or <b>Command+Shift+R</b> while on a Mac</li>
             <li>This graphical bivariate Normal probability calculator shows visually the correspondence between the graphical area representation and the numeric (PDF/CDF) results. However, the reported probabilities are approximate (accuracy 10<sup>-3</sup> for Results section and the 2D graph, 10<sup>-2</sup> for 3D bivariate plot) due to the finite viewing window of the infinitely supported Normal distribution, and the limited numerical precision of the inputs (domain) and outputs (range). Users that require high-precision calculations are encouraged to use the <a href="https://socr.umich.edu/Applets/index.html#High-Precision_Distribution_Calculators">SOCR high-precision numerical probability calculators</a></li>
             <li>Also see the <a href = "https://socr.umich.edu/HTML5/BivariateNormal/index.html">first verison</a> and the <a href = "https://socr.umich.edu/HTML5/BivariateNormal/BVN2/">second verison</a> of the bivariate Normal (BVN) Distribution Calculator.</li>
@@ -247,7 +248,7 @@
             <li id = "15">F-distribution: the values for the degrees of freedom D1 and D2 must be positive integers. Also, the X or Y limits must also be non-negative</li>
             <li id = "16">Beta Distribution: the values for &alpha; and &beta; must be positive numbers. Also, the limits must be within the 0 to 1 range</li>
             <li id = "17">Weibull Distribution: the values for the shape (k) and scale (&lambda;) must be greater than 0. Also, the X or Y limits must also be non-negative</li>
-            <li id = "18">Pareto distribution: the values for the shape (&alpha;) and scale (Xm or Ym) must be greater than 0. Also, the X or Y limits must also be non-negative</li>
+            <li id = "18">Pareto distribution: the values for the shape (&alpha;) and scale (Xm or Ym or Zm) must be greater than 0. Also, the X or Y limits must also be non-negative</li>
             <li id = "19">Logistic distribution: while the value for the location (&mu;) may be any real number, the value for s must be greater than 0</li>
             <li id = "20">Log-normal distribution: &mu; must be a non-negative value and &sigma; must be breater than 0. Also, the X or Y limits must also be non-negative</li>
             <li id = "21">Gumbel distribution: while the value for the location (&mu;) may be any real number, the value for scale (&beta;) must be greater than 0</li>
@@ -258,7 +259,7 @@
             <li id = "26">Semicircle distribution: the value for the radius (R) must be greater than 0</li>
             <li id = "27">Max Distance Walked distribution: the value for N must be a positive integer. Also, the X or Y limits must be non-negative</li>
             <li id = "28">Final Position on a Walk distribution: the value for N must be a positive integer. Also, the X or Y limits must be non-negative</li>
-            <li id = "29">Cauchy distribution</li>
+            <li id = "29">Cauchy distribution: the value for scale (&gamma;) must be a positive number. Also, the X or Y limits must be non-negative</li>
             <li id = "30">Hyperbolic Secant distribution: while the value for the location may be any real number, the value for scale must be greater than 0</li>
             <li id = "31">Irwin-Hall distribution: the value for N must be a positive integer. Also, the X or Y limits must be non-negative</li>
             <li id = "32">Laplace distribution: while the value for the location (&mu;) may be any real number, the value for scale (b) must be greater than 0</li>
@@ -273,13 +274,13 @@
             <li id = "41">Negative Binomial distribution: the value for Prob must be greater than 0 but less than 1, while the value for K must be a positive integer. Also, the X or Y limits must be non-negative</li>
             <li id = "42">Hypergeometric distribution: the value for N (population size) must be a positive integer, while the values for k and n must be positive integers no greater than N. Also, the X or Y limits must be non-negative</li>
             <li id = "43">Polya: the value for r (number of successes) must be a positive integer, while the values for p must be between 0 and 1. Also, the X or Y limits must be non-negative</li>
-            <li id = "44">Finite Order distribution: the value for m (population size) must be a positive integer, the value for n must be a positive integer no greater than m, and the value for k must be a positive integer no greater than m. Also, the X or Y limits must be non-negative</li>
+            <li id = "44">Finite Order distribution: the value for m (population size) must be a positive integer, the value for n must be a positive integer no greater than m, and the value for k must be a positive integer no greater than n. Also, the X or Y limits must be non-negative</li>
             <li id = "45">Matching Hats distribution: the value for the number of hats must be a positive integer. Also, the X or Y limits must be non-negative</li>
             <li id = "46">Triangular distribution: while all of the parameters can be any real number, Right must be greater than Left, while Middle must be in between Left and Right.</li>
             <li id = "47">Coupon Collector distribution: both m and k must be positive integers, but k must be no greater than m. Also, the X or Y limits must be non-negative</li>
             <li id = "48">Benford's Digit distribution: the value for b must be greater than 1. Also, the X or Y limits must be non-negative</li>
             <li id = "49">Beta Binomial distribution: the value for n must be a positive integer, while a and b must be positive real numbers. Also, the X or Y limits must be non-negative</li>
-            <li id = "50">Beta Negative Binomial distribution: the value for k must be a positive integer, the value for a must be greater than 2 whileb must be positive real numbers. Also, the X or Y limits must be non-negative</li>
+            <li id = "50">Beta Negative Binomial distribution: the value for k must be a positive integer, the value for a must be greater than 2 while b must be a positive real number. Also, the X or Y limits must be non-negative and greater than k</li>
         </ul>
         <table>
             <tr><td colspan = "2"><h2>Distribution type</h2></td></tr>
@@ -319,7 +320,7 @@
                     <option value = "0" selected>Normal</option>
                     <option value = "8">Pareto</option>
                     <option value = "1">Poisson</option>
-                    <option value = "33">Polya</option>
+                    <!--<option value = "33">Polya</option>-->
                     <option value = "16">Semicircle</option>
                     <option value = "4">Student's t</option>
                     <option value = "36">Triangular</option>
@@ -411,7 +412,7 @@
                     <option value = "0" selected>Normal</option>
                     <option value = "8">Pareto</option>
                     <option value = "1">Poisson</option>
-                    <option value = "33">Polya</option>
+                    <!--<option value = "33">Polya</option>-->
                     <option value = "16">Semicircle</option>
                     <option value = "4">Student's t</option>
                     <option value = "36">Triangular</option>
@@ -574,6 +575,10 @@
     <div id = "versionHist">
         <button id = "closeV">&times;</button>
         <h2>Version History</h2>
+        <h3>1.4.1</h3>
+        <ul>
+            <li>Various bug fixes</li>
+        </ul>
         <h3>1.4</h3>
         <ul>
             <li>Decreased the loading times for trivariate shell generation</li>
